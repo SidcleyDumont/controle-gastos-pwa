@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { transactionService } from '../services/transactionService'
+import { recurringTransactionService } from '../services/recurringTransactionService'
 import { calcularResumoMes } from '../utils/calculations'
 import { formatCurrency, formatPercent, MESES, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { StatCard } from '../components/ui/Card'
@@ -21,6 +22,11 @@ export default function Dashboard() {
   const [lancamentos, setLancamentos] = useState([])
   const [todos, setTodos] = useState([])
   const [loading, setLoading] = useState(true)
+
+  // Gera transações recorrentes pendentes silenciosamente ao abrir o app
+  useEffect(() => {
+    if (user) recurringTransactionService.generatePending(user.id).catch(() => {})
+  }, [user])
 
   useEffect(() => {
     if (!user) return
