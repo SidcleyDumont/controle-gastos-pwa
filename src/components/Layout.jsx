@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react'
+import { Wallet } from 'lucide-react'
 
 const nav = [
   { to: '/dashboard', label: 'Dashboard', emoji: '📊' },
@@ -33,8 +34,10 @@ export function Layout({ children }) {
             <div style={{
               width: '44px', height: '44px', background: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
               borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: '18px', fontWeight: '800', color: 'white', boxShadow: '0 4px 12px rgba(59,130,246,0.4)'
-            }}>CG</div>
+              boxShadow: '0 4px 12px rgba(59,130,246,0.4)'
+            }}>
+              <Wallet size={22} color="white" strokeWidth={1.8} />
+            </div>
             <div>
               <div style={{ color: 'white', fontWeight: '700', fontSize: '14px', lineHeight: 1.2 }}>Controle de Gastos</div>
               <div style={{ color: '#93c5fd', fontSize: '11px', marginTop: '2px' }}>Consultivo</div>
@@ -82,8 +85,9 @@ export function Layout({ children }) {
           <div style={{
             width: '36px', height: '36px', background: 'rgba(255,255,255,0.2)',
             borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: 'white', fontWeight: '800', fontSize: '14px'
-          }}>CG</div>
+          }}>
+            <Wallet size={18} color="white" strokeWidth={1.8} />
+          </div>
           <span style={{ color: 'white', fontWeight: '600', fontSize: '15px' }}>Controle de Gastos</span>
         </div>
         <button onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' }}>
