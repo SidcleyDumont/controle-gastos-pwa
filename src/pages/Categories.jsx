@@ -114,39 +114,74 @@ export default function Categories() {
       </div>
 
       <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-          <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
-            <tr>
-              <th style={thStyle}>Tipo</th>
-              <th style={thStyle}>Nome</th>
-              <th style={thStyle}>Uso</th>
-              <th style={thStyle}>Observação</th>
-              <th style={{ ...thStyle, textAlign: 'right' }}>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0 ? (
-              <tr><td colSpan={5} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '15px' }}>Nenhuma categoria encontrada</td></tr>
-            ) : filtered.map((item, idx) => (
-              <tr key={item.id} style={{ background: idx % 2 === 0 ? 'white' : '#fafafa' }}>
-                <td style={tdStyle}><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
-                <td style={{ ...tdStyle, fontWeight: '600', color: '#1e293b' }}>{item.name}</td>
-                <td style={{ ...tdStyle, color: '#64748b' }}>{item.usage || '-'}</td>
-                <td style={{ ...tdStyle, color: '#94a3b8', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.notes || '-'}</td>
-                <td style={{ ...tdStyle, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                  <button onClick={() => setModal({ open: true, data: item })} title="Editar"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', fontSize: '15px' }}
-                    onMouseEnter={e => e.target.style.background='#eff6ff'}
-                    onMouseLeave={e => e.target.style.background='none'}>✏️</button>
-                  <button onClick={() => handleDelete(item.id)} title="Excluir"
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', fontSize: '15px' }}
-                    onMouseEnter={e => e.target.style.background='#fff1f2'}
-                    onMouseLeave={e => e.target.style.background='none'}>🗑️</button>
-                </td>
+        {/* Desktop: tabela */}
+        <div className="table-desktop">
+          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+            <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
+              <tr>
+                <th style={thStyle}>Tipo</th>
+                <th style={thStyle}>Nome</th>
+                <th style={thStyle}>Uso</th>
+                <th style={thStyle}>Observação</th>
+                <th style={{ ...thStyle, textAlign: 'right' }}>Ações</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr><td colSpan={5} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '15px' }}>Nenhuma categoria encontrada</td></tr>
+              ) : filtered.map((item, idx) => (
+                <tr key={item.id} style={{ background: idx % 2 === 0 ? 'white' : '#fafafa' }}>
+                  <td style={tdStyle}><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
+                  <td style={{ ...tdStyle, fontWeight: '600', color: '#1e293b' }}>{item.name}</td>
+                  <td style={{ ...tdStyle, color: '#64748b' }}>{item.usage || '-'}</td>
+                  <td style={{ ...tdStyle, color: '#94a3b8', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.notes || '-'}</td>
+                  <td style={{ ...tdStyle, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <button onClick={() => setModal({ open: true, data: item })} title="Editar"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', fontSize: '15px' }}
+                      onMouseEnter={e => e.target.style.background='#eff6ff'}
+                      onMouseLeave={e => e.target.style.background='none'}>✏️</button>
+                    <button onClick={() => handleDelete(item.id)} title="Excluir"
+                      style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', fontSize: '15px' }}
+                      onMouseEnter={e => e.target.style.background='#fff1f2'}
+                      onMouseLeave={e => e.target.style.background='none'}>🗑️</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile: cards */}
+        <div className="mobile-card-list">
+          {filtered.length === 0 ? (
+            <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8', fontSize: '15px' }}>
+              Nenhuma categoria encontrada
+            </div>
+          ) : filtered.map((item, idx) => (
+            <div key={item.id} style={{
+              padding: '14px 16px',
+              borderBottom: idx < filtered.length - 1 ? '1px solid #f1f5f9' : 'none',
+              background: idx % 2 === 0 ? 'white' : '#fafafa',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                <Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={() => setModal({ open: true, data: item })}
+                    style={{ padding: '5px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '13px', color: '#475569', fontFamily: 'inherit' }}>
+                    ✏️ Editar
+                  </button>
+                  <button onClick={() => handleDelete(item.id)}
+                    style={{ padding: '5px 12px', border: '1px solid #fca5a5', borderRadius: '8px', background: '#fff1f2', cursor: 'pointer', fontSize: '13px', color: '#dc2626', fontFamily: 'inherit' }}>
+                    🗑️
+                  </button>
+                </div>
+              </div>
+              <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '15px', marginBottom: '2px' }}>{item.name}</div>
+              {item.usage && <div style={{ fontSize: '12px', color: '#64748b' }}>Uso: {item.usage}</div>}
+              {item.notes && <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{item.notes}</div>}
+            </div>
+          ))}
+        </div>
       </div>
 
       {modal.open && <CategoryModal data={modal.data} onClose={() => setModal({ open: false, data: null })} onSave={load} />}

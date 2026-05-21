@@ -65,7 +65,7 @@ export default function Transactions() {
           <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Lançamentos</h1>
           <p style={{ fontSize: '14px', color: '#64748b', margin: '4px 0 0' }}>{items.length} registro(s) encontrado(s)</p>
         </div>
-        <div style={{ display: 'flex', gap: '8px' }}>
+        <div className="header-actions">
           <button style={btnStyle('secondary')} onClick={() => transactionService.exportCSV(user.id)}>
             ↓ Exportar CSV
           </button>
@@ -105,12 +105,13 @@ export default function Transactions() {
         </div>
       </div>
 
-      {/* Table */}
+      {/* Table / Cards */}
       <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
         {loading ? (
           <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8', fontSize: '15px' }}>Carregando...</div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
+        ) : (<>
+          {/* Desktop: tabela */}
+          <div className="table-desktop" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
               <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
                 <tr>
@@ -154,7 +155,48 @@ export default function Transactions() {
               </tbody>
             </table>
           </div>
-        )}
+
+          {/* Mobile: cards */}
+          <div className="mobile-card-list">
+            {sorted.length === 0 ? (
+              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8', fontSize: '15px' }}>
+                Nenhum lançamento encontrado
+              </div>
+            ) : sorted.map((item, idx) => (
+              <div key={item.id} style={{
+                padding: '14px 16px',
+                borderBottom: idx < sorted.length - 1 ? '1px solid #f1f5f9' : 'none',
+                background: idx % 2 === 0 ? 'white' : '#fafafa',
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                    <Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge>
+                    <SituacaoBadge situacao={item.status} />
+                  </div>
+                  <span style={{ fontWeight: '700', color: item.type === 'Receita' ? '#16a34a' : '#dc2626', fontSize: '15px', whiteSpace: 'nowrap', marginLeft: '8px' }}>
+                    {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
+                  </span>
+                </div>
+                <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px', marginBottom: '4px' }}>
+                  {item.description}
+                </div>
+                <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
+                  <span>{formatDate(item.date)}</span>
+                  <span>·</span>
+                  <span>{item.period}</span>
+                  {item.categories?.name && <><span>·</span><span>{item.categories.name}</span></>}
+                  {item.payment_method && <><span>·</span><span>{item.payment_method}</span></>}
+                </div>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button style={{ flex: 1, padding: '7px 0', border: '1px solid #e2e8f0', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '13px', color: '#475569', fontFamily: 'inherit' }}
+                    onClick={() => setModal({ open: true, data: item })}>✏️ Editar</button>
+                  <button style={{ flex: 1, padding: '7px 0', border: '1px solid #fca5a5', borderRadius: '8px', background: '#fff1f2', cursor: 'pointer', fontSize: '13px', color: '#dc2626', fontFamily: 'inherit' }}
+                    onClick={() => handleDelete(item.id)}>🗑️ Excluir</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </>)}
       </div>
 
       {modal.open && <TransactionModal data={modal.data} cats={cats} onClose={() => setModal({ open: false, data: null })} onSave={load} />}

@@ -9,7 +9,6 @@ const inputStyle = {
   padding: '9px 12px', fontSize: '14px', color: '#1e293b',
   background: 'white', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
 }
-const gridTwo = { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px' }
 
 export default function TransactionModal({ data, cats, onClose, onSave }) {
   const { user } = useAuth()
@@ -74,7 +73,7 @@ export default function TransactionModal({ data, cats, onClose, onSave }) {
             <div style={{ background: '#fff1f2', border: '1px solid #fca5a5', color: '#b91c1c', borderRadius: '10px', padding: '10px 14px', fontSize: '13px' }}>{error}</div>
           )}
 
-          <div style={gridTwo}>
+          <div className="grid-2col">
             <div>
               <label style={labelStyle}>Data *</label>
               <input type="date" value={form.date} onChange={e => set('date', e.target.value)} required style={inputStyle} onFocus={focusStyle} onBlur={blurStyle} />
@@ -87,7 +86,7 @@ export default function TransactionModal({ data, cats, onClose, onSave }) {
             </div>
           </div>
 
-          <div style={gridTwo}>
+          <div className="grid-2col">
             <div>
               <label style={labelStyle}>Tipo *</label>
               <select value={form.type} onChange={e => set('type', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }} onFocus={focusStyle} onBlur={blurStyle}>
@@ -105,7 +104,7 @@ export default function TransactionModal({ data, cats, onClose, onSave }) {
             <input value={form.description} onChange={e => set('description', e.target.value)} required placeholder="Ex: Salário, Aluguel, Mercado..." style={inputStyle} onFocus={focusStyle} onBlur={blurStyle} />
           </div>
 
-          <div style={gridTwo}>
+          <div className="grid-2col">
             <div>
               <label style={labelStyle}>Categoria</label>
               <select value={form.category_id} onChange={e => set('category_id', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }} onFocus={focusStyle} onBlur={blurStyle}>
@@ -121,7 +120,7 @@ export default function TransactionModal({ data, cats, onClose, onSave }) {
             </div>
           </div>
 
-          <div style={gridTwo}>
+          <div className="grid-2col">
             <div>
               <label style={labelStyle}>Forma de Pagamento</label>
               <select value={form.payment_method} onChange={e => set('payment_method', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }} onFocus={focusStyle} onBlur={blurStyle}>

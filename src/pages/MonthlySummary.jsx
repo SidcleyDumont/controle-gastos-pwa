@@ -44,7 +44,8 @@ export default function MonthlySummary() {
         <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8', fontSize: '15px' }}>Carregando...</div>
       ) : (
         <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-          <div style={{ overflowX: 'auto' }}>
+          {/* Desktop: tabela */}
+          <div className="table-desktop" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
               <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
                 <tr>
@@ -85,6 +86,63 @@ export default function MonthlySummary() {
                 </tr>
               </tfoot>
             </table>
+          </div>
+
+          {/* Mobile: cards por mês */}
+          <div className="mobile-card-list">
+            {resumo.map((m, idx) => (
+              <div key={m.mes} style={{
+                padding: '14px 16px',
+                borderBottom: idx < resumo.length - 1 ? '1px solid #f1f5f9' : 'none',
+                background: idx % 2 === 0 ? 'white' : '#fafafa',
+                opacity: m.status === 'Sem lançamentos' ? 0.5 : 1,
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <span style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b' }}>{m.mes}</span>
+                  <StatusBadge status={m.status} />
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px' }}>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.04em' }}>Receitas</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#16a34a' }}>{formatCurrency(m.receita)}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.04em' }}>Despesas</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#dc2626' }}>{formatCurrency(m.despesa)}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.04em' }}>Saldo</div>
+                    <div style={{ fontSize: '14px', fontWeight: '700', color: m.saldo >= 0 ? '#1d4ed8' : '#dc2626' }}>{formatCurrency(m.saldo)}</div>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '11px', color: '#94a3b8', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.04em' }}>Poupança</div>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#7e22ce' }}>{formatPercent(m.poupanca)}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {/* Total mobile */}
+            <div style={{ padding: '14px 16px', background: 'linear-gradient(90deg, #eff6ff, #dbeafe)', borderTop: '2px solid #93c5fd' }}>
+              <div style={{ fontWeight: '800', fontSize: '14px', color: '#1e3a8a', marginBottom: '8px' }}>TOTAL {ano}</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px 16px' }}>
+                <div>
+                  <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.04em' }}>Receitas</div>
+                  <div style={{ fontSize: '14px', fontWeight: '800', color: '#15803d' }}>{formatCurrency(totais.receita)}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.04em' }}>Despesas</div>
+                  <div style={{ fontSize: '14px', fontWeight: '800', color: '#b91c1c' }}>{formatCurrency(totais.despesa)}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.04em' }}>Saldo</div>
+                  <div style={{ fontSize: '14px', fontWeight: '800', color: totais.saldo >= 0 ? '#1e3a8a' : '#b91c1c' }}>{formatCurrency(totais.saldo)}</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: '11px', color: '#64748b', textTransform: 'uppercase', fontWeight: '600', letterSpacing: '0.04em' }}>Poupança</div>
+                  <div style={{ fontSize: '14px', fontWeight: '800', color: '#7e22ce' }}>{formatPercent(totais.receita > 0 ? (totais.saldo / totais.receita) * 100 : 0)}</div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       )}

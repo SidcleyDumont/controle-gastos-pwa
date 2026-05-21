@@ -128,7 +128,10 @@ export function Layout({ children }) {
         @media (max-width: 768px) {
           .hidden-mobile { display: none !important; }
           .show-mobile { display: flex !important; }
-          .main-content { margin-left: 0 !important; padding: 76px 16px 24px !important; }
+          .main-content {
+            margin-left: 0 !important;
+            padding: 76px 14px 32px !important;
+          }
         }
         @media (min-width: 769px) {
           .show-mobile { display: none !important; }
