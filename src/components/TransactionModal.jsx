@@ -28,17 +28,30 @@ export default function TransactionModal({ data, cats, onClose, onSave }) {
   const [loading, setLoading] = useState(false)
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
+  const friendlyError = (msg) => {
+    if (!msg) return 'Erro ao salvar. Tente novamente.'
+    if (msg.includes('uuid')) return 'Selecione uma categoria válida ou deixe "Sem categoria".'
+    if (msg.includes('network') || msg.includes('fetch')) return 'Sem conexão com a internet. Verifique sua rede.'
+    if (msg.includes('JWT') || msg.includes('auth')) return 'Sessão expirada. Faça login novamente.'
+    if (msg.includes('violates')) return 'Dados inválidos. Verifique os campos e tente novamente.'
+    return 'Erro ao salvar. Tente novamente.'
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.description.trim()) return setError('Descrição obrigatória')
-    if (!form.original_value || isNaN(Number(form.original_value))) return setError('Valor inválido')
+    if (!form.description.trim()) return setError('Preencha a descrição do lançamento.')
+    if (!form.original_value || isNaN(Number(form.original_value))) return setError('Informe um valor numérico válido.')
     setLoading(true); setError('')
     try {
-      const payload = { ...form, original_value: Number(form.original_value) }
+      const payload = {
+        ...form,
+        original_value: Number(form.original_value),
+        category_id: form.category_id || null,
+      }
       if (data?.id) await transactionService.update(data.id, user.id, payload)
       else await transactionService.create(user.id, payload)
       onSave(); onClose()
-    } catch (err) { setError(err.message) } finally { setLoading(false) }
+    } catch (err) { setError(friendlyError(err.message)) } finally { setLoading(false) }
   }
 
   const focusStyle = (e) => e.target.style.borderColor = '#1e40af'
