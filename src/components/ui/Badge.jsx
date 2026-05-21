@@ -1,13 +1,18 @@
-export function Badge({ children, variant = 'default' }) {
-  const variants = {
-    default: 'bg-gray-100 text-gray-700',
-    success: 'bg-green-100 text-green-700',
-    danger: 'bg-red-100 text-red-700',
-    warning: 'bg-yellow-100 text-yellow-700',
-    info: 'bg-blue-100 text-blue-700',
-    purple: 'bg-purple-100 text-purple-700',
-  }
-  return <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${variants[variant]}`}>{children}</span>
+const base = {
+  display: 'inline-flex', alignItems: 'center', padding: '3px 10px',
+  borderRadius: '20px', fontSize: '12px', fontWeight: '600',
+}
+const variants = {
+  default: { background: '#f1f5f9', color: '#64748b' },
+  success: { background: '#dcfce7', color: '#15803d' },
+  danger:  { background: '#fee2e2', color: '#b91c1c' },
+  warning: { background: '#fef9c3', color: '#92400e' },
+  info:    { background: '#dbeafe', color: '#1d4ed8' },
+  purple:  { background: '#f3e8ff', color: '#7e22ce' },
+}
+
+export function Badge({ children, variant = 'default', style = {} }) {
+  return <span style={{ ...base, ...variants[variant], ...style }}>{children}</span>
 }
 
 export function StatusBadge({ status }) {

@@ -1,11 +1,21 @@
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { transactionService } from '../services/transactionService'
-import { Button } from '../components/ui/Button'
-import { LogOut, Download, Upload, User } from 'lucide-react'
 import { useState } from 'react'
 import { supabase } from '../services/supabaseClient'
 import * as XLSX from 'xlsx'
+
+const card = { background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', padding: '20px 24px', marginBottom: '0' }
+const sectionTitle = { fontSize: '15px', fontWeight: '700', color: '#1e293b', margin: '0 0 14px', display: 'flex', alignItems: 'center', gap: '8px' }
+const btn = (variant) => ({
+  display: 'inline-flex', alignItems: 'center', gap: '6px', border: 'none', borderRadius: '10px',
+  padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit',
+  ...(variant === 'danger'
+    ? { background: '#fee2e2', color: '#b91c1c' }
+    : variant === 'primary'
+    ? { background: '#1e40af', color: 'white', boxShadow: '0 2px 8px rgba(30,64,175,0.2)' }
+    : { background: '#f1f5f9', color: '#475569' }),
+})
 
 export default function Settings() {
   const { user, signOut } = useAuth()
@@ -59,43 +69,57 @@ export default function Settings() {
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '640px' }}>
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Configurações</h1>
-        <p className="text-gray-500 text-sm">Gerencie sua conta e dados</p>
+        <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Configurações</h1>
+        <p style={{ fontSize: '14px', color: '#64748b', margin: '4px 0 0' }}>Gerencie sua conta e dados</p>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-3">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-blue-100 rounded-xl flex items-center justify-center"><User size={20} className="text-blue-600" /></div>
+      {/* Account */}
+      <div style={card}>
+        <p style={sectionTitle}>👤 Conta</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+          <div style={{ width: '48px', height: '48px', background: 'linear-gradient(135deg, #dbeafe, #bfdbfe)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px' }}>
+            👤
+          </div>
           <div>
-            <div className="font-semibold text-gray-900">Conta</div>
-            <div className="text-sm text-gray-500">{user?.email}</div>
+            <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '15px' }}>Usuário</div>
+            <div style={{ fontSize: '13px', color: '#64748b' }}>{user?.email}</div>
           </div>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
-        <h2 className="font-semibold text-gray-800 flex items-center gap-2"><Download size={18} />Exportar Dados</h2>
-        <div className="flex gap-3">
-          <Button variant="secondary" onClick={() => transactionService.exportCSV(user.id)}><Download size={16} />Exportar CSV</Button>
-          <Button variant="secondary" onClick={handleExportExcel}><Download size={16} />Exportar Excel</Button>
+      {/* Export */}
+      <div style={card}>
+        <p style={sectionTitle}>↓ Exportar Dados</p>
+        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px' }}>Baixe todos os seus lançamentos em CSV ou Excel.</p>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <button style={btn('secondary')} onClick={() => transactionService.exportCSV(user.id)}>↓ Exportar CSV</button>
+          <button style={btn('secondary')} onClick={handleExportExcel}>↓ Exportar Excel (.xlsx)</button>
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5 space-y-4">
-        <h2 className="font-semibold text-gray-800 flex items-center gap-2"><Upload size={18} />Importar Planilha</h2>
-        <p className="text-sm text-gray-500">Importe lançamentos da planilha Excel (aba "Base Consolidada").</p>
-        {msg && <div className="bg-blue-50 text-blue-700 rounded-xl p-3 text-sm">{msg}</div>}
-        <label className="inline-flex items-center gap-2 bg-blue-700 text-white px-4 py-2 rounded-xl text-sm font-medium cursor-pointer hover:bg-blue-800 transition">
-          <Upload size={16} />{importing ? 'Importando...' : 'Selecionar arquivo Excel'}
-          <input type="file" accept=".xlsx,.xls,.csv" className="hidden" onChange={handleImport} disabled={importing} />
+      {/* Import */}
+      <div style={card}>
+        <p style={sectionTitle}>↑ Importar Planilha</p>
+        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px' }}>
+          Importe lançamentos da planilha Excel (aba <strong>"Base Consolidada"</strong> ou primeira aba).
+        </p>
+        {msg && (
+          <div style={{ background: msg.startsWith('✅') ? '#f0fdf4' : '#fff1f2', border: `1px solid ${msg.startsWith('✅') ? '#86efac' : '#fca5a5'}`, color: msg.startsWith('✅') ? '#15803d' : '#b91c1c', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', marginBottom: '14px' }}>
+            {msg}
+          </div>
+        )}
+        <label style={{ ...btn('primary'), cursor: 'pointer' }}>
+          ↑ {importing ? 'Importando...' : 'Selecionar arquivo Excel'}
+          <input type="file" accept=".xlsx,.xls,.csv" style={{ display: 'none' }} onChange={handleImport} disabled={importing} />
         </label>
       </div>
 
-      <div className="bg-white rounded-2xl border border-red-100 shadow-sm p-5">
-        <h2 className="font-semibold text-gray-800 mb-3">Sessão</h2>
-        <Button variant="danger" onClick={handleSignOut}><LogOut size={16} />Sair da conta</Button>
+      {/* Sign out */}
+      <div style={{ ...card, border: '1px solid #fee2e2' }}>
+        <p style={sectionTitle}>Sessão</p>
+        <button style={btn('danger')} onClick={handleSignOut}>🚪 Sair da conta</button>
       </div>
     </div>
   )

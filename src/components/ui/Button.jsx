@@ -1,12 +1,30 @@
-export function Button({ children, variant = 'primary', size = 'md', className = '', ...props }) {
-  const base = 'inline-flex items-center gap-2 font-medium rounded-xl transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed'
-  const variants = {
-    primary: 'bg-blue-700 text-white hover:bg-blue-800 focus:ring-blue-500',
-    secondary: 'bg-gray-100 text-gray-700 hover:bg-gray-200 focus:ring-gray-400',
-    danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500',
-    ghost: 'text-gray-600 hover:bg-gray-100 focus:ring-gray-400',
-    success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500',
-  }
-  const sizes = { sm: 'px-3 py-1.5 text-sm', md: 'px-4 py-2 text-sm', lg: 'px-6 py-3 text-base' }
-  return <button className={`${base} ${variants[variant]} ${sizes[size]} ${className}`} {...props}>{children}</button>
+const base = {
+  display: 'inline-flex', alignItems: 'center', gap: '6px',
+  fontWeight: '600', borderRadius: '10px', border: 'none',
+  cursor: 'pointer', transition: 'all 0.15s', fontFamily: 'inherit',
+  outline: 'none',
+}
+const variants = {
+  primary:   { background: '#1e40af', color: 'white' },
+  secondary: { background: '#f1f5f9', color: '#475569' },
+  danger:    { background: '#dc2626', color: 'white' },
+  ghost:     { background: 'transparent', color: '#475569' },
+  success:   { background: '#16a34a', color: 'white' },
+}
+const sizes = {
+  sm: { padding: '6px 12px', fontSize: '13px' },
+  md: { padding: '8px 16px', fontSize: '14px' },
+  lg: { padding: '12px 24px', fontSize: '15px' },
+}
+
+export function Button({ children, variant = 'primary', size = 'md', style = {}, disabled, ...props }) {
+  return (
+    <button
+      style={{ ...base, ...variants[variant], ...sizes[size], opacity: disabled ? 0.5 : 1, ...style }}
+      disabled={disabled}
+      {...props}
+    >
+      {children}
+    </button>
+  )
 }

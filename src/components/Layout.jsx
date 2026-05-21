@@ -1,14 +1,13 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
-import { LayoutDashboard, List, Tag, BarChart2, Settings, LogOut, Menu, X } from 'lucide-react'
 import { useState } from 'react'
 
 const nav = [
-  { to: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { to: '/lancamentos', label: 'Lançamentos', icon: List },
-  { to: '/categorias', label: 'Categorias', icon: Tag },
-  { to: '/resumo', label: 'Resumo Mensal', icon: BarChart2 },
-  { to: '/configuracoes', label: 'Configurações', icon: Settings },
+  { to: '/dashboard', label: 'Dashboard', emoji: '📊' },
+  { to: '/lancamentos', label: 'Lançamentos', emoji: '💳' },
+  { to: '/categorias', label: 'Categorias', emoji: '🏷️' },
+  { to: '/resumo', label: 'Resumo Mensal', emoji: '📅' },
+  { to: '/configuracoes', label: 'Configurações', emoji: '⚙️' },
 ]
 
 export function Layout({ children }) {
@@ -19,60 +18,122 @@ export function Layout({ children }) {
   const handleSignOut = async () => { await signOut(); navigate('/login') }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex">
-      {/* Sidebar desktop */}
-      <aside className="hidden lg:flex flex-col w-64 bg-blue-900 text-white min-h-screen fixed top-0 left-0 z-30">
-        <div className="flex items-center gap-3 px-6 py-6 border-b border-blue-800">
-          <div className="w-10 h-10 bg-blue-400 rounded-xl flex items-center justify-center font-bold text-lg">CG</div>
-          <div>
-            <div className="font-bold text-sm leading-tight">Controle de Gastos</div>
-            <div className="text-xs text-blue-300">Consultivo</div>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9' }}>
+
+      {/* Sidebar Desktop */}
+      <aside style={{
+        width: '240px', background: 'linear-gradient(180deg, #1e3a8a 0%, #1e40af 100%)',
+        display: 'flex', flexDirection: 'column', position: 'fixed', top: 0, left: 0,
+        height: '100vh', zIndex: 40, boxShadow: '4px 0 20px rgba(0,0,0,0.15)'
+      }} className="hidden-mobile">
+        {/* Logo */}
+        <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            <div style={{
+              width: '44px', height: '44px', background: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
+              borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              fontSize: '18px', fontWeight: '800', color: 'white', boxShadow: '0 4px 12px rgba(59,130,246,0.4)'
+            }}>CG</div>
+            <div>
+              <div style={{ color: 'white', fontWeight: '700', fontSize: '14px', lineHeight: 1.2 }}>Controle de Gastos</div>
+              <div style={{ color: '#93c5fd', fontSize: '11px', marginTop: '2px' }}>Consultivo</div>
+            </div>
           </div>
         </div>
-        <nav className="flex-1 px-3 py-4 space-y-1">
-          {nav.map(({ to, label, icon: Icon }) => (
-            <NavLink key={to} to={to} className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${isActive ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white'}`}>
-              <Icon size={18} />{label}
+
+        {/* Nav */}
+        <nav style={{ flex: 1, padding: '16px 12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {nav.map(({ to, label, emoji }) => (
+            <NavLink key={to} to={to} style={({ isActive }) => ({
+              display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px',
+              borderRadius: '10px', textDecoration: 'none', fontSize: '14px', fontWeight: '500',
+              transition: 'all 0.2s',
+              background: isActive ? 'rgba(255,255,255,0.15)' : 'transparent',
+              color: isActive ? 'white' : '#bfdbfe',
+              backdropFilter: isActive ? 'blur(10px)' : 'none',
+              borderLeft: isActive ? '3px solid #60a5fa' : '3px solid transparent',
+            })}>
+              <span style={{ fontSize: '16px' }}>{emoji}</span>
+              {label}
             </NavLink>
           ))}
         </nav>
-        <button onClick={handleSignOut} className="flex items-center gap-3 px-6 py-4 text-blue-300 hover:text-white hover:bg-blue-800 text-sm border-t border-blue-800 transition">
-          <LogOut size={18} />Sair
-        </button>
+
+        <div style={{ padding: '16px 12px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+          <button onClick={handleSignOut} style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+            padding: '10px 12px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+            background: 'rgba(239,68,68,0.15)', color: '#fca5a5', fontSize: '14px', fontWeight: '500'
+          }}>
+            🚪 Sair da conta
+          </button>
+        </div>
       </aside>
 
-      {/* Mobile header */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 z-40 bg-blue-900 text-white flex items-center justify-between px-4 h-14">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 bg-blue-400 rounded-lg flex items-center justify-center font-bold text-sm">CG</div>
-          <span className="font-semibold text-sm">Controle de Gastos</span>
+      {/* Mobile Header */}
+      <div style={{
+        position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50, height: '60px',
+        background: 'linear-gradient(90deg, #1e3a8a, #1e40af)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 16px', boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+      }} className="show-mobile">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{
+            width: '36px', height: '36px', background: 'rgba(255,255,255,0.2)',
+            borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: 'white', fontWeight: '800', fontSize: '14px'
+          }}>CG</div>
+          <span style={{ color: 'white', fontWeight: '600', fontSize: '15px' }}>Controle de Gastos</span>
         </div>
-        <button onClick={() => setOpen(!open)}>{open ? <X size={22} /> : <Menu size={22} />}</button>
+        <button onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' }}>
+          {open ? '✕' : '☰'}
+        </button>
       </div>
 
-      {/* Mobile menu */}
+      {/* Mobile Menu */}
       {open && (
-        <div className="lg:hidden fixed inset-0 z-30 bg-black/50" onClick={() => setOpen(false)}>
-          <div className="bg-blue-900 text-white w-64 min-h-full" onClick={e => e.stopPropagation()}>
-            <div className="h-14" />
-            <nav className="px-3 py-4 space-y-1">
-              {nav.map(({ to, label, icon: Icon }) => (
-                <NavLink key={to} to={to} onClick={() => setOpen(false)} className={({ isActive }) => `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition ${isActive ? 'bg-blue-700 text-white' : 'text-blue-200 hover:bg-blue-800 hover:text-white'}`}>
-                  <Icon size={18} />{label}
-                </NavLink>
-              ))}
-              <button onClick={handleSignOut} className="w-full flex items-center gap-3 px-3 py-2.5 text-blue-200 hover:text-white hover:bg-blue-800 text-sm rounded-xl transition">
-                <LogOut size={18} />Sair
-              </button>
-            </nav>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 45, background: 'rgba(0,0,0,0.5)' }} onClick={() => setOpen(false)}>
+          <div style={{
+            width: '260px', height: '100%', background: 'linear-gradient(180deg, #1e3a8a, #1e40af)',
+            padding: '80px 12px 20px', display: 'flex', flexDirection: 'column', gap: '4px'
+          }} onClick={e => e.stopPropagation()}>
+            {nav.map(({ to, label, emoji }) => (
+              <NavLink key={to} to={to} onClick={() => setOpen(false)} style={({ isActive }) => ({
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px',
+                borderRadius: '10px', textDecoration: 'none', fontSize: '15px',
+                color: isActive ? 'white' : '#bfdbfe',
+                background: isActive ? 'rgba(255,255,255,0.15)' : 'transparent',
+              })}>
+                <span>{emoji}</span>{label}
+              </NavLink>
+            ))}
+            <button onClick={handleSignOut} style={{
+              marginTop: '16px', display: 'flex', alignItems: 'center', gap: '10px',
+              padding: '12px 14px', borderRadius: '10px', border: 'none', cursor: 'pointer',
+              background: 'rgba(239,68,68,0.15)', color: '#fca5a5', fontSize: '15px'
+            }}>🚪 Sair</button>
           </div>
         </div>
       )}
 
-      {/* Main content */}
-      <main className="flex-1 lg:ml-64 pt-14 lg:pt-0 min-h-screen">
-        <div className="max-w-7xl mx-auto px-4 py-6">{children}</div>
+      {/* Main Content */}
+      <main style={{
+        flex: 1, marginLeft: '240px', minHeight: '100vh',
+        padding: '32px 28px', background: '#f1f5f9'
+      }} className="main-content">
+        {children}
       </main>
+
+      <style>{`
+        @media (max-width: 768px) {
+          .hidden-mobile { display: none !important; }
+          .show-mobile { display: flex !important; }
+          .main-content { margin-left: 0 !important; padding: 76px 16px 24px !important; }
+        }
+        @media (min-width: 769px) {
+          .show-mobile { display: none !important; }
+        }
+      `}</style>
     </div>
   )
 }

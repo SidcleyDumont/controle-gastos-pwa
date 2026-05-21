@@ -2,12 +2,25 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { transactionService } from '../services/transactionService'
 import { categoryService } from '../services/categoryService'
-import { formatCurrency, formatDate, MESES, PERIODOS, TIPOS, SITUACOES, FORMAS_PAGAMENTO, getMesAtual, getAnoAtual } from '../utils/formatters'
-import { Button } from '../components/ui/Button'
-import { Select } from '../components/ui/Input'
+import { formatCurrency, formatDate, MESES, PERIODOS, TIPOS, SITUACOES, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { SituacaoBadge, Badge } from '../components/ui/Badge'
-import { Plus, Pencil, Trash2, Download, ChevronUp, ChevronDown } from 'lucide-react'
 import TransactionModal from '../components/TransactionModal'
+
+const selStyle = {
+  border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '7px 10px',
+  fontSize: '13px', background: 'white', color: '#1e293b', outline: 'none', fontFamily: 'inherit', cursor: 'pointer',
+}
+const btnStyle = (variant) => ({
+  display: 'inline-flex', alignItems: 'center', gap: '6px', border: 'none', borderRadius: '10px',
+  padding: '8px 14px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit',
+  ...(variant === 'primary'
+    ? { background: '#1e40af', color: 'white', boxShadow: '0 2px 8px rgba(30,64,175,0.25)' }
+    : { background: '#f1f5f9', color: '#475569' }),
+})
+const iconBtn = (hover) => ({
+  padding: '6px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit',
+  background: 'transparent', color: '#94a3b8', fontSize: '15px',
+})
 
 export default function Transactions() {
   const { user } = useAuth()
@@ -39,89 +52,102 @@ export default function Transactions() {
   })
 
   const toggleSort = (field) => setSort(s => ({ field, dir: s.field === field && s.dir === 'asc' ? 'desc' : 'asc' }))
-  const SortIcon = ({ field }) => sort.field === field ? (sort.dir === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />) : null
-
   const setFilter = (key, val) => setFilters(f => ({ ...f, [key]: val }))
 
+  const thStyle = { padding: '12px 14px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#64748b', whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }
+  const tdStyle = { padding: '12px 14px', fontSize: '13px', color: '#374151', borderBottom: '1px solid #f8fafc' }
+
   return (
-    <div className="space-y-5">
-      <div className="flex flex-wrap items-center justify-between gap-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+      {/* Header */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Lançamentos</h1>
-          <p className="text-gray-500 text-sm">{items.length} registro(s)</p>
+          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Lançamentos</h1>
+          <p style={{ fontSize: '14px', color: '#64748b', margin: '4px 0 0' }}>{items.length} registro(s) encontrado(s)</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="secondary" size="sm" onClick={() => transactionService.exportCSV(user.id)}><Download size={16} />Exportar</Button>
-          <Button size="sm" onClick={() => setModal({ open: true, data: null })}><Plus size={16} />Novo lançamento</Button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button style={btnStyle('secondary')} onClick={() => transactionService.exportCSV(user.id)}>
+            ↓ Exportar CSV
+          </button>
+          <button style={btnStyle('primary')} onClick={() => setModal({ open: true, data: null })}>
+            + Novo lançamento
+          </button>
         </div>
       </div>
 
       {/* Filtros */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4">
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-          <Select value={filters.month} onChange={e => setFilter('month', Number(e.target.value))}>
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', padding: '16px' }}>
+        <div style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Filtros</div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
+          <select style={selStyle} value={filters.month} onChange={e => setFilter('month', Number(e.target.value))}>
             <option value="">Todos os meses</option>
             {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
-          </Select>
-          <Select value={filters.year} onChange={e => setFilter('year', Number(e.target.value))}>
+          </select>
+          <select style={selStyle} value={filters.year} onChange={e => setFilter('year', Number(e.target.value))}>
             {[2024, 2025, 2026, 2027, 2028].map(y => <option key={y} value={y}>{y}</option>)}
-          </Select>
-          <Select value={filters.type} onChange={e => setFilter('type', e.target.value)}>
+          </select>
+          <select style={selStyle} value={filters.type} onChange={e => setFilter('type', e.target.value)}>
             <option value="">Todos os tipos</option>
             {TIPOS.map(t => <option key={t} value={t}>{t}</option>)}
-          </Select>
-          <Select value={filters.period} onChange={e => setFilter('period', e.target.value)}>
+          </select>
+          <select style={selStyle} value={filters.period} onChange={e => setFilter('period', e.target.value)}>
             <option value="">Todos os períodos</option>
-            {PERIODOS.map(p => <option key={p} value={p}>{p}</option>)}
-          </Select>
-          <Select value={filters.status} onChange={e => setFilter('status', e.target.value)}>
+            {['Quinzena', 'Final do Mês'].map(p => <option key={p} value={p}>{p}</option>)}
+          </select>
+          <select style={selStyle} value={filters.status} onChange={e => setFilter('status', e.target.value)}>
             <option value="">Todas as situações</option>
-            {SITUACOES.map(s => <option key={s} value={s}>{s}</option>)}
-          </Select>
-          <Select value={filters.category_id} onChange={e => setFilter('category_id', e.target.value)}>
+            {['Pago', 'A pagar', 'Recebido', 'Pendente'].map(s => <option key={s} value={s}>{s}</option>)}
+          </select>
+          <select style={selStyle} value={filters.category_id} onChange={e => setFilter('category_id', e.target.value)}>
             <option value="">Todas as categorias</option>
             {cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </Select>
+          </select>
         </div>
       </div>
 
-      {/* Tabela */}
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        {loading ? <div className="text-center py-12 text-gray-500">Carregando...</div> : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead className="bg-gray-50 border-b border-gray-100">
+      {/* Table */}
+      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8', fontSize: '15px' }}>Carregando...</div>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
+              <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
                 <tr>
                   {[['date','Data'],['description','Descrição'],['type','Tipo'],['period','Período'],['categories.name','Categoria'],['original_value','Valor'],['status','Situação'],['payment_method','Pagamento']].map(([f, l]) => (
-                    <th key={f} onClick={() => toggleSort(f)} className="px-4 py-3 text-left font-medium text-gray-600 cursor-pointer hover:text-gray-900 whitespace-nowrap">
-                      <span className="flex items-center gap-1">{l}<SortIcon field={f} /></span>
+                    <th key={f} style={thStyle} onClick={() => toggleSort(f)}>
+                      {l} {sort.field === f ? (sort.dir === 'asc' ? '↑' : '↓') : ''}
                     </th>
                   ))}
-                  <th className="px-4 py-3 text-right font-medium text-gray-600">Ações</th>
+                  <th style={{ ...thStyle, textAlign: 'right' }}>Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-50">
+              <tbody>
                 {sorted.length === 0 ? (
-                  <tr><td colSpan={9} className="text-center py-12 text-gray-400">Nenhum lançamento encontrado</td></tr>
-                ) : sorted.map(item => (
-                  <tr key={item.id} className="hover:bg-gray-50 transition">
-                    <td className="px-4 py-3 text-gray-700 whitespace-nowrap">{formatDate(item.date)}</td>
-                    <td className="px-4 py-3 text-gray-900 max-w-xs truncate">{item.description}</td>
-                    <td className="px-4 py-3"><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{item.period}</td>
-                    <td className="px-4 py-3 text-gray-600">{item.categories?.name || '-'}</td>
-                    <td className="px-4 py-3 font-medium whitespace-nowrap">
-                      <span className={item.type === 'Receita' ? 'text-green-600' : 'text-red-600'}>
-                        {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
-                      </span>
+                  <tr><td colSpan={9} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '15px' }}>Nenhum lançamento encontrado</td></tr>
+                ) : sorted.map((item, idx) => (
+                  <tr key={item.id} style={{ background: idx % 2 === 0 ? 'white' : '#fafafa' }}>
+                    <td style={tdStyle}>{formatDate(item.date)}</td>
+                    <td style={{ ...tdStyle, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '500', color: '#1e293b' }}>{item.description}</td>
+                    <td style={tdStyle}><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
+                    <td style={{ ...tdStyle, color: '#64748b' }}>{item.period}</td>
+                    <td style={{ ...tdStyle, color: '#64748b' }}>{item.categories?.name || '-'}</td>
+                    <td style={{ ...tdStyle, fontWeight: '700', color: item.type === 'Receita' ? '#16a34a' : '#dc2626', whiteSpace: 'nowrap' }}>
+                      {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
                     </td>
-                    <td className="px-4 py-3"><SituacaoBadge situacao={item.status} /></td>
-                    <td className="px-4 py-3 text-gray-600 whitespace-nowrap">{item.payment_method}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex justify-end gap-2">
-                        <button onClick={() => setModal({ open: true, data: item })} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition"><Pencil size={15} /></button>
-                        <button onClick={() => handleDelete(item.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition"><Trash2 size={15} /></button>
-                      </div>
+                    <td style={tdStyle}><SituacaoBadge situacao={item.status} /></td>
+                    <td style={{ ...tdStyle, color: '#64748b', whiteSpace: 'nowrap' }}>{item.payment_method}</td>
+                    <td style={{ ...tdStyle, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <button style={iconBtn()} title="Editar" onClick={() => setModal({ open: true, data: item })}
+                        onMouseEnter={e => { e.target.style.background='#eff6ff'; e.target.style.color='#1e40af' }}
+                        onMouseLeave={e => { e.target.style.background='transparent'; e.target.style.color='#94a3b8' }}>
+                        ✏️
+                      </button>
+                      <button style={iconBtn()} title="Excluir" onClick={() => handleDelete(item.id)}
+                        onMouseEnter={e => { e.target.style.background='#fff1f2'; e.target.style.color='#dc2626' }}
+                        onMouseLeave={e => { e.target.style.background='transparent'; e.target.style.color='#94a3b8' }}>
+                        🗑️
+                      </button>
                     </td>
                   </tr>
                 ))}
