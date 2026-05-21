@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { transactionService } from '../services/transactionService'
 import { recurringTransactionService } from '../services/recurringTransactionService'
+import { categoryService } from '../services/categoryService'
+import Onboarding from '../components/Onboarding'
 import { calcularResumoMes } from '../utils/calculations'
 import { formatCurrency, formatPercent, MESES, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { StatCard } from '../components/ui/Card'
@@ -22,6 +24,18 @@ export default function Dashboard() {
   const [lancamentos, setLancamentos] = useState([])
   const [todos, setTodos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showOnboarding, setShowOnboarding] = useState(false)
+
+  // Exibe onboarding para novos usuários (sem categorias cadastradas)
+  useEffect(() => {
+    if (!user) return
+    const key = `cg_onboarding_${user.id}`
+    if (localStorage.getItem(key) === 'done') return
+    categoryService.list(user.id).then(cats => {
+      if (cats.length === 0) setShowOnboarding(true)
+      else localStorage.setItem(key, 'done')
+    }).catch(() => {})
+  }, [user])
 
   // Gera transações recorrentes pendentes silenciosamente ao abrir o app
   useEffect(() => {
@@ -59,6 +73,7 @@ export default function Dashboard() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+      {showOnboarding && <Onboarding user={user} onComplete={() => setShowOnboarding(false)} />}
       {/* Header */}
       <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
         <div>
