@@ -7,6 +7,7 @@ import Transactions from './pages/Transactions'
 import Categories from './pages/Categories'
 import MonthlySummary from './pages/MonthlySummary'
 import Settings from './pages/Settings'
+import Budgets from './pages/Budgets'
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/lancamentos" element={<PrivateRoute><Transactions /></PrivateRoute>} />
           <Route path="/categorias" element={<PrivateRoute><Categories /></PrivateRoute>} />
           <Route path="/resumo" element={<PrivateRoute><MonthlySummary /></PrivateRoute>} />
+          <Route path="/orcamentos" element={<PrivateRoute><Budgets /></PrivateRoute>} />
           <Route path="/configuracoes" element={<PrivateRoute><Settings /></PrivateRoute>} />
           <Route path="*" element={<Navigate to="/dashboard" />} />
         </Routes>

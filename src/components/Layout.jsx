@@ -7,6 +7,7 @@ const nav = [
   { to: '/lancamentos', label: 'Lançamentos', emoji: '💳' },
   { to: '/categorias', label: 'Categorias', emoji: '🏷️' },
   { to: '/resumo', label: 'Resumo Mensal', emoji: '📅' },
+  { to: '/orcamentos', label: 'Orçamentos', emoji: '🎯' },
   { to: '/configuracoes', label: 'Configurações', emoji: '⚙️' },
 ]
 
