@@ -130,15 +130,11 @@ export default function Login() {
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            width: '64px', height: '64px',
-            background: 'linear-gradient(135deg, #1e40af, #3b82f6)',
-            borderRadius: '18px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-            fontWeight: '800', fontSize: '22px', color: 'white', margin: '0 auto 16px',
-            boxShadow: '0 8px 24px rgba(30,64,175,0.35)',
-          }}>CG</div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', margin: '0 0 4px' }}>Planejamento Financeiro</h1>
-          <p style={{ fontSize: '14px', color: '#94a3b8', margin: 0 }}>planejofinanceiro.com.br</p>
+          <img
+            src="/logo.jpg"
+            alt="Planejamento Financeiro"
+            style={{ width: '160px', margin: '0 auto 8px', display: 'block' }}
+          />
         </div>
 
         {msg && (

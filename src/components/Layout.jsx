@@ -30,20 +30,8 @@ export function Layout({ children }) {
         height: '100vh', zIndex: 40, boxShadow: '4px 0 20px rgba(0,0,0,0.15)'
       }} className="hidden-mobile">
         {/* Logo */}
-        <div style={{ padding: '24px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <div style={{
-              width: '44px', height: '44px', background: 'linear-gradient(135deg, #60a5fa, #3b82f6)',
-              borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(59,130,246,0.4)'
-            }}>
-              <Wallet size={22} color="white" strokeWidth={1.8} />
-            </div>
-            <div>
-              <div style={{ color: 'white', fontWeight: '700', fontSize: '14px', lineHeight: 1.2 }}>Planejamento Financeiro</div>
-              <div style={{ color: '#93c5fd', fontSize: '11px', marginTop: '2px' }}>planejofinanceiro.com.br</div>
-            </div>
-          </div>
+        <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.1)', textAlign: 'center' }}>
+          <img src="/logo.jpg" alt="Planejamento Financeiro" style={{ width: '140px', display: 'block', margin: '0 auto' }} />
         </div>
 
         {/* Nav */}
@@ -83,13 +71,7 @@ export function Layout({ children }) {
         padding: '0 16px', boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
       }} className="show-mobile">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{
-            width: '36px', height: '36px', background: 'rgba(255,255,255,0.2)',
-            borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-          }}>
-            <Wallet size={18} color="white" strokeWidth={1.8} />
-          </div>
-          <span style={{ color: 'white', fontWeight: '600', fontSize: '15px' }}>Planejamento Financeiro</span>
+          <img src="/logo.jpg" alt="Planejamento Financeiro" style={{ height: '36px', width: 'auto', borderRadius: '6px' }} />
         </div>
         <button onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' }}>
           {open ? '✕' : '☰'}
