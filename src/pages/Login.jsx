@@ -47,6 +47,7 @@ const ERROR_MAP = {
   'rate limited': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
   'sending confirmation email': 'Não foi possível enviar o e-mail de confirmação. Tente novamente em alguns minutos ou entre em contato com o suporte.',
   'Error sending': 'Falha ao enviar e-mail de confirmação. Verifique se o endereço está correto e tente novamente.',
+  'Auth session missing': 'Link de recuperação expirado ou já utilizado. Solicite um novo link em "Esqueci minha senha".',
 }
 
 function friendlyAuthError(msg = '') {
@@ -147,7 +148,12 @@ export default function Login() {
         boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
         width: '100%', maxWidth: '420px', padding: '40px 36px', position: 'relative',
       }}>
-        {needsPasswordUpdate && (
+        {needsPasswordUpdate && !user && (
+          <div style={{ background: '#fefce8', border: '1px solid #fde047', color: '#854d0e', borderRadius: '12px', padding: '12px 16px', fontSize: '14px', marginBottom: '20px', textAlign: 'center' }}>
+            Verificando sessão de recuperação...
+          </div>
+        )}
+        {needsPasswordUpdate && user && (
           <div style={{ background: '#eff6ff', border: '1px solid #93c5fd', color: '#1e40af', borderRadius: '12px', padding: '12px 16px', fontSize: '14px', marginBottom: '20px', textAlign: 'center' }}>
             Digite sua nova senha abaixo para concluir a recuperação.
           </div>
@@ -233,16 +239,16 @@ export default function Login() {
           )}
 
           <button
-            type="submit" disabled={loading}
+            type="submit" disabled={loading || (needsPasswordUpdate && !user)}
             style={{
               width: '100%', padding: '13px', borderRadius: '12px', border: 'none',
-              background: loading ? '#93c5fd' : 'linear-gradient(135deg, #1e40af, #2563eb)',
-              color: 'white', fontSize: '15px', fontWeight: '700', cursor: loading ? 'default' : 'pointer',
+              background: (loading || (needsPasswordUpdate && !user)) ? '#93c5fd' : 'linear-gradient(135deg, #1e40af, #2563eb)',
+              color: 'white', fontSize: '15px', fontWeight: '700', cursor: (loading || (needsPasswordUpdate && !user)) ? 'default' : 'pointer',
               fontFamily: 'inherit', marginTop: '4px',
               boxShadow: '0 4px 12px rgba(30,64,175,0.3)',
             }}
           >
-            {loading ? 'Aguarde...' : needsPasswordUpdate ? 'Salvar nova senha' : mode === 'login' ? 'Entrar na conta' : mode === 'register' ? 'Criar conta' : 'Enviar e-mail'}
+            {loading ? 'Aguarde...' : (needsPasswordUpdate && !user) ? 'Aguardando sessão...' : needsPasswordUpdate ? 'Salvar nova senha' : mode === 'login' ? 'Entrar na conta' : mode === 'register' ? 'Criar conta' : 'Enviar e-mail'}
           </button>
         </form>
 
