@@ -11,9 +11,9 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon.ico', 'logo.png'],
       manifest: {
-        name: 'Controle de Gastos Consultivo',
-        short_name: 'CG Consultivo',
-        description: 'Controle financeiro pessoal e consultivo',
+        name: 'Planejamento Financeiro',
+        short_name: 'Planej. Financeiro',
+        description: 'Planejamento e controle financeiro pessoal',
         theme_color: '#1e40af',
         background_color: '#ffffff',
         display: 'standalone',

@@ -40,7 +40,7 @@ function WelcomeStep({ user, onNext, onSkip }) {
         Bem-vindo, {name}!
       </h1>
       <p style={{ color: '#64748b', fontSize: '14px', lineHeight: 1.65, margin: '0 0 22px' }}>
-        O <strong style={{ color: '#1e293b' }}>Controle de Gastos</strong> organiza suas finanças em um só lugar. Em 2 passos rápidos vamos configurar o essencial.
+        O <strong style={{ color: '#1e293b' }}>Planejamento Financeiro</strong> organiza suas finanças em um só lugar. Em 2 passos rápidos vamos configurar o essencial.
       </p>
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px', textAlign: 'left' }}>

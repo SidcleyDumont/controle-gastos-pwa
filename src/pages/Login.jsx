@@ -45,6 +45,8 @@ const ERROR_MAP = {
   'Password should be at least': 'A senha deve ter pelo menos 8 caracteres.',
   'signup_disabled': 'Cadastro temporariamente indisponível.',
   'rate limited': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
+  'sending confirmation email': 'Não foi possível enviar o e-mail de confirmação. Tente novamente em alguns minutos ou entre em contato com o suporte.',
+  'Error sending': 'Falha ao enviar e-mail de confirmação. Verifique se o endereço está correto e tente novamente.',
 }
 
 function friendlyAuthError(msg = '') {
@@ -135,8 +137,8 @@ export default function Login() {
             fontWeight: '800', fontSize: '22px', color: 'white', margin: '0 auto 16px',
             boxShadow: '0 8px 24px rgba(30,64,175,0.35)',
           }}>CG</div>
-          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', margin: '0 0 4px' }}>Controle de Gastos</h1>
-          <p style={{ fontSize: '14px', color: '#94a3b8', margin: 0 }}>Consultivo Financeiro Pessoal</p>
+          <h1 style={{ fontSize: '22px', fontWeight: '800', color: '#0f172a', margin: '0 0 4px' }}>Planejamento Financeiro</h1>
+          <p style={{ fontSize: '14px', color: '#94a3b8', margin: 0 }}>planejofinanceiro.com.br</p>
         </div>
 
         {msg && (

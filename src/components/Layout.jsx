@@ -40,8 +40,8 @@ export function Layout({ children }) {
               <Wallet size={22} color="white" strokeWidth={1.8} />
             </div>
             <div>
-              <div style={{ color: 'white', fontWeight: '700', fontSize: '14px', lineHeight: 1.2 }}>Controle de Gastos</div>
-              <div style={{ color: '#93c5fd', fontSize: '11px', marginTop: '2px' }}>Consultivo</div>
+              <div style={{ color: 'white', fontWeight: '700', fontSize: '14px', lineHeight: 1.2 }}>Planejamento Financeiro</div>
+              <div style={{ color: '#93c5fd', fontSize: '11px', marginTop: '2px' }}>planejofinanceiro.com.br</div>
             </div>
           </div>
         </div>
@@ -89,7 +89,7 @@ export function Layout({ children }) {
           }}>
             <Wallet size={18} color="white" strokeWidth={1.8} />
           </div>
-          <span style={{ color: 'white', fontWeight: '600', fontSize: '15px' }}>Controle de Gastos</span>
+          <span style={{ color: 'white', fontWeight: '600', fontSize: '15px' }}>Planejamento Financeiro</span>
         </div>
         <button onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' }}>
           {open ? '✕' : '☰'}

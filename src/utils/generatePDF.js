@@ -53,7 +53,7 @@ function addPageNumbers(doc) {
     doc.setFontSize(7)
     doc.setTextColor(...GRAY)
     doc.text(`Pagina ${i} de ${total}`, 196, 290, { align: 'right' })
-    doc.text('Controle de Gastos', 14, 290)
+    doc.text('Planejamento Financeiro', 14, 290)
   }
 }
 
