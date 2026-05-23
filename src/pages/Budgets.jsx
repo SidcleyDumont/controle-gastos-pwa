@@ -1,20 +1,13 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { budgetService } from '../services/budgetService'
-import { categoryService } from '../services/categoryService'
-import { transactionService } from '../services/transactionService'
+import { useBudgets } from '../hooks/useBudgets'
+import { useCategories } from '../hooks/useCategories'
+import { useTransactions } from '../hooks/useTransactions'
 import { formatCurrency, getMesAtual, getAnoAtual, MESES } from '../utils/formatters'
-
-const labelStyle = { fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }
-const inputStyle = {
-  width: '100%', border: '1.5px solid #e2e8f0', borderRadius: '10px',
-  padding: '9px 12px', fontSize: '14px', color: '#1e293b',
-  background: 'white', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
-}
-const selectFilterStyle = {
-  border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '8px 12px',
-  fontSize: '13px', color: '#374151', background: 'white', cursor: 'pointer', fontFamily: 'inherit',
-}
+import { Button } from '../components/ui/Button'
+import { Modal } from '../components/ui/Modal'
+import { S, onFocus, onBlur, getYearRange } from '../styles'
 
 function getStatusColor(percent) {
   if (percent >= 100) return '#dc2626'
@@ -84,32 +77,24 @@ function BudgetModal({ data, categories, onClose, onSave }) {
     } finally { setLoading(false) }
   }
 
-  const focus = e => e.target.style.borderColor = '#1e40af'
-  const blur = e => e.target.style.borderColor = '#e2e8f0'
-
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)' }} onClick={onClose}>
-      <div style={{ background: 'white', borderRadius: '20px', boxShadow: '0 20px 60px rgba(0,0,0,0.25)', width: '100%', maxWidth: '440px' }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid #f1f5f9' }}>
-          <h2 style={{ fontSize: '17px', fontWeight: '800', color: '#0f172a', margin: 0 }}>{isEditing ? 'Editar Orçamento' : 'Novo Orçamento'}</h2>
-          <button onClick={onClose} style={{ background: '#f1f5f9', border: 'none', borderRadius: '8px', width: '32px', height: '32px', cursor: 'pointer', fontSize: '16px', color: '#64748b' }}>✕</button>
-        </div>
-        <form onSubmit={handleSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {error && (
-            <div style={{ background: '#fff1f2', border: '1px solid #fca5a5', color: '#b91c1c', borderRadius: '10px', padding: '10px 14px', fontSize: '13px' }}>
-              {error}
-            </div>
-          )}
+    <Modal onClose={onClose} title={isEditing ? 'Editar Orçamento' : 'Novo Orçamento'}>
+      <form onSubmit={handleSubmit} style={S.modal.body}>
+          {error && <div style={S.modal.errorAlert} role="alert">{error}</div>}
           <div>
-            <label style={labelStyle}>Categoria *</label>
-            <select value={form.category_id} onChange={e => set('category_id', e.target.value)} disabled={isEditing} style={{ ...inputStyle, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.7 : 1 }} onFocus={focus} onBlur={blur}>
+            <label style={S.label}>Categoria *</label>
+            <select value={form.category_id} onChange={e => set('category_id', e.target.value)} disabled={isEditing}
+              style={{ ...S.input, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.7 : 1 }}
+              onFocus={onFocus} onBlur={onBlur}>
               <option value="">Selecione uma categoria...</option>
               {despesas.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
           <div>
-            <label style={labelStyle}>Período *</label>
-            <select value={form.period} onChange={e => set('period', e.target.value)} disabled={isEditing} style={{ ...inputStyle, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.7 : 1 }} onFocus={focus} onBlur={blur}>
+            <label style={S.label}>Período *</label>
+            <select value={form.period} onChange={e => set('period', e.target.value)} disabled={isEditing}
+              style={{ ...S.input, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.7 : 1 }}
+              onFocus={onFocus} onBlur={onBlur}>
               <option value="Mensal">Mensal</option>
               <option value="Quinzenal">Quinzenal</option>
             </select>
@@ -120,25 +105,21 @@ function BudgetModal({ data, categories, onClose, onSave }) {
             )}
           </div>
           <div>
-            <label style={labelStyle}>Limite (R$) *</label>
-            <input
-              type="number" min="0.01" step="0.01"
+            <label style={S.label}>Limite (R$) *</label>
+            <input type="number" min="0.01" step="0.01"
               value={form.amount} onChange={e => set('amount', e.target.value)}
               required placeholder="0,00"
-              style={inputStyle} onFocus={focus} onBlur={blur}
+              style={S.input} onFocus={onFocus} onBlur={onBlur}
             />
           </div>
-          <div style={{ display: 'flex', gap: '12px', paddingTop: '4px' }}>
-            <button type="button" onClick={onClose} style={{ flex: 1, padding: '11px', border: '1.5px solid #e2e8f0', borderRadius: '10px', background: 'white', color: '#475569', fontSize: '14px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
-              Cancelar
-            </button>
-            <button type="submit" disabled={loading} style={{ flex: 1, padding: '11px', border: 'none', borderRadius: '10px', background: '#1e40af', color: 'white', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: loading ? 0.7 : 1 }}>
+          <div style={S.modal.footer}>
+            <button type="button" onClick={onClose} style={S.modal.cancelBtn}>Cancelar</button>
+            <button type="submit" disabled={loading} style={S.modal.submitBtn(loading)}>
               {loading ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -161,7 +142,6 @@ function MensalCard({ budget, sp, onEdit, onDelete }) {
           <ActionBtn onClick={onDelete} emoji="🗑️" hoverBg="#fff1f2" />
         </div>
       </div>
-
       <div style={{ marginBottom: '10px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '5px' }}>
           <span style={{ fontSize: '12px', color: '#64748b' }}>Progresso do mês</span>
@@ -169,7 +149,6 @@ function MensalCard({ budget, sp, onEdit, onDelete }) {
         </div>
         <ProgressBar percent={percent} color={color} />
       </div>
-
       <div style={{ display: 'flex', justifyContent: 'space-between' }}>
         <div>
           <div style={{ fontSize: '11px', color: '#94a3b8', marginBottom: '1px' }}>Gasto</div>
@@ -186,7 +165,6 @@ function MensalCard({ budget, sp, onEdit, onDelete }) {
           </div>
         </div>
       </div>
-
       {percent >= 90 && (
         <div style={{ marginTop: '10px', background: percent >= 100 ? '#fff1f2' : '#fff7ed', border: `1px solid ${color}40`, borderRadius: '8px', padding: '7px 10px', fontSize: '12px', color, fontWeight: '600' }}>
           {percent >= 100 ? '🚨 Limite ultrapassado!' : '⚠️ Próximo do limite'}
@@ -216,11 +194,9 @@ function QuinzenalCard({ budget, sp, onEdit, onDelete }) {
           <ActionBtn onClick={onDelete} emoji="🗑️" hoverBg="#fff1f2" />
         </div>
       </div>
-
       <div style={{ fontSize: '12px', color: '#94a3b8', marginBottom: '12px' }}>
         Limite por quinzena: <strong style={{ color: '#374151' }}>{formatCurrency(budget.amount)}</strong>
       </div>
-
       {periods.map(({ label, spent }) => {
         const percent = budget.amount > 0 ? (spent / budget.amount) * 100 : 0
         const color = getStatusColor(percent)
@@ -242,32 +218,17 @@ function QuinzenalCard({ budget, sp, onEdit, onDelete }) {
 
 export default function Budgets() {
   const { user } = useAuth()
-  const [budgets, setBudgets] = useState([])
-  const [categories, setCategories] = useState([])
-  const [transactions, setTransactions] = useState([])
   const [month, setMonth] = useState(getMesAtual())
   const [year, setYear] = useState(getAnoAtual())
   const [filterPeriod, setFilterPeriod] = useState('')
   const [modal, setModal] = useState({ open: false, data: null })
-  const [loading, setLoading] = useState(true)
 
-  const load = async () => {
-    setLoading(true)
-    try {
-      const [b, c, t] = await Promise.all([
-        budgetService.list(user.id),
-        categoryService.list(user.id),
-        transactionService.list(user.id, { month, year, type: 'Despesa' }),
-      ])
-      setBudgets(b)
-      setCategories(c)
-      setTransactions(t)
-    } finally { setLoading(false) }
-  }
+  const { data: budgets = [], isLoading: loadingBudgets, invalidate: invalidateBudgets } = useBudgets(user?.id)
+  const { data: categories = [] } = useCategories(user?.id)
+  const { data: transactions = [], isLoading: loadingTx } = useTransactions(user?.id, { month, year, type: 'Despesa' })
 
-  useEffect(() => { if (user) load() }, [user, month, year])
+  const isLoading = loadingBudgets || loadingTx
 
-  // Aggregate spending per category
   const spending = transactions.reduce((acc, t) => {
     if (!t.category_id) return acc
     if (!acc[t.category_id]) acc[t.category_id] = { total: 0, quinzena: 0, finalMes: 0 }
@@ -280,7 +241,7 @@ export default function Budgets() {
   const handleDelete = async (id) => {
     if (!confirm('Excluir este orçamento?')) return
     await budgetService.delete(id, user.id)
-    load()
+    invalidateBudgets()
   }
 
   const openModal = (data = null) => setModal({ open: true, data })
@@ -288,14 +249,11 @@ export default function Budgets() {
 
   const filtered = budgets.filter(b => !filterPeriod || b.period === filterPeriod)
 
-  // Categories with spending but no configured budget
   const budgetCategoryIds = new Set(budgets.map(b => b.category_id))
   const unconfigured = Object.entries(spending)
     .filter(([cid]) => !budgetCategoryIds.has(cid))
     .map(([cid, sp]) => ({ cid, name: categories.find(c => c.id === cid)?.name || 'Sem categoria', total: sp.total }))
     .sort((a, b) => b.total - a.total)
-
-  const anos = [getAnoAtual() - 1, getAnoAtual(), getAnoAtual() + 1]
 
   const alertCount = filtered.filter(b => {
     const sp = spending[b.category_id] || { total: 0, quinzena: 0, finalMes: 0 }
@@ -306,45 +264,39 @@ export default function Budgets() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Header */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+      <div style={S.pageHeader}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Orçamento por Categoria</h1>
-          <p style={{ fontSize: '14px', color: '#64748b', margin: '4px 0 0' }}>
+          <h1 style={S.pageTitle}>Orçamento por Categoria</h1>
+          <p style={S.pageSubtitle}>
             {budgets.length} orçamento(s) configurado(s)
             {alertCount > 0 && <span style={{ color: '#dc2626', fontWeight: '600' }}> · {alertCount} acima do limite</span>}
           </p>
         </div>
-        <button onClick={() => openModal()} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', border: 'none', borderRadius: '10px', padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', background: '#1e40af', color: 'white', fontFamily: 'inherit', boxShadow: '0 2px 8px rgba(30,64,175,0.25)' }}>
-          + Novo Orçamento
-        </button>
+        <Button variant="primary" onClick={() => openModal()}>+ Novo Orçamento</Button>
       </div>
 
-      {/* Filters */}
+      {/* Filtros */}
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
-        <select value={month} onChange={e => setMonth(Number(e.target.value))} style={selectFilterStyle}>
+        <select value={month} onChange={e => setMonth(Number(e.target.value))} style={S.selectFilter}>
           {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
         </select>
-        <select value={year} onChange={e => setYear(Number(e.target.value))} style={selectFilterStyle}>
-          {anos.map(a => <option key={a} value={a}>{a}</option>)}
+        <select value={year} onChange={e => setYear(Number(e.target.value))} style={S.selectFilter}>
+          {getYearRange(1, 1).map(a => <option key={a} value={a}>{a}</option>)}
         </select>
         <div style={{ display: 'flex', gap: '6px' }}>
           {[['', 'Todos'], ['Mensal', 'Mensal'], ['Quinzenal', 'Quinzenal']].map(([val, label]) => (
-            <button key={val} onClick={() => setFilterPeriod(val)} style={{
-              padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
-              cursor: 'pointer', fontFamily: 'inherit', border: 'none',
-              background: filterPeriod === val ? '#1e40af' : 'white',
-              color: filterPeriod === val ? 'white' : '#475569',
-              boxShadow: filterPeriod === val ? '0 2px 8px rgba(30,64,175,0.2)' : '0 1px 3px rgba(0,0,0,0.08)',
-            }}>{label}</button>
+            <button key={val} onClick={() => setFilterPeriod(val)} style={S.pillBtn(filterPeriod === val)}>
+              {label}
+            </button>
           ))}
         </div>
       </div>
 
       {/* Cards */}
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8', fontSize: '15px' }}>Carregando...</div>
+      {isLoading ? (
+        <div style={S.loading}>Carregando...</div>
       ) : filtered.length === 0 ? (
-        <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', padding: '60px', textAlign: 'center' }}>
+        <div style={S.emptyCard}>
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>🎯</div>
           <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Nenhum orçamento configurado.</p>
           <p style={{ color: '#94a3b8', fontSize: '13px', marginTop: '4px' }}>Clique em <strong>+ Novo Orçamento</strong> para começar.</p>
@@ -365,13 +317,13 @@ export default function Budgets() {
         </div>
       )}
 
-      {/* Categories spending without budget */}
-      {!loading && unconfigured.length > 0 && (
+      {/* Despesas sem orçamento */}
+      {!isLoading && unconfigured.length > 0 && (
         <div>
           <h2 style={{ fontSize: '14px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '10px' }}>
             Despesas sem orçamento definido
           </h2>
-          <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+          <div style={{ ...S.card, overflow: 'hidden' }}>
             {unconfigured.map((item, idx) => (
               <div key={item.cid} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '13px 16px', borderBottom: idx < unconfigured.length - 1 ? '1px solid #f1f5f9' : 'none', background: idx % 2 === 0 ? 'white' : '#fafafa' }}>
                 <span style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>{item.name}</span>
@@ -395,7 +347,7 @@ export default function Budgets() {
           data={modal.data}
           categories={categories}
           onClose={closeModal}
-          onSave={load}
+          onSave={invalidateBudgets}
         />
       )}
     </div>

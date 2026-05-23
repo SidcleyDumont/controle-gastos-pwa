@@ -155,7 +155,7 @@ function CategoriesStep({ selected, onToggle, onBack, onNext, onSkip, loading })
   )
 }
 
-function DoneStep({ created, onFinish }) {
+function DoneStep({ created, failed, onFinish }) {
   return (
     <div style={{ textAlign: 'center' }}>
       <div style={{ fontSize: '52px', marginBottom: '14px', lineHeight: 1 }}>🎉</div>
@@ -164,8 +164,13 @@ function DoneStep({ created, onFinish }) {
       </h2>
 
       {created > 0 && (
-        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '14px', color: '#15803d', fontWeight: '600' }}>
+        <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '10px 16px', marginBottom: '10px', fontSize: '14px', color: '#15803d', fontWeight: '600' }}>
           ✅ {created} categoria{created > 1 ? 's criadas' : ' criada'} com sucesso
+        </div>
+      )}
+      {failed > 0 && (
+        <div style={{ background: '#fff7ed', border: '1px solid #fed7aa', borderRadius: '10px', padding: '10px 16px', marginBottom: '16px', fontSize: '14px', color: '#c2410c', fontWeight: '600' }}>
+          ⚠️ {failed} categoria{failed > 1 ? 's não puderam' : ' não pôde'} ser criada{failed > 1 ? 's' : ''}. Você pode adicioná-las manualmente depois.
         </div>
       )}
 
@@ -203,6 +208,7 @@ export default function Onboarding({ user, onComplete }) {
   )
   const [loading, setLoading] = useState(false)
   const [created, setCreated] = useState(0)
+  const [failed, setFailed] = useState(0)
 
   const dismiss = () => {
     localStorage.setItem(`cg_onboarding_${user.id}`, 'done')
@@ -218,13 +224,18 @@ export default function Onboarding({ user, onComplete }) {
   const handleCreateCategories = async () => {
     setLoading(true)
     let count = 0
+    let errors = 0
     for (const p of PRESETS.filter(p => selected.has(p.name))) {
       try {
         await categoryService.create(user.id, { name: p.name, type: p.type, usage: 'Mensal', notes: '' })
         count++
-      } catch {}
+      } catch (err) {
+        errors++
+        console.error(`[Onboarding] falha ao criar categoria "${p.name}":`, err)
+      }
     }
     setCreated(count)
+    setFailed(errors)
     setLoading(false)
     setStep(2)
   }
@@ -248,7 +259,7 @@ export default function Onboarding({ user, onComplete }) {
             />
           )}
           {step === 2 && (
-            <DoneStep created={created} onFinish={dismiss} />
+            <DoneStep created={created} failed={failed} onFinish={dismiss} />
           )}
         </div>
       </div>

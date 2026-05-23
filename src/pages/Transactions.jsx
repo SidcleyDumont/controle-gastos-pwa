@@ -1,47 +1,32 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { transactionService } from '../services/transactionService'
-import { categoryService } from '../services/categoryService'
-import { formatCurrency, formatDate, MESES, PERIODOS, TIPOS, SITUACOES, getMesAtual, getAnoAtual } from '../utils/formatters'
+import { useTransactions } from '../hooks/useTransactions'
+import { useCategories } from '../hooks/useCategories'
+import { formatCurrency, formatDate, MESES, TIPOS, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { SituacaoBadge, Badge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
 import TransactionModal from '../components/TransactionModal'
+import { S, getYearRange } from '../styles'
 
-const selStyle = {
-  border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '7px 10px',
-  fontSize: '13px', background: 'white', color: '#1e293b', outline: 'none', fontFamily: 'inherit', cursor: 'pointer',
+const iconBtn = {
+  padding: '6px', border: 'none', borderRadius: '8px', cursor: 'pointer',
+  background: 'transparent', color: '#94a3b8', fontSize: '15px', fontFamily: 'inherit',
 }
-const btnStyle = (variant) => ({
-  display: 'inline-flex', alignItems: 'center', gap: '6px', border: 'none', borderRadius: '10px',
-  padding: '8px 14px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit',
-  ...(variant === 'primary'
-    ? { background: '#1e40af', color: 'white', boxShadow: '0 2px 8px rgba(30,64,175,0.25)' }
-    : { background: '#f1f5f9', color: '#475569' }),
-})
-const iconBtn = (hover) => ({
-  padding: '6px', border: 'none', borderRadius: '8px', cursor: 'pointer', fontFamily: 'inherit',
-  background: 'transparent', color: '#94a3b8', fontSize: '15px',
-})
 
 export default function Transactions() {
   const { user } = useAuth()
-  const [items, setItems] = useState([])
-  const [cats, setCats] = useState([])
-  const [loading, setLoading] = useState(true)
   const [modal, setModal] = useState({ open: false, data: null })
   const [filters, setFilters] = useState({ month: getMesAtual(), year: getAnoAtual(), type: '', period: '', status: '', category_id: '' })
   const [sort, setSort] = useState({ field: 'date', dir: 'desc' })
 
-  const load = async () => {
-    setLoading(true)
-    const [data, c] = await Promise.all([transactionService.list(user.id, filters), categoryService.list(user.id)])
-    setItems(data); setCats(c); setLoading(false)
-  }
-
-  useEffect(() => { if (user) load() }, [user, filters])
+  const { data: items = [], isLoading, invalidate } = useTransactions(user?.id, filters)
+  const { data: cats = [] } = useCategories(user?.id)
 
   const handleDelete = async (id) => {
     if (!confirm('Excluir este lançamento?')) return
-    await transactionService.delete(id, user.id); load()
+    await transactionService.delete(id, user.id)
+    invalidate()
   }
 
   const sorted = [...items].sort((a, b) => {
@@ -54,51 +39,48 @@ export default function Transactions() {
   const toggleSort = (field) => setSort(s => ({ field, dir: s.field === field && s.dir === 'asc' ? 'desc' : 'asc' }))
   const setFilter = (key, val) => setFilters(f => ({ ...f, [key]: val }))
 
-  const thStyle = { padding: '12px 14px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: '#64748b', whiteSpace: 'nowrap', cursor: 'pointer', userSelect: 'none', textTransform: 'uppercase', letterSpacing: '0.04em' }
-  const tdStyle = { padding: '12px 14px', fontSize: '13px', color: '#374151', borderBottom: '1px solid #f8fafc' }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* Header */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+      <div style={S.pageHeader}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Lançamentos</h1>
-          <p style={{ fontSize: '14px', color: '#64748b', margin: '4px 0 0' }}>{items.length} registro(s) encontrado(s)</p>
+          <h1 style={S.pageTitle}>Lançamentos</h1>
+          <p style={S.pageSubtitle}>{items.length} registro(s) encontrado(s)</p>
         </div>
         <div className="header-actions">
-          <button style={btnStyle('secondary')} onClick={() => transactionService.exportCSV(user.id)}>
+          <Button variant="secondary" onClick={() => transactionService.exportCSV(user.id)}>
             ↓ Exportar CSV
-          </button>
-          <button style={btnStyle('primary')} onClick={() => setModal({ open: true, data: null })}>
+          </Button>
+          <Button variant="primary" onClick={() => setModal({ open: true, data: null })}>
             + Novo lançamento
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Filtros */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', padding: '16px' }}>
+      <div style={{ ...S.card, padding: '16px' }}>
         <div style={{ fontSize: '12px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '12px' }}>Filtros</div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: '10px' }}>
-          <select style={selStyle} value={filters.month} onChange={e => setFilter('month', Number(e.target.value))}>
+          <select style={S.selectFilter} value={filters.month} onChange={e => setFilter('month', Number(e.target.value))}>
             <option value="">Todos os meses</option>
             {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
-          <select style={selStyle} value={filters.year} onChange={e => setFilter('year', Number(e.target.value))}>
-            {[2024, 2025, 2026, 2027, 2028].map(y => <option key={y} value={y}>{y}</option>)}
+          <select style={S.selectFilter} value={filters.year} onChange={e => setFilter('year', Number(e.target.value))}>
+            {getYearRange(1, 2).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
-          <select style={selStyle} value={filters.type} onChange={e => setFilter('type', e.target.value)}>
+          <select style={S.selectFilter} value={filters.type} onChange={e => setFilter('type', e.target.value)}>
             <option value="">Todos os tipos</option>
             {TIPOS.map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-          <select style={selStyle} value={filters.period} onChange={e => setFilter('period', e.target.value)}>
+          <select style={S.selectFilter} value={filters.period} onChange={e => setFilter('period', e.target.value)}>
             <option value="">Todos os períodos</option>
             {['Quinzena', 'Final do Mês'].map(p => <option key={p} value={p}>{p}</option>)}
           </select>
-          <select style={selStyle} value={filters.status} onChange={e => setFilter('status', e.target.value)}>
+          <select style={S.selectFilter} value={filters.status} onChange={e => setFilter('status', e.target.value)}>
             <option value="">Todas as situações</option>
             {['Pago', 'A pagar', 'Recebido', 'Pendente'].map(s => <option key={s} value={s}>{s}</option>)}
           </select>
-          <select style={selStyle} value={filters.category_id} onChange={e => setFilter('category_id', e.target.value)}>
+          <select style={S.selectFilter} value={filters.category_id} onChange={e => setFilter('category_id', e.target.value)}>
             <option value="">Todas as categorias</option>
             {cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
           </select>
@@ -106,9 +88,9 @@ export default function Transactions() {
       </div>
 
       {/* Table / Cards */}
-      <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-        {loading ? (
-          <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8', fontSize: '15px' }}>Carregando...</div>
+      <div style={{ ...S.card, overflow: 'hidden' }}>
+        {isLoading ? (
+          <div style={S.loading}>Carregando...</div>
         ) : (<>
           {/* Desktop: tabela */}
           <div className="table-desktop" style={{ overflowX: 'auto' }}>
@@ -116,11 +98,11 @@ export default function Transactions() {
               <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
                 <tr>
                   {[['date','Data'],['description','Descrição'],['type','Tipo'],['period','Período'],['categories.name','Categoria'],['original_value','Valor'],['status','Situação'],['payment_method','Pagamento']].map(([f, l]) => (
-                    <th key={f} style={thStyle} onClick={() => toggleSort(f)}>
+                    <th key={f} style={S.th} onClick={() => toggleSort(f)}>
                       {l} {sort.field === f ? (sort.dir === 'asc' ? '↑' : '↓') : ''}
                     </th>
                   ))}
-                  <th style={{ ...thStyle, textAlign: 'right' }}>Ações</th>
+                  <th style={{ ...S.th, textAlign: 'right' }}>Ações</th>
                 </tr>
               </thead>
               <tbody>
@@ -128,23 +110,23 @@ export default function Transactions() {
                   <tr><td colSpan={9} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '15px' }}>Nenhum lançamento encontrado</td></tr>
                 ) : sorted.map((item, idx) => (
                   <tr key={item.id} style={{ background: idx % 2 === 0 ? 'white' : '#fafafa' }}>
-                    <td style={tdStyle}>{formatDate(item.date)}</td>
-                    <td style={{ ...tdStyle, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '500', color: '#1e293b' }}>{item.description}</td>
-                    <td style={tdStyle}><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
-                    <td style={{ ...tdStyle, color: '#64748b' }}>{item.period}</td>
-                    <td style={{ ...tdStyle, color: '#64748b' }}>{item.categories?.name || '-'}</td>
-                    <td style={{ ...tdStyle, fontWeight: '700', color: item.type === 'Receita' ? '#16a34a' : '#dc2626', whiteSpace: 'nowrap' }}>
+                    <td style={S.td}>{formatDate(item.date)}</td>
+                    <td style={{ ...S.td, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '500', color: '#1e293b' }}>{item.description}</td>
+                    <td style={S.td}><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
+                    <td style={{ ...S.td, color: '#64748b' }}>{item.period}</td>
+                    <td style={{ ...S.td, color: '#64748b' }}>{item.categories?.name || '-'}</td>
+                    <td style={{ ...S.td, fontWeight: '700', color: item.type === 'Receita' ? '#16a34a' : '#dc2626', whiteSpace: 'nowrap' }}>
                       {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
                     </td>
-                    <td style={tdStyle}><SituacaoBadge situacao={item.status} /></td>
-                    <td style={{ ...tdStyle, color: '#64748b', whiteSpace: 'nowrap' }}>{item.payment_method}</td>
-                    <td style={{ ...tdStyle, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      <button style={iconBtn()} title="Editar" onClick={() => setModal({ open: true, data: item })}
+                    <td style={S.td}><SituacaoBadge situacao={item.status} /></td>
+                    <td style={{ ...S.td, color: '#64748b', whiteSpace: 'nowrap' }}>{item.payment_method}</td>
+                    <td style={{ ...S.td, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <button style={iconBtn} title="Editar" onClick={() => setModal({ open: true, data: item })}
                         onMouseEnter={e => { e.target.style.background='#eff6ff'; e.target.style.color='#1e40af' }}
                         onMouseLeave={e => { e.target.style.background='transparent'; e.target.style.color='#94a3b8' }}>
                         ✏️
                       </button>
-                      <button style={iconBtn()} title="Excluir" onClick={() => handleDelete(item.id)}
+                      <button style={iconBtn} title="Excluir" onClick={() => handleDelete(item.id)}
                         onMouseEnter={e => { e.target.style.background='#fff1f2'; e.target.style.color='#dc2626' }}
                         onMouseLeave={e => { e.target.style.background='transparent'; e.target.style.color='#94a3b8' }}>
                         🗑️
@@ -199,7 +181,14 @@ export default function Transactions() {
         </>)}
       </div>
 
-      {modal.open && <TransactionModal data={modal.data} cats={cats} onClose={() => setModal({ open: false, data: null })} onSave={load} />}
+      {modal.open && (
+        <TransactionModal
+          data={modal.data}
+          cats={cats}
+          onClose={() => setModal({ open: false, data: null })}
+          onSave={invalidate}
+        />
+      )}
     </div>
   )
 }

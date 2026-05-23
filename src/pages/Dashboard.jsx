@@ -1,55 +1,54 @@
 import { useState, useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
-import { transactionService } from '../services/transactionService'
 import { recurringTransactionService } from '../services/recurringTransactionService'
-import { categoryService } from '../services/categoryService'
+import { useTransactions } from '../hooks/useTransactions'
+import { useCategories } from '../hooks/useCategories'
 import Onboarding from '../components/Onboarding'
 import { calcularResumoMes } from '../utils/calculations'
 import { formatCurrency, formatPercent, MESES, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { StatCard } from '../components/ui/Card'
 import { StatusBadge } from '../components/ui/Badge'
+import { Button } from '../components/ui/Button'
+import { S, getYearRange } from '../styles'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 
 const COLORS = ['#1e40af', '#dc2626', '#16a34a', '#9333ea']
 
-const selStyle = {
-  border: '1.5px solid #e2e8f0', borderRadius: '10px', padding: '8px 12px',
-  fontSize: '14px', background: 'white', color: '#1e293b', outline: 'none', fontFamily: 'inherit', cursor: 'pointer',
-}
-
 export default function Dashboard() {
   const { user } = useAuth()
+  const queryClient = useQueryClient()
   const [mes, setMes] = useState(getMesAtual())
   const [ano, setAno] = useState(getAnoAtual())
-  const [lancamentos, setLancamentos] = useState([])
-  const [todos, setTodos] = useState([])
-  const [loading, setLoading] = useState(true)
   const [showOnboarding, setShowOnboarding] = useState(false)
 
-  // Exibe onboarding para novos usuários (sem categorias cadastradas)
+  const { data: lancamentos = [], isLoading: l1 } = useTransactions(user?.id, { month: mes, year: ano })
+  const { data: todos = [], isLoading: l2 } = useTransactions(user?.id, { year: ano })
+  const { data: cats = [], invalidate: invalidateCats } = useCategories(user?.id)
+
+  const loading = l1 || l2
+
+  // Verifica se deve mostrar onboarding (sem categorias cadastradas)
   useEffect(() => {
-    if (!user) return
+    if (!user || cats === undefined) return
     const key = `cg_onboarding_${user.id}`
     if (localStorage.getItem(key) === 'done') return
-    categoryService.list(user.id).then(cats => {
-      if (cats.length === 0) setShowOnboarding(true)
-      else localStorage.setItem(key, 'done')
-    }).catch(() => {})
-  }, [user])
+    if (cats.length === 0) setShowOnboarding(true)
+    else localStorage.setItem(key, 'done')
+  }, [user, cats])
 
   // Gera transações recorrentes pendentes silenciosamente ao abrir o app
   useEffect(() => {
-    if (user) recurringTransactionService.generatePending(user.id).catch(() => {})
+    if (!user) return
+    recurringTransactionService.generatePending(user.id)
+      .then(() => queryClient.invalidateQueries({ queryKey: ['transactions', user.id] }))
+      .catch(err => console.error('[generatePending]', err))
   }, [user])
 
-  useEffect(() => {
-    if (!user) return
-    setLoading(true)
-    Promise.all([
-      transactionService.list(user.id, { month: mes, year: ano }),
-      transactionService.list(user.id, { year: ano }),
-    ]).then(([d, t]) => { setLancamentos(d); setTodos(t); setLoading(false) })
-  }, [user, mes, ano])
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false)
+    invalidateCats()
+  }
 
   const resumo = calcularResumoMes(lancamentos)
 
@@ -69,29 +68,50 @@ export default function Dashboard() {
     acc[cat] = (acc[cat] || 0) + l.expense_value
     return acc
   }, {})
-  const dadosCat = Object.entries(categorias).map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value).slice(0, 5)
+  const dadosCat = Object.entries(categorias)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5)
+
+  const [pdfLoading, setPdfLoading] = useState(false)
+
+  const handleExportPDF = async () => {
+    setPdfLoading(true)
+    try {
+      const { generateMonthlyReport } = await import('../utils/generatePDF')
+      generateMonthlyReport({ transactions: lancamentos, resumo, dadosCat, mes, ano, userEmail: user?.email })
+    } finally {
+      setPdfLoading(false)
+    }
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-      {showOnboarding && <Onboarding user={user} onComplete={() => setShowOnboarding(false)} />}
+      {showOnboarding && <Onboarding user={user} onComplete={handleOnboardingComplete} />}
+
       {/* Header */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+      <div style={S.pageHeader}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Dashboard</h1>
-          <p style={{ fontSize: '14px', color: '#64748b', margin: '4px 0 0' }}>Visão financeira do mês</p>
+          <h1 style={S.pageTitle}>Dashboard</h1>
+          <p style={S.pageSubtitle}>Visão financeira do mês</p>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <select value={mes} onChange={e => setMes(Number(e.target.value))} style={selStyle}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <select value={mes} onChange={e => setMes(Number(e.target.value))} style={S.selectFilter}>
             {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
           </select>
-          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={selStyle}>
-            {[2024, 2025, 2026, 2027, 2028].map(y => <option key={y} value={y}>{y}</option>)}
+          <select value={ano} onChange={e => setAno(Number(e.target.value))} style={S.selectFilter}>
+            {getYearRange(1, 2).map(y => <option key={y} value={y}>{y}</option>)}
           </select>
+          {!loading && (
+            <Button variant="secondary" onClick={handleExportPDF} disabled={pdfLoading} title="Exportar relatório mensal em PDF">
+              {pdfLoading ? 'Gerando...' : '📄 PDF'}
+            </Button>
+          )}
         </div>
       </div>
 
       {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8', fontSize: '16px' }}>Carregando...</div>
+        <div style={S.loading}>Carregando...</div>
       ) : (<>
         {/* Status */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -115,8 +135,7 @@ export default function Dashboard() {
 
         {/* Charts */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
-          {/* Monthly Bar Chart */}
-          <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #f1f5f9', padding: '20px' }}>
+          <div style={{ ...S.card, padding: '20px' }}>
             <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '16px' }}>Evolução Mensal {ano}</h2>
             <ResponsiveContainer width="100%" height={220}>
               <BarChart data={dadosMensais} barGap={4}>
@@ -130,8 +149,7 @@ export default function Dashboard() {
             </ResponsiveContainer>
           </div>
 
-          {/* Pie Chart */}
-          <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #f1f5f9', padding: '20px' }}>
+          <div style={{ ...S.card, padding: '20px' }}>
             <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '16px' }}>Despesas por Período</h2>
             {dadosPeriodo.length === 0 ? (
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '220px', color: '#94a3b8', fontSize: '14px' }}>
@@ -153,7 +171,7 @@ export default function Dashboard() {
 
         {/* Top categories */}
         {dadosCat.length > 0 && (
-          <div style={{ background: 'white', borderRadius: '16px', boxShadow: '0 1px 4px rgba(0,0,0,0.06)', border: '1px solid #f1f5f9', padding: '20px' }}>
+          <div style={{ ...S.card, padding: '20px' }}>
             <h2 style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b', marginBottom: '16px' }}>Top Categorias de Despesa</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               {dadosCat.map((cat, i) => {

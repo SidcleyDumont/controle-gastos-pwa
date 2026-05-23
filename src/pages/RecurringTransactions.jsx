@@ -1,16 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { recurringTransactionService, getNextDueDate } from '../services/recurringTransactionService'
-import { categoryService } from '../services/categoryService'
+import { useRecurring } from '../hooks/useRecurring'
+import { useCategories } from '../hooks/useCategories'
 import { formatCurrency, formatDate, getMesAtual, getAnoAtual, MESES, FORMAS_PAGAMENTO } from '../utils/formatters'
 import { Badge } from '../components/ui/Badge'
-
-const labelStyle = { fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '5px' }
-const inputStyle = {
-  width: '100%', border: '1.5px solid #e2e8f0', borderRadius: '10px',
-  padding: '9px 12px', fontSize: '14px', color: '#1e293b',
-  background: 'white', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
-}
+import { Button } from '../components/ui/Button'
+import { Modal } from '../components/ui/Modal'
+import { S, onFocus, onBlur, getYearRange } from '../styles'
 
 const FREQ_LABEL = { Mensal: 'Todo mês', Bimestral: 'A cada 2 meses', Trimestral: 'A cada 3 meses', Anual: 'Anual' }
 
@@ -35,7 +32,7 @@ function RecurringModal({ data, categories, onClose, onSave }) {
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
 
   const filteredCats = categories.filter(c => c.type === form.type)
-  const anos = [getAnoAtual() - 1, getAnoAtual(), getAnoAtual() + 1, getAnoAtual() + 2]
+  const anos = getYearRange(1, 2)
 
   const handleTypeChange = (v) => setForm(f => ({ ...f, type: v, category_id: '' }))
 
@@ -55,7 +52,6 @@ function RecurringModal({ data, categories, onClose, onSave }) {
         origin: form.origin || null,
       }
       if (isEditing) {
-        // Only mutable fields on edit
         const { description, category_id, amount, period, payment_method, origin } = payload
         await recurringTransactionService.update(data.id, user.id, { description, category_id, amount, period, payment_method, origin })
       } else {
@@ -66,30 +62,24 @@ function RecurringModal({ data, categories, onClose, onSave }) {
     } catch (err) { setError(err.message) } finally { setLoading(false) }
   }
 
-  const focus = e => e.target.style.borderColor = '#1e40af'
-  const blur = e => e.target.style.borderColor = '#e2e8f0'
-
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', background: 'rgba(15,23,42,0.6)', backdropFilter: 'blur(4px)' }} onClick={onClose}>
-      <div style={{ background: 'white', borderRadius: '20px', boxShadow: '0 20px 60px rgba(0,0,0,0.25)', width: '100%', maxWidth: '480px', maxHeight: '90vh', overflowY: 'auto' }} onClick={e => e.stopPropagation()}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 24px', borderBottom: '1px solid #f1f5f9', position: 'sticky', top: 0, background: 'white', zIndex: 1 }}>
-          <h2 style={{ fontSize: '17px', fontWeight: '800', color: '#0f172a', margin: 0 }}>
-            {isEditing ? 'Editar Recorrente' : 'Nova Transação Recorrente'}
-          </h2>
-          <button onClick={onClose} style={{ background: '#f1f5f9', border: 'none', borderRadius: '8px', width: '32px', height: '32px', cursor: 'pointer', fontSize: '16px', color: '#64748b' }}>✕</button>
-        </div>
-
-        <form onSubmit={handleSubmit} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-          {error && <div style={{ background: '#fff1f2', border: '1px solid #fca5a5', color: '#b91c1c', borderRadius: '10px', padding: '10px 14px', fontSize: '13px' }}>{error}</div>}
+    <Modal
+      onClose={onClose}
+      title={isEditing ? 'Editar Recorrente' : 'Nova Transação Recorrente'}
+      maxWidth="480px"
+      sticky
+    >
+        <form onSubmit={handleSubmit} style={S.modal.body}>
+          {error && <div style={S.modal.errorAlert} role="alert">{error}</div>}
 
           <div>
-            <label style={labelStyle}>Descrição *</label>
-            <input value={form.description} onChange={e => set('description', e.target.value)} required placeholder="Ex: Aluguel, Salário, Netflix..." style={inputStyle} onFocus={focus} onBlur={blur} />
+            <label style={S.label}>Descrição *</label>
+            <input value={form.description} onChange={e => set('description', e.target.value)} required
+              placeholder="Ex: Aluguel, Salário, Netflix..." style={S.input} onFocus={onFocus} onBlur={onBlur} />
           </div>
 
-          {/* Tipo */}
           <div>
-            <label style={labelStyle}>Tipo *</label>
+            <label style={S.label}>Tipo *</label>
             <div style={{ display: 'flex', gap: '8px' }}>
               {['Receita', 'Despesa'].map(t => (
                 <button key={t} type="button" onClick={() => handleTypeChange(t)} disabled={isEditing}
@@ -101,8 +91,9 @@ function RecurringModal({ data, categories, onClose, onSave }) {
           </div>
 
           <div>
-            <label style={labelStyle}>Categoria</label>
-            <select value={form.category_id} onChange={e => set('category_id', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }} onFocus={focus} onBlur={blur}>
+            <label style={S.label}>Categoria</label>
+            <select value={form.category_id} onChange={e => set('category_id', e.target.value)}
+              style={{ ...S.input, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
               <option value="">Sem categoria</option>
               {filteredCats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
@@ -110,12 +101,15 @@ function RecurringModal({ data, categories, onClose, onSave }) {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <label style={labelStyle}>Valor (R$) *</label>
-              <input type="number" min="0.01" step="0.01" value={form.amount} onChange={e => set('amount', e.target.value)} required placeholder="0,00" style={inputStyle} onFocus={focus} onBlur={blur} />
+              <label style={S.label}>Valor (R$) *</label>
+              <input type="number" min="0.01" step="0.01" value={form.amount} onChange={e => set('amount', e.target.value)}
+                required placeholder="0,00" style={S.input} onFocus={onFocus} onBlur={onBlur} />
             </div>
             <div>
-              <label style={labelStyle}>Dia do mês *</label>
-              <select value={form.day_of_month} onChange={e => set('day_of_month', e.target.value)} disabled={isEditing} style={{ ...inputStyle, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.6 : 1 }} onFocus={focus} onBlur={blur}>
+              <label style={S.label}>Dia do mês *</label>
+              <select value={form.day_of_month} onChange={e => set('day_of_month', e.target.value)} disabled={isEditing}
+                style={{ ...S.input, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.6 : 1 }}
+                onFocus={onFocus} onBlur={onBlur}>
                 {Array.from({ length: 28 }, (_, i) => i + 1).map(d => <option key={d} value={d}>Dia {d}</option>)}
               </select>
             </div>
@@ -123,8 +117,10 @@ function RecurringModal({ data, categories, onClose, onSave }) {
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
             <div>
-              <label style={labelStyle}>Frequência *</label>
-              <select value={form.frequency} onChange={e => set('frequency', e.target.value)} disabled={isEditing} style={{ ...inputStyle, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.6 : 1 }} onFocus={focus} onBlur={blur}>
+              <label style={S.label}>Frequência *</label>
+              <select value={form.frequency} onChange={e => set('frequency', e.target.value)} disabled={isEditing}
+                style={{ ...S.input, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.6 : 1 }}
+                onFocus={onFocus} onBlur={onBlur}>
                 <option value="Mensal">Mensal</option>
                 <option value="Bimestral">Bimestral</option>
                 <option value="Trimestral">Trimestral</option>
@@ -132,22 +128,26 @@ function RecurringModal({ data, categories, onClose, onSave }) {
               </select>
             </div>
             <div>
-              <label style={labelStyle}>Período *</label>
-              <select value={form.period} onChange={e => set('period', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }} onFocus={focus} onBlur={blur}>
+              <label style={S.label}>Período *</label>
+              <select value={form.period} onChange={e => set('period', e.target.value)}
+                style={{ ...S.input, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
                 <option value="Quinzena">Quinzena</option>
                 <option value="Final do Mês">Final do Mês</option>
               </select>
             </div>
           </div>
 
-          {/* Início (imutável na edição) */}
           <div>
-            <label style={labelStyle}>Início *</label>
+            <label style={S.label}>Início *</label>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <select value={form.start_month} onChange={e => set('start_month', e.target.value)} disabled={isEditing} style={{ ...inputStyle, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.6 : 1 }} onFocus={focus} onBlur={blur}>
+              <select value={form.start_month} onChange={e => set('start_month', e.target.value)} disabled={isEditing}
+                style={{ ...S.input, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.6 : 1 }}
+                onFocus={onFocus} onBlur={onBlur}>
                 {MESES.map((m, i) => <option key={i} value={i + 1}>{m}</option>)}
               </select>
-              <select value={form.start_year} onChange={e => set('start_year', e.target.value)} disabled={isEditing} style={{ ...inputStyle, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.6 : 1 }} onFocus={focus} onBlur={blur}>
+              <select value={form.start_year} onChange={e => set('start_year', e.target.value)} disabled={isEditing}
+                style={{ ...S.input, cursor: isEditing ? 'not-allowed' : 'pointer', opacity: isEditing ? 0.6 : 1 }}
+                onFocus={onFocus} onBlur={onBlur}>
                 {anos.map(a => <option key={a} value={a}>{a}</option>)}
               </select>
             </div>
@@ -155,26 +155,27 @@ function RecurringModal({ data, categories, onClose, onSave }) {
           </div>
 
           <div>
-            <label style={labelStyle}>Forma de Pagamento</label>
-            <select value={form.payment_method} onChange={e => set('payment_method', e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }} onFocus={focus} onBlur={blur}>
+            <label style={S.label}>Forma de Pagamento</label>
+            <select value={form.payment_method} onChange={e => set('payment_method', e.target.value)}
+              style={{ ...S.input, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
               {FORMAS_PAGAMENTO.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
           </div>
 
           <div>
-            <label style={labelStyle}>Origem</label>
-            <input value={form.origin} onChange={e => set('origin', e.target.value)} placeholder="Ex: Banco Itaú, Nubank..." style={inputStyle} onFocus={focus} onBlur={blur} />
+            <label style={S.label}>Origem</label>
+            <input value={form.origin} onChange={e => set('origin', e.target.value)}
+              placeholder="Ex: Banco Itaú, Nubank..." style={S.input} onFocus={onFocus} onBlur={onBlur} />
           </div>
 
-          <div style={{ display: 'flex', gap: '12px', paddingTop: '4px' }}>
-            <button type="button" onClick={onClose} style={{ flex: 1, padding: '11px', border: '1.5px solid #e2e8f0', borderRadius: '10px', background: 'white', color: '#475569', fontSize: '14px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>Cancelar</button>
-            <button type="submit" disabled={loading} style={{ flex: 1, padding: '11px', border: 'none', borderRadius: '10px', background: '#1e40af', color: 'white', fontSize: '14px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', opacity: loading ? 0.7 : 1 }}>
+          <div style={S.modal.footer}>
+            <button type="button" onClick={onClose} style={S.modal.cancelBtn}>Cancelar</button>
+            <button type="submit" disabled={loading} style={S.modal.submitBtn(loading)}>
               {loading ? 'Salvando...' : 'Salvar'}
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   )
 }
 
@@ -185,7 +186,6 @@ function RecurringCard({ item, onEdit, onToggle, onDelete }) {
 
   return (
     <div style={{ background: 'white', borderRadius: '16px', border: `1px solid ${item.active ? '#f1f5f9' : '#e2e8f0'}`, padding: '18px 20px', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', opacity: item.active ? 1 : 0.7 }}>
-      {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontWeight: '700', fontSize: '15px', color: '#1e293b', marginBottom: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</div>
@@ -203,13 +203,9 @@ function RecurringCard({ item, onEdit, onToggle, onDelete }) {
           <button onClick={onDelete} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px', borderRadius: '6px', fontSize: '14px' }} onMouseEnter={e => e.currentTarget.style.background = '#fff1f2'} onMouseLeave={e => e.currentTarget.style.background = 'none'}>🗑️</button>
         </div>
       </div>
-
-      {/* Amount */}
       <div style={{ fontSize: '22px', fontWeight: '800', color: isReceita ? '#16a34a' : '#dc2626', marginBottom: '10px' }}>
         {isReceita ? '+' : '-'} {formatCurrency(item.amount)}
       </div>
-
-      {/* Details grid */}
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', fontSize: '12px' }}>
         <div style={{ background: '#f8fafc', borderRadius: '8px', padding: '7px 10px' }}>
           <div style={{ color: '#94a3b8', marginBottom: '2px' }}>Frequência</div>
@@ -234,46 +230,29 @@ function RecurringCard({ item, onEdit, onToggle, onDelete }) {
 
 export default function RecurringTransactions() {
   const { user } = useAuth()
-  const [items, setItems] = useState([])
-  const [categories, setCategories] = useState([])
   const [filter, setFilter] = useState('')
   const [modal, setModal] = useState({ open: false, data: null })
-  const [loading, setLoading] = useState(true)
   const [genResult, setGenResult] = useState(null)
 
-  const load = async () => {
-    setLoading(true)
-    try {
-      const [r, c] = await Promise.all([
-        recurringTransactionService.list(user.id),
-        categoryService.list(user.id),
-      ])
-      setItems(r)
-      setCategories(c)
-    } finally { setLoading(false) }
-  }
-
-  const generate = async () => {
-    try {
-      const result = await recurringTransactionService.generatePending(user.id)
-      setGenResult(result.generated)
-    } catch { setGenResult(0) }
-  }
+  const { data: items = [], isLoading, invalidate } = useRecurring(user?.id)
+  const { data: categories = [] } = useCategories(user?.id)
 
   useEffect(() => {
     if (!user) return
-    load().then(() => generate())
+    recurringTransactionService.generatePending(user.id)
+      .then(result => { if (result.generated > 0) setGenResult(result.generated) })
+      .catch(err => console.error('[generatePending]', err))
   }, [user])
 
   const handleToggle = async (item) => {
     await recurringTransactionService.toggleActive(item.id, user.id, !item.active)
-    load()
+    invalidate()
   }
 
   const handleDelete = async (id) => {
     if (!confirm('Excluir esta recorrente? As transações já geradas serão mantidas.')) return
     await recurringTransactionService.delete(id, user.id)
-    load()
+    invalidate()
   }
 
   const handleGenerate = async () => {
@@ -304,41 +283,33 @@ export default function RecurringTransactions() {
       )}
 
       {/* Header */}
-      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+      <div style={S.pageHeader}>
         <div>
-          <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#0f172a', margin: 0 }}>Transações Recorrentes</h1>
-          <p style={{ fontSize: '14px', color: '#64748b', margin: '4px 0 0' }}>
-            {items.length} recorrente(s) · {activeCount} ativa(s)
-          </p>
+          <h1 style={S.pageTitle}>Transações Recorrentes</h1>
+          <p style={S.pageSubtitle}>{items.length} recorrente(s) · {activeCount} ativa(s)</p>
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
-          <button onClick={handleGenerate} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', border: '1.5px solid #1e40af', borderRadius: '10px', padding: '8px 14px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', background: 'white', color: '#1e40af', fontFamily: 'inherit' }}>
+          <Button variant="secondary" style={{ border: '1.5px solid #1e40af', color: '#1e40af', background: 'white' }} onClick={handleGenerate}>
             🔄 Gerar agora
-          </button>
-          <button onClick={() => setModal({ open: true, data: null })} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', border: 'none', borderRadius: '10px', padding: '9px 16px', fontSize: '13px', fontWeight: '600', cursor: 'pointer', background: '#1e40af', color: 'white', fontFamily: 'inherit', boxShadow: '0 2px 8px rgba(30,64,175,0.25)' }}>
+          </Button>
+          <Button variant="primary" onClick={() => setModal({ open: true, data: null })}>
             + Nova Recorrente
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Filtros */}
       <div style={{ display: 'flex', gap: '6px' }}>
         {[['', 'Todas'], ['ativas', 'Ativas'], ['pausadas', 'Pausadas']].map(([val, label]) => (
-          <button key={val} onClick={() => setFilter(val)} style={{
-            padding: '6px 14px', borderRadius: '20px', fontSize: '13px', fontWeight: '600',
-            cursor: 'pointer', fontFamily: 'inherit', border: 'none',
-            background: filter === val ? '#1e40af' : 'white',
-            color: filter === val ? 'white' : '#475569',
-            boxShadow: filter === val ? '0 2px 8px rgba(30,64,175,0.2)' : '0 1px 3px rgba(0,0,0,0.08)',
-          }}>{label}</button>
+          <button key={val} onClick={() => setFilter(val)} style={S.pillBtn(filter === val)}>{label}</button>
         ))}
       </div>
 
       {/* Cards */}
-      {loading ? (
-        <div style={{ textAlign: 'center', padding: '60px', color: '#94a3b8', fontSize: '15px' }}>Carregando...</div>
+      {isLoading ? (
+        <div style={S.loading}>Carregando...</div>
       ) : filtered.length === 0 ? (
-        <div style={{ background: 'white', borderRadius: '16px', border: '1px solid #f1f5f9', padding: '60px', textAlign: 'center' }}>
+        <div style={S.emptyCard}>
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔄</div>
           <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Nenhuma transação recorrente.</p>
           <p style={{ color: '#94a3b8', fontSize: '13px', marginTop: '4px' }}>Clique em <strong>+ Nova Recorrente</strong> para automatizar lançamentos fixos como aluguel e salário.</p>
@@ -362,7 +333,7 @@ export default function RecurringTransactions() {
           data={modal.data}
           categories={categories}
           onClose={() => setModal({ open: false, data: null })}
-          onSave={load}
+          onSave={invalidate}
         />
       )}
     </div>

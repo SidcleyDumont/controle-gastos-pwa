@@ -16,6 +16,12 @@ dist-ssr
 .env.local
 .env.production
 
+# Claude Code local settings
+.claude/settings.local.json
+
+# Outros projetos na mesma pasta (não fazem parte deste repo)
+hervelly-keila-landing/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
