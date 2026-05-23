@@ -26,6 +26,7 @@ export default function TransactionModal({ data, cats, onClose, onSave }) {
     status: data?.status || 'A pagar',
     payment_method: data?.payment_method || 'Pix',
     origin: data?.origin || '',
+    due_date: data?.due_date || '',
   })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -46,6 +47,7 @@ export default function TransactionModal({ data, cats, onClose, onSave }) {
         ...form,
         original_value: Number(form.original_value),
         category_id: form.category_id || null,
+        due_date: form.type === 'Despesa' && form.due_date ? form.due_date : null,
       }
       if (data?.id) await transactionService.update(data.id, user.id, payload)
       else await transactionService.create(user.id, payload)
@@ -122,6 +124,15 @@ export default function TransactionModal({ data, cats, onClose, onSave }) {
             <input value={form.origin} onChange={e => set('origin', e.target.value)} placeholder="Ex: Janeiro/2026" style={S.input} onFocus={onFocus} onBlur={onBlur} />
           </div>
         </div>
+
+        {form.type === 'Despesa' && (
+          <div>
+            <label style={S.label}>
+              Vencimento <span style={{ fontWeight: 400, color: '#94a3b8', marginLeft: '6px' }}>opcional — para receber alerta</span>
+            </label>
+            <input type="date" value={form.due_date} onChange={e => set('due_date', e.target.value)} style={S.input} onFocus={onFocus} onBlur={onBlur} />
+          </div>
+        )}
 
         <div style={S.modal.footer}>
           <button type="button" onClick={onClose} style={S.modal.cancelBtn}>Cancelar</button>
