@@ -9,10 +9,16 @@ export function AuthProvider({ children }) {
   const [needsPasswordUpdate, setNeedsPasswordUpdate] = useState(false)
 
   useEffect(() => {
+    // Detecta token de recovery direto na URL (antes do listener estar pronto)
+    const hashParams = new URLSearchParams(window.location.hash.substring(1))
+    if (hashParams.get('type') === 'recovery') {
+      setNeedsPasswordUpdate(true)
+    }
+
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setNeedsPasswordUpdate(true)
-      } else {
+      } else if (event === 'SIGNED_IN' || event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
         setNeedsPasswordUpdate(false)
       }
       setUser(session?.user ?? null)
