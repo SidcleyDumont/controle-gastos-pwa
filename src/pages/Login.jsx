@@ -130,26 +130,32 @@ export default function Login() {
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)',
-            borderRadius: '20px', padding: '20px 24px 18px',
-            boxShadow: '0 8px 32px rgba(30,64,175,0.35)',
-            display: 'flex', flexDirection: 'column', alignItems: 'center',
-          }}>
-            {/* Mostra só o hexágono — corta o texto da imagem */}
-            <div style={{ width: '100px', height: '90px', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
-              <img
-                src="/logo.jpg"
-                alt="PF"
-                style={{ width: '170px', objectFit: 'cover', objectPosition: 'top center', marginLeft: '-35px' }}
-              />
+          {/* Hexágono com borda dourada */}
+          <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
+            <div style={{
+              width: '92px', height: '92px',
+              background: 'linear-gradient(135deg, #f59e0b, #fbbf24)',
+              clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 6px 24px rgba(251,191,36,0.45)',
+            }}>
+              <div style={{
+                width: '80px', height: '80px',
+                background: 'linear-gradient(135deg, #0f172a, #1e3a8a)',
+                clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <span style={{ color: 'white', fontSize: '26px', fontWeight: '900', letterSpacing: '-1px' }}>PF</span>
+              </div>
             </div>
-            <p style={{ margin: '10px 0 2px', fontSize: '16px', fontWeight: '800', color: 'white', letterSpacing: '0.06em' }}>
-              PLANEJAMENTO FINANCEIRO
-            </p>
-            <p style={{ margin: 0, fontSize: '10px', fontWeight: '700', letterSpacing: '0.2em', color: '#fbbf24' }}>
-              ORGANIZE · INVISTA · CONQUISTE
-            </p>
+            <div>
+              <h1 style={{ fontSize: '19px', fontWeight: '800', color: '#0f172a', margin: '0 0 5px', letterSpacing: '0.05em' }}>
+                PLANEJAMENTO FINANCEIRO
+              </h1>
+              <p style={{ fontSize: '10px', fontWeight: '700', color: '#f59e0b', letterSpacing: '0.22em', margin: 0 }}>
+                ORGANIZE · INVISTA · CONQUISTE
+              </p>
+            </div>
           </div>
         </div>
 
