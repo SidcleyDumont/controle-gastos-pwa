@@ -1,17 +1,25 @@
 import { useAuth } from '../contexts/AuthContext'
 import { useNavigate } from 'react-router-dom'
 import { transactionService } from '../services/transactionService'
+import { userSettingsService } from '../services/userSettingsService'
+import { useUserSettings } from '../hooks/useUserSettings'
 import { useState } from 'react'
-import { supabase } from '../services/supabaseClient'
 import * as XLSX from 'xlsx'
 import { Button } from '../components/ui/Button'
-import { S } from '../styles'
+import { S, onFocus, onBlur } from '../styles'
+import { formatCurrency } from '../utils/formatters'
 
 export default function Settings() {
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
   const [importing, setImporting] = useState(false)
   const [msg, setMsg] = useState('')
+
+  const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
+  const currentGoal = settings?.monthly_savings_goal ?? null
+  const [goalInput, setGoalInput] = useState('')
+  const [goalMsg, setGoalMsg] = useState('')
+  const [savingGoal, setSavingGoal] = useState(false)
 
   const handleSignOut = async () => { await signOut(); navigate('/login') }
 
@@ -58,7 +66,36 @@ export default function Settings() {
     finally { setImporting(false); e.target.value = '' }
   }
 
+  const handleSaveGoal = async () => {
+    const num = Number(goalInput)
+    if (!goalInput || isNaN(num) || num <= 0) {
+      setGoalMsg('❌ Informe um valor maior que zero.')
+      return
+    }
+    setSavingGoal(true)
+    try {
+      await userSettingsService.upsert(user.id, { monthly_savings_goal: num })
+      invalidateSettings()
+      setGoalMsg(`✅ Meta de ${formatCurrency(num)} definida com sucesso!`)
+      setGoalInput('')
+    } catch {
+      setGoalMsg('❌ Erro ao salvar. Tente novamente.')
+    } finally { setSavingGoal(false) }
+  }
+
+  const handleRemoveGoal = async () => {
+    setSavingGoal(true)
+    try {
+      await userSettingsService.upsert(user.id, { monthly_savings_goal: null })
+      invalidateSettings()
+      setGoalMsg('✅ Meta removida.')
+    } catch {
+      setGoalMsg('❌ Erro ao remover. Tente novamente.')
+    } finally { setSavingGoal(false) }
+  }
+
   const isSuccess = msg.startsWith('✅')
+  const goalMsgOk = goalMsg.startsWith('✅')
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', maxWidth: '640px' }}>
@@ -81,6 +118,42 @@ export default function Settings() {
         </div>
       </div>
 
+      {/* Meta de Poupança */}
+      <div style={{ ...S.card, padding: '20px 24px' }}>
+        <p style={S.sectionTitle}>🎯 Meta de Poupança Mensal</p>
+        {currentGoal && (
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: '#15803d', fontWeight: '600', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <span>Meta atual: {formatCurrency(currentGoal)}/mês</span>
+            <button onClick={handleRemoveGoal} disabled={savingGoal}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}>
+              Remover
+            </button>
+          </div>
+        )}
+        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px' }}>
+          {currentGoal ? 'Altere a meta abaixo:' : 'Defina quanto deseja poupar por mês. Acompanhe o progresso no Dashboard.'}
+        </p>
+        {goalMsg && (
+          <div style={{ background: goalMsgOk ? '#f0fdf4' : '#fff1f2', border: `1px solid ${goalMsgOk ? '#86efac' : '#fca5a5'}`, color: goalMsgOk ? '#15803d' : '#b91c1c', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', marginBottom: '14px' }}>
+            {goalMsg}
+          </div>
+        )}
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
+          <div style={{ flex: 1 }}>
+            <label style={S.label}>Novo valor (R$)</label>
+            <input
+              type="number" min="0.01" step="0.01"
+              value={goalInput} onChange={e => { setGoalInput(e.target.value); setGoalMsg('') }}
+              placeholder={currentGoal ? formatCurrency(currentGoal).replace('R$ ', '') : 'Ex: 1500,00'}
+              style={S.input} onFocus={onFocus} onBlur={onBlur}
+            />
+          </div>
+          <Button variant="primary" onClick={handleSaveGoal} disabled={savingGoal}>
+            {savingGoal ? 'Salvando...' : 'Salvar'}
+          </Button>
+        </div>
+      </div>
+
       {/* Exportar */}
       <div style={{ ...S.card, padding: '20px 24px' }}>
         <p style={S.sectionTitle}>↓ Exportar Dados</p>
@@ -98,12 +171,7 @@ export default function Settings() {
           Importe lançamentos da planilha Excel (aba <strong>"Base Consolidada"</strong> ou primeira aba).
         </p>
         {msg && (
-          <div style={{
-            background: isSuccess ? '#f0fdf4' : '#fff1f2',
-            border: `1px solid ${isSuccess ? '#86efac' : '#fca5a5'}`,
-            color: isSuccess ? '#15803d' : '#b91c1c',
-            borderRadius: '10px', padding: '10px 14px', fontSize: '13px', marginBottom: '14px',
-          }}>
+          <div style={{ background: isSuccess ? '#f0fdf4' : '#fff1f2', border: `1px solid ${isSuccess ? '#86efac' : '#fca5a5'}`, color: isSuccess ? '#15803d' : '#b91c1c', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', marginBottom: '14px' }}>
             {msg}
           </div>
         )}

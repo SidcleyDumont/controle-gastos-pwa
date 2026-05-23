@@ -2,18 +2,145 @@ import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../contexts/AuthContext'
 import { recurringTransactionService } from '../services/recurringTransactionService'
+import { userSettingsService } from '../services/userSettingsService'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
+import { useUserSettings } from '../hooks/useUserSettings'
 import Onboarding from '../components/Onboarding'
+import { Modal } from '../components/ui/Modal'
 import { calcularResumoMes } from '../utils/calculations'
 import { formatCurrency, formatPercent, MESES, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { StatCard } from '../components/ui/Card'
 import { StatusBadge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
-import { S, getYearRange } from '../styles'
+import { S, onFocus, onBlur, getYearRange } from '../styles'
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts'
 
 const COLORS = ['#1e40af', '#dc2626', '#16a34a', '#9333ea']
+
+function goalColor(percent) {
+  if (percent >= 100) return '#16a34a'
+  if (percent >= 80)  return '#1e40af'
+  if (percent >= 50)  return '#f97316'
+  return '#dc2626'
+}
+
+function SavingsGoalCard({ saldo, goal, onEdit }) {
+  const pct = goal > 0 ? Math.min((saldo / goal) * 100, 100) : 0
+  const achieved = saldo >= goal
+  const color = goalColor(pct)
+  const remaining = goal - saldo
+
+  return (
+    <div style={{ ...S.card, padding: '20px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '20px' }}>🎯</span>
+          <span style={{ fontSize: '15px', fontWeight: '700', color: '#1e293b' }}>Meta de Poupança Mensal</span>
+        </div>
+        <button onClick={onEdit} style={S.pillBtn(false)}>Editar meta</button>
+      </div>
+
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '12px' }}>
+        <div>
+          <div style={{ fontSize: '26px', fontWeight: '800', color }}>
+            {formatCurrency(Math.max(saldo, 0))}
+          </div>
+          <div style={{ fontSize: '13px', color: '#64748b', marginTop: '2px' }}>
+            de {formatCurrency(goal)} de meta
+          </div>
+        </div>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{ fontSize: '30px', fontWeight: '800', color, lineHeight: 1 }}>{pct.toFixed(0)}%</div>
+          {achieved ? (
+            <div style={{ fontSize: '13px', color: '#16a34a', fontWeight: '700', marginTop: '4px' }}>
+              Meta atingida!
+            </div>
+          ) : (
+            <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>
+              Faltam {formatCurrency(remaining)}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div style={{ background: '#f1f5f9', borderRadius: '99px', height: '10px', overflow: 'hidden' }}>
+        <div style={{
+          width: `${pct}%`, height: '100%', borderRadius: '99px',
+          background: color, transition: 'width 0.5s ease',
+        }} />
+      </div>
+
+      {achieved && (
+        <div style={{ marginTop: '10px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', padding: '8px 12px', fontSize: '13px', color: '#15803d', fontWeight: '600' }}>
+          Parabéns! Você atingiu sua meta de poupança este mês.
+        </div>
+      )}
+    </div>
+  )
+}
+
+function GoalModal({ currentGoal, onClose, onSave }) {
+  const [value, setValue] = useState(currentGoal ? String(currentGoal) : '')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const num = Number(value)
+    if (!value || isNaN(num) || num <= 0) return setError('Informe um valor maior que zero.')
+    setLoading(true)
+    try {
+      await onSave(num)
+      onClose()
+    } catch (err) {
+      setError(err.message || 'Erro ao salvar meta.')
+    } finally { setLoading(false) }
+  }
+
+  const handleRemove = async () => {
+    setLoading(true)
+    try {
+      await onSave(null)
+      onClose()
+    } catch (err) {
+      setError(err.message || 'Erro ao remover meta.')
+    } finally { setLoading(false) }
+  }
+
+  return (
+    <Modal onClose={onClose} title="Meta de Poupança Mensal" maxWidth="400px">
+      <form onSubmit={handleSubmit} style={S.modal.body}>
+        <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+          Defina quanto deseja poupar por mês. O progresso aparece no Dashboard.
+        </p>
+        {error && <div style={S.modal.errorAlert} role="alert">{error}</div>}
+        <div>
+          <label style={S.label}>Valor da meta (R$) *</label>
+          <input
+            type="number" min="0.01" step="0.01"
+            value={value} onChange={e => setValue(e.target.value)}
+            placeholder="Ex: 1500,00"
+            style={S.input} onFocus={onFocus} onBlur={onBlur}
+            autoFocus
+          />
+        </div>
+        <div style={S.modal.footer}>
+          {currentGoal && (
+            <button type="button" onClick={handleRemove} disabled={loading}
+              style={{ ...S.modal.cancelBtn, color: '#dc2626', borderColor: '#fca5a5' }}>
+              Remover
+            </button>
+          )}
+          <button type="button" onClick={onClose} style={S.modal.cancelBtn}>Cancelar</button>
+          <button type="submit" disabled={loading} style={{ ...S.modal.submitBtn(loading), flex: 1 }}>
+            {loading ? 'Salvando...' : 'Salvar meta'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
 
 export default function Dashboard() {
   const { user } = useAuth()
@@ -21,14 +148,17 @@ export default function Dashboard() {
   const [mes, setMes] = useState(getMesAtual())
   const [ano, setAno] = useState(getAnoAtual())
   const [showOnboarding, setShowOnboarding] = useState(false)
+  const [showGoalModal, setShowGoalModal] = useState(false)
+  const [pdfLoading, setPdfLoading] = useState(false)
 
   const { data: lancamentos = [], isLoading: l1 } = useTransactions(user?.id, { month: mes, year: ano })
   const { data: todos = [], isLoading: l2 } = useTransactions(user?.id, { year: ano })
   const { data: cats = [], invalidate: invalidateCats } = useCategories(user?.id)
+  const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
 
   const loading = l1 || l2
+  const goal = settings?.monthly_savings_goal ?? null
 
-  // Verifica se deve mostrar onboarding (sem categorias cadastradas)
   useEffect(() => {
     if (!user || cats === undefined) return
     const key = `cg_onboarding_${user.id}`
@@ -37,7 +167,6 @@ export default function Dashboard() {
     else localStorage.setItem(key, 'done')
   }, [user, cats])
 
-  // Gera transações recorrentes pendentes silenciosamente ao abrir o app
   useEffect(() => {
     if (!user) return
     recurringTransactionService.generatePending(user.id)
@@ -48,6 +177,11 @@ export default function Dashboard() {
   const handleOnboardingComplete = () => {
     setShowOnboarding(false)
     invalidateCats()
+  }
+
+  const handleSaveGoal = async (value) => {
+    await userSettingsService.upsert(user.id, { monthly_savings_goal: value })
+    invalidateSettings()
   }
 
   const resumo = calcularResumoMes(lancamentos)
@@ -73,8 +207,6 @@ export default function Dashboard() {
     .sort((a, b) => b.value - a.value)
     .slice(0, 5)
 
-  const [pdfLoading, setPdfLoading] = useState(false)
-
   const handleExportPDF = async () => {
     setPdfLoading(true)
     try {
@@ -88,6 +220,14 @@ export default function Dashboard() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {showOnboarding && <Onboarding user={user} onComplete={handleOnboardingComplete} />}
+
+      {showGoalModal && (
+        <GoalModal
+          currentGoal={goal}
+          onClose={() => setShowGoalModal(false)}
+          onSave={handleSaveGoal}
+        />
+      )}
 
       {/* Header */}
       <div style={S.pageHeader}>
@@ -132,6 +272,27 @@ export default function Dashboard() {
           <StatCard title="Despesas Quinzena" value={formatCurrency(resumo.quinzena)} color="yellow" icon="📅" />
           <StatCard title="Despesas Final do Mês" value={formatCurrency(resumo.finalMes)} color="yellow" icon="📆" />
         </div>
+
+        {/* Meta de Poupança */}
+        {goal ? (
+          <SavingsGoalCard
+            saldo={resumo.saldo}
+            goal={goal}
+            onEdit={() => setShowGoalModal(true)}
+          />
+        ) : (
+          <button
+            onClick={() => setShowGoalModal(true)}
+            style={{ ...S.card, padding: '16px 20px', border: '2px dashed #e2e8f0', background: 'transparent', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', width: '100%', textAlign: 'left', fontFamily: 'inherit' }}
+          >
+            <span style={{ fontSize: '24px' }}>🎯</span>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: '#374151' }}>Definir meta de poupança mensal</div>
+              <div style={{ fontSize: '13px', color: '#94a3b8' }}>Acompanhe seu progresso de economia todo mês</div>
+            </div>
+            <span style={{ marginLeft: 'auto', color: '#1e40af', fontWeight: '700', fontSize: '18px' }}>+</span>
+          </button>
+        )}
 
         {/* Charts */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
