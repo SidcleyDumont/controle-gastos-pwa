@@ -132,18 +132,22 @@ export default function Login() {
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
             background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)',
-            borderRadius: '20px', padding: '20px 20px 16px', display: 'inline-block',
+            borderRadius: '20px', padding: '20px 24px 18px',
             boxShadow: '0 8px 32px rgba(30,64,175,0.35)',
+            display: 'flex', flexDirection: 'column', alignItems: 'center',
           }}>
-            <img
-              src="/logo.jpg"
-              alt="Planejamento Financeiro"
-              style={{ width: '180px', display: 'block', borderRadius: '8px' }}
-            />
-            <p style={{
-              margin: '12px 0 0', fontSize: '11px', fontWeight: '700', letterSpacing: '0.18em',
-              color: '#fbbf24', textAlign: 'center',
-            }}>
+            {/* Mostra só o hexágono — corta o texto da imagem */}
+            <div style={{ width: '100px', height: '90px', overflow: 'hidden', display: 'flex', justifyContent: 'center' }}>
+              <img
+                src="/logo.jpg"
+                alt="PF"
+                style={{ width: '170px', objectFit: 'cover', objectPosition: 'top center', marginLeft: '-35px' }}
+              />
+            </div>
+            <p style={{ margin: '10px 0 2px', fontSize: '16px', fontWeight: '800', color: 'white', letterSpacing: '0.06em' }}>
+              PLANEJAMENTO FINANCEIRO
+            </p>
+            <p style={{ margin: 0, fontSize: '10px', fontWeight: '700', letterSpacing: '0.2em', color: '#fbbf24' }}>
               ORGANIZE · INVISTA · CONQUISTE
             </p>
           </div>
