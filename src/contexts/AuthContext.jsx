@@ -21,12 +21,12 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const origin = window.location.origin
+  const appUrl = import.meta.env.VITE_APP_URL || window.location.origin
   const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password })
-  const signUp = (email, password) => supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${origin}/login` } })
+  const signUp = (email, password) => supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${appUrl}/login` } })
   const signOut = () => supabase.auth.signOut()
-  const resetPassword = (email) => supabase.auth.resetPasswordForEmail(email, { redirectTo: `${origin}/reset-password` })
-  const resendConfirmation = (email) => supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: `${origin}/login` } })
+  const resetPassword = (email) => supabase.auth.resetPasswordForEmail(email, { redirectTo: `${appUrl}/reset-password` })
+  const resendConfirmation = (email) => supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: `${appUrl}/login` } })
 
   return (
     <AuthContext.Provider value={{ user, loading, signIn, signUp, signOut, resetPassword, resendConfirmation }}>
