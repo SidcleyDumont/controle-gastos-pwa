@@ -14,6 +14,27 @@ const iconBtn = {
   background: 'transparent', color: '#94a3b8', fontSize: '15px', fontFamily: 'inherit',
 }
 
+function getDueDays(due_date, status) {
+  if (!due_date || status === 'Pago' || status === 'Recebido') return null
+  const today = new Date(); today.setHours(0, 0, 0, 0)
+  const due = new Date(due_date + 'T00:00:00')
+  return Math.round((due - today) / 86400000)
+}
+
+function DueBadge({ due_date, status }) {
+  const days = getDueDays(due_date, status)
+  if (days === null || days > 3) return null
+  const overdue = days < 0
+  const bg = overdue ? '#fef2f2' : days === 0 ? '#fff7ed' : '#fffbeb'
+  const color = overdue ? '#dc2626' : days === 0 ? '#ea580c' : '#d97706'
+  const label = overdue ? `Vencida há ${Math.abs(days)}d` : days === 0 ? 'Vence hoje' : `Vence em ${days}d`
+  return (
+    <span style={{ display: 'inline-block', background: bg, color, border: `1px solid ${color}33`, borderRadius: '6px', fontSize: '11px', fontWeight: '700', padding: '2px 6px', whiteSpace: 'nowrap', marginLeft: '6px' }}>
+      ⏰ {label}
+    </span>
+  )
+}
+
 export default function Transactions() {
   const { user } = useAuth()
   const [modal, setModal] = useState({ open: false, data: null })
@@ -111,7 +132,12 @@ export default function Transactions() {
                 ) : sorted.map((item, idx) => (
                   <tr key={item.id} style={{ background: idx % 2 === 0 ? 'white' : '#fafafa' }}>
                     <td style={S.td}>{formatDate(item.date)}</td>
-                    <td style={{ ...S.td, maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', fontWeight: '500', color: '#1e293b' }}>{item.description}</td>
+                    <td style={{ ...S.td, maxWidth: '220px', fontWeight: '500', color: '#1e293b' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'nowrap' }}>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</span>
+                        <DueBadge due_date={item.due_date} status={item.status} />
+                      </div>
+                    </td>
                     <td style={S.td}><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
                     <td style={{ ...S.td, color: '#64748b' }}>{item.period}</td>
                     <td style={{ ...S.td, color: '#64748b' }}>{item.categories?.name || '-'}</td>
@@ -159,8 +185,9 @@ export default function Transactions() {
                     {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
                   </span>
                 </div>
-                <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px', marginBottom: '4px' }}>
+                <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px', marginBottom: '4px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                   {item.description}
+                  <DueBadge due_date={item.due_date} status={item.status} />
                 </div>
                 <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
                   <span>{formatDate(item.date)}</span>

@@ -1,8 +1,8 @@
 import { supabase } from './supabaseClient'
 
 // Whitelist de campos aceitos em create/update — campos fora desta lista são ignorados
-const ALLOWED_CREATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin']
-const ALLOWED_UPDATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin']
+const ALLOWED_CREATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin', 'due_date']
+const ALLOWED_UPDATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin', 'due_date']
 
 function pick(data, fields) {
   return fields.reduce((acc, key) => {
@@ -50,6 +50,8 @@ export const transactionService = {
       year: d.getFullYear(),
       income_value: safe.type === 'Receita' ? Number(safe.original_value) : 0,
       expense_value: safe.type === 'Despesa' ? Number(safe.original_value) : 0,
+      // Reativa alerta se due_date foi alterado
+      ...('due_date' in safe ? { alert_sent: false } : {}),
     }
     const { data: result, error } = await supabase.from('transactions').update(payload).eq('id', id).eq('user_id', userId).select().single()
     if (error) throw error
