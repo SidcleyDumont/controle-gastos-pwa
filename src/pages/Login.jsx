@@ -132,15 +132,20 @@ export default function Login() {
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{
             background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)',
-            borderRadius: '20px', padding: '20px', display: 'inline-block',
+            borderRadius: '20px', padding: '20px 20px 16px', display: 'inline-block',
             boxShadow: '0 8px 32px rgba(30,64,175,0.35)',
-            marginBottom: '4px',
           }}>
             <img
               src="/logo.jpg"
               alt="Planejamento Financeiro"
               style={{ width: '180px', display: 'block', borderRadius: '8px' }}
             />
+            <p style={{
+              margin: '12px 0 0', fontSize: '11px', fontWeight: '700', letterSpacing: '0.18em',
+              color: '#fbbf24', textAlign: 'center',
+            }}>
+              ORGANIZE · INVISTA · CONQUISTE
+            </p>
           </div>
         </div>
 
