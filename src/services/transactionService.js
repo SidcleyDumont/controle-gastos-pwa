@@ -1,5 +1,16 @@
 import { supabase } from './supabaseClient'
 
+// Whitelist de campos aceitos em create/update — campos fora desta lista são ignorados
+const ALLOWED_CREATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin']
+const ALLOWED_UPDATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin']
+
+function pick(data, fields) {
+  return fields.reduce((acc, key) => {
+    if (key in data) acc[key] = data[key]
+    return acc
+  }, {})
+}
+
 export const transactionService = {
   async list(userId, filters = {}) {
     let q = supabase.from('transactions').select('*, categories(name, type)').eq('user_id', userId).order('date', { ascending: false })
@@ -15,14 +26,15 @@ export const transactionService = {
   },
 
   async create(userId, data) {
-    const d = new Date(data.date)
+    const safe = pick(data, ALLOWED_CREATE)
+    const d = new Date(safe.date)
     const payload = {
-      ...data,
+      ...safe,
       user_id: userId,
       month: d.getMonth() + 1,
       year: d.getFullYear(),
-      income_value: data.type === 'Receita' ? data.original_value : 0,
-      expense_value: data.type === 'Despesa' ? data.original_value : 0,
+      income_value: safe.type === 'Receita' ? Number(safe.original_value) : 0,
+      expense_value: safe.type === 'Despesa' ? Number(safe.original_value) : 0,
     }
     const { data: result, error } = await supabase.from('transactions').insert(payload).select().single()
     if (error) throw error
@@ -30,13 +42,14 @@ export const transactionService = {
   },
 
   async update(id, userId, data) {
-    const d = new Date(data.date)
+    const safe = pick(data, ALLOWED_UPDATE)
+    const d = new Date(safe.date)
     const payload = {
-      ...data,
+      ...safe,
       month: d.getMonth() + 1,
       year: d.getFullYear(),
-      income_value: data.type === 'Receita' ? data.original_value : 0,
-      expense_value: data.type === 'Despesa' ? data.original_value : 0,
+      income_value: safe.type === 'Receita' ? Number(safe.original_value) : 0,
+      expense_value: safe.type === 'Despesa' ? Number(safe.original_value) : 0,
     }
     const { data: result, error } = await supabase.from('transactions').update(payload).eq('id', id).eq('user_id', userId).select().single()
     if (error) throw error

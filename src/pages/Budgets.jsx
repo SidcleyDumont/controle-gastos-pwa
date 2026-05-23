@@ -59,8 +59,9 @@ function BudgetModal({ data, categories, onClose, onSave }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.category_id) return setError('Selecione uma categoria')
-    if (!form.amount || Number(form.amount) <= 0) return setError('Informe um valor válido')
+    if (!form.category_id) return setError('Selecione uma categoria.')
+    const valor = Number(form.amount)
+    if (!form.amount || isNaN(valor) || valor <= 0) return setError('Informe um valor maior que zero.')
     setLoading(true)
     try {
       const payload = { category_id: form.category_id, period: form.period, amount: Number(form.amount) }

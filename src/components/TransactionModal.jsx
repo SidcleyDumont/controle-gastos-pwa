@@ -33,8 +33,13 @@ export default function TransactionModal({ data, cats, onClose, onSave }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.description.trim()) return setError('Preencha a descrição do lançamento.')
-    if (!form.original_value || isNaN(Number(form.original_value))) return setError('Informe um valor numérico válido.')
+    const desc = form.description.trim()
+    if (!desc) return setError('Preencha a descrição do lançamento.')
+    if (desc.length > 200) return setError('Descrição muito longa — máximo 200 caracteres.')
+    const valor = Number(form.original_value)
+    if (!form.original_value || isNaN(valor)) return setError('Informe um valor numérico válido.')
+    if (valor <= 0) return setError('O valor deve ser maior que zero.')
+    if (!form.date) return setError('Informe a data do lançamento.')
     setLoading(true); setError('')
     try {
       const payload = {

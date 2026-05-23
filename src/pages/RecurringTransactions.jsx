@@ -38,8 +38,11 @@ function RecurringModal({ data, categories, onClose, onSave }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    if (!form.description.trim()) return setError('Descrição obrigatória')
-    if (!form.amount || Number(form.amount) <= 0) return setError('Valor inválido')
+    const desc = form.description.trim()
+    if (!desc) return setError('Preencha a descrição.')
+    if (desc.length > 200) return setError('Descrição muito longa — máximo 200 caracteres.')
+    const valor = Number(form.amount)
+    if (!form.amount || isNaN(valor) || valor <= 0) return setError('Informe um valor maior que zero.')
     setLoading(true)
     try {
       const payload = {

@@ -2,6 +2,20 @@ import { supabase } from './supabaseClient'
 
 const STEP_MONTHS = { Mensal: 1, Bimestral: 2, Trimestral: 3, Anual: 12 }
 
+// Whitelist de campos aceitos em create/update
+const ALLOWED_CREATE = [
+  'description', 'type', 'category_id', 'amount', 'frequency',
+  'period', 'day_of_month', 'start_month', 'start_year', 'payment_method', 'origin',
+]
+const ALLOWED_UPDATE = ['description', 'category_id', 'amount', 'period', 'payment_method', 'origin']
+
+function pick(data, fields) {
+  return fields.reduce((acc, key) => {
+    if (key in data) acc[key] = data[key]
+    return acc
+  }, {})
+}
+
 function getTargetDates(template) {
   const step = STEP_MONTHS[template.frequency] || 1
   const day = template.day_of_month
@@ -42,9 +56,10 @@ export const recurringTransactionService = {
   },
 
   async create(userId, data) {
+    const safe = pick(data, ALLOWED_CREATE)
     const { data: result, error } = await supabase
       .from('recurring_transactions')
-      .insert({ ...data, user_id: userId })
+      .insert({ ...safe, user_id: userId })
       .select('*, categories(id, name, type)')
       .single()
     if (error) throw error
@@ -52,9 +67,10 @@ export const recurringTransactionService = {
   },
 
   async update(id, userId, data) {
+    const safe = pick(data, ALLOWED_UPDATE)
     const { data: result, error } = await supabase
       .from('recurring_transactions')
-      .update({ ...data, updated_at: new Date().toISOString() })
+      .update({ ...safe, updated_at: new Date().toISOString() })
       .eq('id', id)
       .eq('user_id', userId)
       .select('*, categories(id, name, type)')
@@ -64,7 +80,15 @@ export const recurringTransactionService = {
   },
 
   async toggleActive(id, userId, active) {
-    return this.update(id, userId, { active })
+    const { data: result, error } = await supabase
+      .from('recurring_transactions')
+      .update({ active, updated_at: new Date().toISOString() })
+      .eq('id', id)
+      .eq('user_id', userId)
+      .select('*, categories(id, name, type)')
+      .single()
+    if (error) throw error
+    return result
   },
 
   async delete(id, userId) {
