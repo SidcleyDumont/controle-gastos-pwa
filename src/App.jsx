@@ -10,6 +10,7 @@ import MonthlySummary from './pages/MonthlySummary'
 import Settings from './pages/Settings'
 import Budgets from './pages/Budgets'
 import RecurringTransactions from './pages/RecurringTransactions'
+import ResetPassword from './pages/ResetPassword'
 
 const IS_STAGING = import.meta.env.VITE_APP_ENV === 'staging'
 
@@ -57,6 +58,7 @@ export default function App() {
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/lancamentos" element={<PrivateRoute><Transactions /></PrivateRoute>} />
             <Route path="/categorias" element={<PrivateRoute><Categories /></PrivateRoute>} />

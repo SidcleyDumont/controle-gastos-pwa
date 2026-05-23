@@ -45,11 +45,11 @@ export function AuthProvider({ children }) {
     return () => subscription.unsubscribe()
   }, [])
 
-  const redirectTo = `${window.location.origin}/login`
+  const origin = window.location.origin
   const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password })
-  const signUp = (email, password) => supabase.auth.signUp({ email, password, options: { emailRedirectTo: redirectTo } })
+  const signUp = (email, password) => supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${origin}/login` } })
   const signOut = () => supabase.auth.signOut()
-  const resetPassword = (email) => supabase.auth.resetPasswordForEmail(email, { redirectTo })
+  const resetPassword = (email) => supabase.auth.resetPasswordForEmail(email, { redirectTo: `${origin}/reset-password` })
   const resendConfirmation = (email) => supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: redirectTo } })
   const updatePassword = (newPassword) => supabase.auth.updateUser({ password: newPassword })
 
