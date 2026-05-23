@@ -69,7 +69,7 @@ export default function Login() {
   const strength = useMemo(() => getPasswordStrength(password), [password])
 
   const validate = () => {
-    if (!email.includes('@')) return 'Informe um e-mail válido.'
+    if (!needsPasswordUpdate && !email.includes('@')) return 'Informe um e-mail válido.'
     if (mode !== 'reset') {
       if (password.length < 8) return 'A senha deve ter pelo menos 8 caracteres.'
       if (mode === 'register' && strength < 2) return 'Escolha uma senha mais segura — adicione números ou símbolos.'
