@@ -63,7 +63,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState('')
-  const { signIn, signUp, resetPassword } = useAuth()
+  const { signIn, signUp, resetPassword, resendConfirmation, updatePassword, needsPasswordUpdate, setNeedsPasswordUpdate } = useAuth()
   const navigate = useNavigate()
 
   const strength = useMemo(() => getPasswordStrength(password), [password])
@@ -84,7 +84,14 @@ export default function Login() {
 
     setLoading(true); setError('')
     try {
-      if (mode === 'login') {
+      if (needsPasswordUpdate) {
+        if (password.length < 8) throw new Error('A senha deve ter pelo menos 8 caracteres.')
+        const { error } = await updatePassword(password)
+        if (error) throw error
+        setNeedsPasswordUpdate(false)
+        setMsg('Senha atualizada com sucesso! Você já está logado.')
+        navigate('/dashboard')
+      } else if (mode === 'login') {
         const { error } = await signIn(email, password)
         if (error) throw error
         navigate('/dashboard')
@@ -97,9 +104,21 @@ export default function Login() {
       } else {
         const { error } = await resetPassword(email)
         if (error) throw error
-        setMsg('E-mail de recuperação enviado!')
+        setMsg('E-mail de recuperação enviado! Verifique sua caixa de entrada.')
         setMode('login')
       }
+    } catch (err) {
+      setError(friendlyAuthError(err.message))
+    } finally { setLoading(false) }
+  }
+
+  const handleResendConfirmation = async () => {
+    if (!email.includes('@')) return setError('Informe seu e-mail acima para reenviar a confirmação.')
+    setLoading(true); setError('')
+    try {
+      const { error } = await resendConfirmation(email)
+      if (error) throw error
+      setMsg('E-mail de confirmação reenviado! Verifique sua caixa de entrada.')
     } catch (err) {
       setError(friendlyAuthError(err.message))
     } finally { setLoading(false) }
@@ -128,6 +147,12 @@ export default function Login() {
         boxShadow: '0 25px 60px rgba(0,0,0,0.3)',
         width: '100%', maxWidth: '420px', padding: '40px 36px', position: 'relative',
       }}>
+        {needsPasswordUpdate && (
+          <div style={{ background: '#eff6ff', border: '1px solid #93c5fd', color: '#1e40af', borderRadius: '12px', padding: '12px 16px', fontSize: '14px', marginBottom: '20px', textAlign: 'center' }}>
+            Digite sua nova senha abaixo para concluir a recuperação.
+          </div>
+        )}
+
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           {/* Hexágono com borda dourada */}
@@ -171,6 +196,7 @@ export default function Login() {
         )}
 
         <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }} noValidate>
+          {!needsPasswordUpdate && (
           <div>
             <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '6px' }}>
               E-mail
@@ -184,12 +210,13 @@ export default function Login() {
               onBlur={e => e.target.style.borderColor = '#e2e8f0'}
             />
           </div>
+          )}
 
-          {mode !== 'reset' && (
+          {(needsPasswordUpdate || mode !== 'reset') && (
             <div>
               <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '6px' }}>
-                Senha
-                {mode === 'register' && (
+                {needsPasswordUpdate ? 'Nova senha' : 'Senha'}
+                {(mode === 'register' || needsPasswordUpdate) && (
                   <span style={{ fontWeight: '400', color: '#94a3b8', marginLeft: '6px' }}>mín. 8 caracteres</span>
                 )}
               </label>
@@ -215,12 +242,12 @@ export default function Login() {
               boxShadow: '0 4px 12px rgba(30,64,175,0.3)',
             }}
           >
-            {loading ? 'Aguarde...' : mode === 'login' ? 'Entrar na conta' : mode === 'register' ? 'Criar conta' : 'Enviar e-mail'}
+            {loading ? 'Aguarde...' : needsPasswordUpdate ? 'Salvar nova senha' : mode === 'login' ? 'Entrar na conta' : mode === 'register' ? 'Criar conta' : 'Enviar e-mail'}
           </button>
         </form>
 
         <div style={{ marginTop: '24px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          {mode === 'login' && (<>
+          {!needsPasswordUpdate && mode === 'login' && (<>
             <button onClick={() => switchMode('reset')} style={{ background: 'none', border: 'none', color: '#64748b', fontSize: '13px', cursor: 'pointer', fontFamily: 'inherit' }}>
               Esqueci minha senha
             </button>
@@ -228,9 +255,14 @@ export default function Login() {
               Criar nova conta
             </button>
           </>)}
-          {mode !== 'login' && (
+          {!needsPasswordUpdate && mode !== 'login' && (
             <button onClick={() => switchMode('login')} style={{ background: 'none', border: 'none', color: '#1e40af', fontSize: '14px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit' }}>
               ← Voltar ao login
+            </button>
+          )}
+          {!needsPasswordUpdate && error.includes('Confirme seu e-mail') && (
+            <button onClick={handleResendConfirmation} disabled={loading} style={{ background: 'none', border: '1px solid #1e40af', borderRadius: '8px', color: '#1e40af', fontSize: '13px', fontWeight: '600', cursor: 'pointer', fontFamily: 'inherit', padding: '8px 12px' }}>
+              Reenviar e-mail de confirmação
             </button>
           )}
         </div>
