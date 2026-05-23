@@ -130,11 +130,18 @@ export default function Login() {
       }}>
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-          <img
-            src="/logo.jpg"
-            alt="Planejamento Financeiro"
-            style={{ width: '160px', margin: '0 auto 8px', display: 'block' }}
-          />
+          <div style={{
+            background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)',
+            borderRadius: '20px', padding: '20px', display: 'inline-block',
+            boxShadow: '0 8px 32px rgba(30,64,175,0.35)',
+            marginBottom: '4px',
+          }}>
+            <img
+              src="/logo.jpg"
+              alt="Planejamento Financeiro"
+              style={{ width: '180px', display: 'block', borderRadius: '8px' }}
+            />
+          </div>
         </div>
 
         {msg && (
