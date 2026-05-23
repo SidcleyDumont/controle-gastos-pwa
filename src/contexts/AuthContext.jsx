@@ -1,9 +1,11 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../services/supabaseClient'
 
-// Detecta recovery ANTES do Supabase limpar o hash da URL
+// Detecta e extrai tokens de recovery ANTES do Supabase limpar o hash da URL
 const _initialHashParams = new URLSearchParams(window.location.hash.substring(1))
 const _isRecoveryFlow = _initialHashParams.get('type') === 'recovery'
+const _recoveryAccessToken = _initialHashParams.get('access_token')
+const _recoveryRefreshToken = _initialHashParams.get('refresh_token') || ''
 
 const AuthContext = createContext({})
 
@@ -23,10 +25,22 @@ export function AuthProvider({ children }) {
       setLoading(false)
     })
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null)
-      setLoading(false)
-    })
+    if (_isRecoveryFlow && _recoveryAccessToken) {
+      // Seta a sessão explicitamente com os tokens da URL para garantir que updateUser funcione
+      supabase.auth.setSession({ access_token: _recoveryAccessToken, refresh_token: _recoveryRefreshToken })
+        .then(({ data, error }) => {
+          if (!error && data.session) {
+            setUser(data.session.user)
+            setNeedsPasswordUpdate(true)
+          }
+          setLoading(false)
+        })
+    } else {
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        setUser(session?.user ?? null)
+        setLoading(false)
+      })
+    }
 
     return () => subscription.unsubscribe()
   }, [])
