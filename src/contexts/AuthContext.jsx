@@ -1,20 +1,18 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../services/supabaseClient'
 
+// Detecta recovery ANTES do Supabase limpar o hash da URL
+const _initialHashParams = new URLSearchParams(window.location.hash.substring(1))
+const _isRecoveryFlow = _initialHashParams.get('type') === 'recovery'
+
 const AuthContext = createContext({})
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [needsPasswordUpdate, setNeedsPasswordUpdate] = useState(false)
+  const [needsPasswordUpdate, setNeedsPasswordUpdate] = useState(_isRecoveryFlow)
 
   useEffect(() => {
-    // Detecta token de recovery direto na URL (antes do listener estar pronto)
-    const hashParams = new URLSearchParams(window.location.hash.substring(1))
-    if (hashParams.get('type') === 'recovery') {
-      setNeedsPasswordUpdate(true)
-    }
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === 'PASSWORD_RECOVERY') {
         setNeedsPasswordUpdate(true)
