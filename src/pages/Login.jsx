@@ -124,7 +124,7 @@ export default function Login() {
   const switchMode = (next) => { setMode(next); setError(''); setMsg('') }
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div className="screen-full" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
       <div style={{ position: 'fixed', top: '-80px', right: '-80px', width: '300px', height: '300px', borderRadius: '50%', background: 'rgba(96,165,250,0.12)', pointerEvents: 'none' }} />
       <div style={{ position: 'fixed', bottom: '-60px', left: '-60px', width: '250px', height: '250px', borderRadius: '50%', background: 'rgba(147,197,253,0.08)', pointerEvents: 'none' }} />
 

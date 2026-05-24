@@ -52,7 +52,7 @@ export default function ResetPassword() {
 
   if (TOKEN_TYPE !== 'recovery' || !ACCESS_TOKEN) {
     return (
-      <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+      <div className="screen-full" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
         <div style={{ background: 'white', borderRadius: '24px', padding: '40px 36px', maxWidth: '420px', width: '100%', textAlign: 'center' }}>
           <p style={{ color: '#b91c1c', marginBottom: '16px' }}>Link inválido ou expirado.</p>
           <a href="/login" style={{ color: '#1e40af', fontWeight: '600' }}>Solicitar novo link</a>
