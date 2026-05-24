@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { Eye, EyeOff } from 'lucide-react'
+import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
 
 function getPasswordStrength(pwd) {
@@ -184,6 +184,13 @@ export default function Login() {
           <button type="submit" disabled={loading} style={{ width: '100%', padding: '13px', borderRadius: '12px', border: 'none', background: loading ? '#93c5fd' : 'linear-gradient(135deg, #1e40af, #2563eb)', color: 'white', fontSize: '15px', fontWeight: '700', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit', marginTop: '4px', boxShadow: '0 4px 12px rgba(30,64,175,0.3)' }}>
             {loading ? 'Aguarde...' : mode === 'login' ? 'Entrar na conta' : mode === 'register' ? 'Criar conta' : 'Enviar e-mail'}
           </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '4px' }}>
+            <ShieldCheck size={16} style={{ color: '#16a34a', flexShrink: 0 }} />
+            <span style={{ fontSize: '12px', color: '#64748b', textAlign: 'center', lineHeight: '1.4' }}>
+              Seus dados estão protegidos<br />com segurança de ponta a ponta.
+            </span>
+          </div>
         </form>
 
         <div style={{ marginTop: '24px', textAlign: 'center', display: 'flex', flexDirection: 'column', gap: '8px' }}>
