@@ -34,17 +34,6 @@ export function Layout({ children }) {
         transition: 'width 0.25s ease', overflow: 'hidden',
       }} className="hidden-mobile">
 
-        {/* Botão colapsar */}
-        <button onClick={() => setCollapsed(v => !v)} style={{
-          position: 'absolute', top: '72px', right: '-16px', width: '32px', height: '32px',
-          borderRadius: '50%', background: 'linear-gradient(135deg, #1e40af, #2563eb)',
-          border: '2px solid white', boxShadow: '0 3px 10px rgba(0,0,0,0.3)',
-          cursor: 'pointer', zIndex: 50,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
-        }} title={collapsed ? 'Expandir menu' : 'Recolher menu'}>
-          {collapsed ? <ChevronRight size={16} color="white" /> : <ChevronLeft size={16} color="white" />}
-        </button>
-
         {/* Logo */}
         <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
           {/* Hexágono mini */}
@@ -96,6 +85,18 @@ export function Layout({ children }) {
           </button>
         </div>
       </aside>
+
+      {/* Botão colapsar sidebar — fora da aside para não ser cortado pelo overflow:hidden */}
+      <button onClick={() => setCollapsed(v => !v)} className="hidden-mobile" style={{
+        position: 'fixed', top: '72px', left: `${sidebarWidth - 16}px`, width: '32px', height: '32px',
+        borderRadius: '50%', background: 'linear-gradient(135deg, #1e40af, #2563eb)',
+        border: '2px solid white', boxShadow: '0 3px 10px rgba(0,0,0,0.3)',
+        cursor: 'pointer', zIndex: 50,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+        transition: 'left 0.25s ease',
+      }} title={collapsed ? 'Expandir menu' : 'Recolher menu'}>
+        {collapsed ? <ChevronRight size={16} color="white" /> : <ChevronLeft size={16} color="white" />}
+      </button>
 
       {/* Mobile Header */}
       <div style={{
