@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { Eye, EyeOff } from 'lucide-react'
 import { supabase } from '../services/supabaseClient'
 
 // Lê os tokens do hash ANTES do Supabase limpar a URL
@@ -10,6 +11,7 @@ const TOKEN_TYPE = _hash.get('type')
 
 export default function ResetPassword() {
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const navigate = useNavigate()
@@ -91,13 +93,20 @@ export default function ResetPassword() {
             <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '6px' }}>
               Nova senha <span style={{ fontWeight: '400', color: '#94a3b8' }}>mín. 8 caracteres</span>
             </label>
-            <input
-              type="password" value={password} onChange={e => setPassword(e.target.value)}
-              required placeholder="••••••••" minLength={8}
-              autoComplete="new-password" style={inputStyle}
-              onFocus={e => e.target.style.borderColor = '#1e40af'}
-              onBlur={e => e.target.style.borderColor = '#e2e8f0'}
-            />
+            <div style={{ position: 'relative' }}>
+              <input
+                type={showPassword ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
+                required placeholder="••••••••" minLength={8}
+                autoComplete="new-password" style={{ ...inputStyle, paddingRight: '44px' }}
+                onFocus={e => e.target.style.borderColor = '#1e40af'}
+                onBlur={e => e.target.style.borderColor = '#e2e8f0'}
+              />
+              <button type="button" onClick={() => setShowPassword(v => !v)} tabIndex={-1}
+                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}>
+                {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+              </button>
+            </div>
           </div>
           <button
             type="submit" disabled={loading}
