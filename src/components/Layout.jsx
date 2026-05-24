@@ -36,12 +36,13 @@ export function Layout({ children }) {
 
         {/* Botão colapsar */}
         <button onClick={() => setCollapsed(v => !v)} style={{
-          position: 'absolute', top: '72px', right: '-13px', width: '26px', height: '26px',
-          borderRadius: '50%', background: 'white', border: '2px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)', cursor: 'pointer', zIndex: 50,
+          position: 'absolute', top: '72px', right: '-16px', width: '32px', height: '32px',
+          borderRadius: '50%', background: 'linear-gradient(135deg, #1e40af, #2563eb)',
+          border: '2px solid white', boxShadow: '0 3px 10px rgba(0,0,0,0.3)',
+          cursor: 'pointer', zIndex: 50,
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
         }} title={collapsed ? 'Expandir menu' : 'Recolher menu'}>
-          {collapsed ? <ChevronRight size={13} color="#1e40af" /> : <ChevronLeft size={13} color="#1e40af" />}
+          {collapsed ? <ChevronRight size={16} color="white" /> : <ChevronLeft size={16} color="white" />}
         </button>
 
         {/* Logo */}
