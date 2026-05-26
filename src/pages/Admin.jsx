@@ -37,7 +37,26 @@ export default function Admin() {
     setUpdating(userId)
     try {
       await adminService.updatePlan(userId, newPlan)
-      setUsers(u => u.map(x => x.id === userId ? { ...x, plan: newPlan, plan_activated_at: newPlan === 'pro' ? new Date().toISOString() : null } : x))
+      const now = new Date().toISOString()
+      const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      setUsers(u => u.map(x => x.id === userId ? {
+        ...x, plan: newPlan,
+        plan_activated_at: newPlan === 'pro' ? now : null,
+        plan_expires_at: newPlan === 'pro' ? expires : null,
+      } : x))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  const handleRenew = async (userId) => {
+    setUpdating(userId + '_renew')
+    try {
+      await adminService.updatePlan(userId, 'pro')
+      const expires = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString()
+      setUsers(u => u.map(x => x.id === userId ? { ...x, plan: 'pro', plan_expires_at: expires } : x))
     } catch (err) {
       setError(err.message)
     } finally {
@@ -94,7 +113,7 @@ export default function Admin() {
           <table style={{ width: '100%', borderCollapse: 'collapse' }}>
             <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
               <tr>
-                {['E-mail', 'Cadastro', 'Plano', 'Ativado em', 'Ação'].map(h => (
+                {['E-mail', 'Cadastro', 'Plano', 'Ativado em', 'Vence em', 'Ação'].map(h => (
                   <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                 ))}
               </tr>
@@ -117,19 +136,39 @@ export default function Admin() {
                   <td style={{ padding: '14px 16px', fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap' }}>
                     {u.plan_activated_at ? formatDate(u.plan_activated_at.slice(0, 10)) : '-'}
                   </td>
-                  <td style={{ padding: '14px 16px' }}>
+                  <td style={{ padding: '14px 16px', fontSize: '13px', whiteSpace: 'nowrap' }}>
+                    {u.plan_expires_at ? (
+                      <span style={{ color: new Date(u.plan_expires_at) < new Date() ? '#dc2626' : new Date(u.plan_expires_at) < new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) ? '#d97706' : '#16a34a', fontWeight: '600' }}>
+                        {formatDate(u.plan_expires_at.slice(0, 10))}
+                      </span>
+                    ) : '-'}
+                  </td>
+                  <td style={{ padding: '14px 16px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                     <button
                       onClick={() => handleTogglePlan(u.id, u.plan)}
-                      disabled={updating === u.id}
+                      disabled={!!updating}
                       style={{
-                        padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: updating === u.id ? 'default' : 'pointer',
+                        padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: updating ? 'default' : 'pointer',
                         fontSize: '13px', fontWeight: '600', fontFamily: 'inherit',
                         background: u.plan === 'pro' ? '#fff1f2' : 'linear-gradient(135deg, #1e40af, #2563eb)',
                         color: u.plan === 'pro' ? '#dc2626' : 'white',
-                        opacity: updating === u.id ? 0.6 : 1,
+                        opacity: updating ? 0.6 : 1,
                       }}>
-                      {updating === u.id ? '...' : u.plan === 'pro' ? 'Revogar Pro' : 'Ativar Pro'}
+                      {updating === u.id ? '...' : u.plan === 'pro' ? 'Revogar' : 'Ativar Pro'}
                     </button>
+                    {u.plan === 'pro' && (
+                      <button
+                        onClick={() => handleRenew(u.id)}
+                        disabled={!!updating}
+                        style={{
+                          padding: '6px 14px', borderRadius: '8px', border: '1px solid #86efac', cursor: updating ? 'default' : 'pointer',
+                          fontSize: '13px', fontWeight: '600', fontFamily: 'inherit',
+                          background: '#f0fdf4', color: '#16a34a',
+                          opacity: updating ? 0.6 : 1,
+                        }}>
+                        {updating === u.id + '_renew' ? '...' : '+30 dias'}
+                      </button>
+                    )}
                   </td>
                 </tr>
               ))}

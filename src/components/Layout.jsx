@@ -1,5 +1,6 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import { usePlan } from '../contexts/PlanContext'
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
@@ -17,6 +18,7 @@ const nav = [
 
 export function Layout({ children }) {
   const { signOut, user } = useAuth()
+  const { daysUntilExpiry, isExpired } = usePlan()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
@@ -176,6 +178,26 @@ export function Layout({ children }) {
         padding: '32px 28px', background: '#f1f5f9',
         transition: 'margin-left 0.25s ease',
       }} className="main-content">
+        {isExpired && (
+          <div style={{
+            background: '#fff1f2', border: '1px solid #fca5a5', borderRadius: '12px',
+            padding: '12px 16px', marginBottom: '20px', fontSize: '14px',
+            color: '#b91c1c', fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px',
+          }}>
+            🔴 Seu plano Pro expirou. Faça um PIX de R$ 29,90 para sidejoao89@gmail.com e envie o comprovante para renovar.
+          </div>
+        )}
+        {!isExpired && daysUntilExpiry !== null && daysUntilExpiry <= 7 && (
+          <div style={{
+            background: daysUntilExpiry <= 3 ? '#fff7ed' : '#fefce8',
+            border: `1px solid ${daysUntilExpiry <= 3 ? '#fdba74' : '#fde047'}`,
+            borderRadius: '12px', padding: '12px 16px', marginBottom: '20px',
+            fontSize: '14px', color: daysUntilExpiry <= 3 ? '#c2410c' : '#854d0e',
+            fontWeight: '600', display: 'flex', alignItems: 'center', gap: '8px',
+          }}>
+            {daysUntilExpiry <= 3 ? '🔴' : '⚠️'} Seu plano Pro vence em <strong>{daysUntilExpiry} dia{daysUntilExpiry !== 1 ? 's' : ''}</strong>. Renove via PIX para manter o acesso.
+          </div>
+        )}
         {children}
       </main>
 
