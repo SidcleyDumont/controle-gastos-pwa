@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { usePlan } from '../contexts/PlanContext'
+import PaywallBanner from '../components/PaywallBanner'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { transactionService } from '../services/transactionService'
 import { useTransactions } from '../hooks/useTransactions'
@@ -38,6 +40,7 @@ function DueBadge({ due_date, status }) {
 
 export default function Transactions() {
   const { user } = useAuth()
+  const { isPro } = usePlan()
   const location = useLocation()
   const navigate = useNavigate()
   const fromCategory = location.state?.category_id ? location.state : null
@@ -56,6 +59,8 @@ export default function Transactions() {
 
   const { data: items = [], isLoading, invalidate } = useTransactions(user?.id, filters)
   const { data: cats = [] } = useCategories(user?.id)
+
+  if (!isPro) return <PaywallBanner feature="Lançamentos" />
 
   const handleDelete = async (id) => {
     if (!confirm('Excluir este lançamento?')) return
