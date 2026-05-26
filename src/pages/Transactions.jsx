@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { transactionService } from '../services/transactionService'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
@@ -37,9 +38,21 @@ function DueBadge({ due_date, status }) {
 
 export default function Transactions() {
   const { user } = useAuth()
+  const location = useLocation()
+  const navigate = useNavigate()
+  const fromCategory = location.state?.category_id ? location.state : null
+
   const [modal, setModal] = useState({ open: false, data: null })
-  const [filters, setFilters] = useState({ month: getMesAtual(), year: getAnoAtual(), type: '', period: '', status: '', category_id: '' })
+  const [filters, setFilters] = useState({
+    month: '', year: getAnoAtual(), type: '', period: '', status: '',
+    category_id: fromCategory?.category_id || ''
+  })
   const [sort, setSort] = useState({ field: 'date', dir: 'desc' })
+
+  const clearCategoryFilter = () => {
+    setFilters(f => ({ ...f, category_id: '' }))
+    navigate('/lancamentos', { replace: true, state: null })
+  }
 
   const { data: items = [], isLoading, invalidate } = useTransactions(user?.id, filters)
   const { data: cats = [] } = useCategories(user?.id)
@@ -77,6 +90,19 @@ export default function Transactions() {
           </Button>
         </div>
       </div>
+
+      {/* Banner: filtrado por categoria */}
+      {fromCategory && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px', padding: '12px 16px' }}>
+          <span style={{ fontSize: '14px', color: '#1e40af', fontWeight: '600' }}>
+            🏷️ Filtrando por categoria: <strong>{fromCategory.category_name}</strong>
+          </span>
+          <button onClick={clearCategoryFilter}
+            style={{ background: 'none', border: '1px solid #93c5fd', borderRadius: '8px', padding: '4px 12px', fontSize: '13px', color: '#1e40af', cursor: 'pointer', fontFamily: 'inherit', fontWeight: '600' }}>
+            Limpar filtro ✕
+          </button>
+        </div>
+      )}
 
       {/* Filtros */}
       <div style={{ ...S.card, padding: '16px' }}>

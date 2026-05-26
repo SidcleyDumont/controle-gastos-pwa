@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { categoryService } from '../services/categoryService'
 import { useCategories } from '../hooks/useCategories'
@@ -65,8 +66,13 @@ function CategoryModal({ data, onClose, onSave }) {
 
 export default function Categories() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const [modal, setModal] = useState({ open: false, data: null })
   const [filter, setFilter] = useState('')
+
+  const verLancamentos = (item) => {
+    navigate('/lancamentos', { state: { category_id: item.id, category_name: item.name } })
+  }
 
   const { data: items = [], invalidate } = useCategories(user?.id)
 
@@ -120,14 +126,18 @@ export default function Categories() {
                   <td style={{ ...S.td, color: '#64748b' }}>{item.usage || '-'}</td>
                   <td style={{ ...S.td, color: '#94a3b8', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.notes || '-'}</td>
                   <td style={{ ...S.td, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <button onClick={() => verLancamentos(item)} title="Ver lançamentos desta categoria"
+                      style={{ background: 'none', border: '1px solid #bfdbfe', cursor: 'pointer', padding: '4px 10px', borderRadius: '6px', fontSize: '12px', color: '#1e40af', fontWeight: '600', fontFamily: 'inherit', marginRight: '6px' }}
+                      onMouseEnter={e => e.currentTarget.style.background='#eff6ff'}
+                      onMouseLeave={e => e.currentTarget.style.background='none'}>Ver lançamentos</button>
                     <button onClick={() => setModal({ open: true, data: item })} title="Editar"
                       style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', fontSize: '15px' }}
-                      onMouseEnter={e => e.target.style.background='#eff6ff'}
-                      onMouseLeave={e => e.target.style.background='none'}>✏️</button>
+                      onMouseEnter={e => e.currentTarget.style.background='#eff6ff'}
+                      onMouseLeave={e => e.currentTarget.style.background='none'}>✏️</button>
                     <button onClick={() => handleDelete(item.id)} title="Excluir"
                       style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px 8px', borderRadius: '6px', fontSize: '15px' }}
-                      onMouseEnter={e => e.target.style.background='#fff1f2'}
-                      onMouseLeave={e => e.target.style.background='none'}>🗑️</button>
+                      onMouseEnter={e => e.currentTarget.style.background='#fff1f2'}
+                      onMouseLeave={e => e.currentTarget.style.background='none'}>🗑️</button>
                   </td>
                 </tr>
               ))}
@@ -149,7 +159,11 @@ export default function Categories() {
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                 <Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge>
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                  <button onClick={() => verLancamentos(item)}
+                    style={{ flex: 1, padding: '5px 12px', border: '1px solid #bfdbfe', borderRadius: '8px', background: '#eff6ff', cursor: 'pointer', fontSize: '13px', color: '#1e40af', fontWeight: '600', fontFamily: 'inherit' }}>
+                    Ver lançamentos
+                  </button>
                   <button onClick={() => setModal({ open: true, data: item })}
                     style={{ padding: '5px 12px', border: '1px solid #e2e8f0', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '13px', color: '#475569', fontFamily: 'inherit' }}>
                     ✏️ Editar
