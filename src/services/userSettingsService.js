@@ -2,11 +2,8 @@ import { supabase } from './supabaseClient'
 
 export const userSettingsService = {
   async get(userId) {
-    const { data } = await supabase
-      .from('user_settings')
-      .select('user_id, monthly_savings_goal, onboarding_completed, plan, plan_activated_at, plan_expires_at, created_at, updated_at')
-      .eq('user_id', userId)
-      .maybeSingle()
+    const { data, error } = await supabase.rpc('get_my_settings')
+    if (error) throw error
     return data
   },
 
