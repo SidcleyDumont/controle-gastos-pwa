@@ -23,7 +23,7 @@ export function Layout({ children }) {
 
   const handleSignOut = async () => { await signOut(); navigate('/login') }
 
-  const sidebarWidth = collapsed ? 68 : 240
+  const sidebarWidth = collapsed ? 68 : 260
 
   return (
     <div style={{ display: 'flex', minHeight: '100vh', background: '#f1f5f9' }}>
@@ -45,8 +45,8 @@ export function Layout({ children }) {
             </div>
           </div>
           {!collapsed && (
-            <div style={{ whiteSpace: 'nowrap', overflow: 'hidden' }}>
-              <div style={{ color: 'white', fontWeight: '700', fontSize: '13px', lineHeight: 1.2 }}>Planejamento Financeiro</div>
+            <div style={{ overflow: 'hidden' }}>
+              <div style={{ color: 'white', fontWeight: '700', fontSize: '13px', lineHeight: 1.3 }}>Planejamento Financeiro</div>
               <div style={{ color: '#fbbf24', fontSize: '10px', marginTop: '2px', letterSpacing: '0.05em' }}>planejofinanceiro.com.br</div>
             </div>
           )}
