@@ -151,6 +151,16 @@ export function Layout({ children }) {
                 <span>{emoji}</span>{label}
               </NavLink>
             ))}
+            {user?.email === ADMIN_EMAIL && (
+              <NavLink to="/admin" onClick={() => setOpen(false)} style={({ isActive }) => ({
+                display: 'flex', alignItems: 'center', gap: '10px', padding: '12px 14px',
+                borderRadius: '10px', textDecoration: 'none', fontSize: '15px',
+                color: '#fbbf24',
+                background: isActive ? 'rgba(251,191,36,0.2)' : 'transparent',
+              })}>
+                <span>🔧</span>Admin
+              </NavLink>
+            )}
             <button onClick={handleSignOut} style={{
               marginTop: '16px', display: 'flex', alignItems: 'center', gap: '10px',
               padding: '12px 14px', borderRadius: '10px', border: 'none', cursor: 'pointer',
