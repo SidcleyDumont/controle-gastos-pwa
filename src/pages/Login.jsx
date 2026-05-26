@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { Eye, EyeOff, ShieldCheck } from 'lucide-react'
 import { useAuth } from '../contexts/AuthContext'
@@ -60,6 +60,13 @@ export default function Login() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState(location.state?.msg || '')
+  const [resendCountdown, setResendCountdown] = useState(0)
+
+  useEffect(() => {
+    if (resendCountdown <= 0) return
+    const timer = setTimeout(() => setResendCountdown(c => c - 1), 1000)
+    return () => clearTimeout(timer)
+  }, [resendCountdown])
   const { signIn, signUp, resetPassword, resendConfirmation } = useAuth()
   const navigate = useNavigate()
 
@@ -91,6 +98,7 @@ export default function Login() {
         setMsg('Conta criada! Verifique seu e-mail para confirmar.')
         setMode('login')
         setPassword('')
+        setResendCountdown(60)
       } else {
         const { error } = await resetPassword(email)
         if (error) throw error
@@ -109,6 +117,7 @@ export default function Login() {
       const { error } = await resendConfirmation(email)
       if (error) throw error
       setMsg('E-mail de confirmação reenviado! Verifique sua caixa de entrada.')
+      setResendCountdown(60)
     } catch (err) {
       setError(friendlyAuthError(err.message))
     } finally { setLoading(false) }
@@ -121,7 +130,9 @@ export default function Login() {
     boxSizing: 'border-box', transition: 'border-color 0.15s',
   }
 
-  const switchMode = (next) => { setMode(next); setError(''); setMsg('') }
+  const switchMode = (next) => { setMode(next); setError(''); setMsg(''); setResendCountdown(0) }
+
+  const showResend = msg.includes('Verifique seu e-mail') || msg.includes('reenviado')
 
   return (
     <div className="screen-full" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
@@ -145,8 +156,24 @@ export default function Login() {
         </div>
 
         {msg && (
-          <div style={{ background: '#f0fdf4', border: '1px solid #86efac', color: '#15803d', borderRadius: '12px', padding: '12px 16px', fontSize: '14px', marginBottom: '20px', textAlign: 'center' }} role="status">
-            {msg}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{ background: '#f0fdf4', border: '1px solid #86efac', color: '#15803d', borderRadius: '12px', padding: '12px 16px', fontSize: '14px', textAlign: 'center' }} role="status">
+              {msg}
+            </div>
+            {showResend && (
+              <div style={{ marginTop: '10px', textAlign: 'center' }}>
+                {resendCountdown > 0 ? (
+                  <p style={{ fontSize: '13px', color: '#94a3b8', margin: 0 }}>
+                    Não chegou? Aguarde <strong style={{ color: '#1e40af' }}>{resendCountdown}s</strong> para reenviar
+                  </p>
+                ) : (
+                  <button onClick={handleResendConfirmation} disabled={loading}
+                    style={{ background: 'none', border: '1px solid #1e40af', borderRadius: '8px', color: '#1e40af', fontSize: '13px', fontWeight: '600', cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit', padding: '8px 16px' }}>
+                    {loading ? 'Enviando...' : '📧 Reenviar e-mail de confirmação'}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
         )}
         {error && (
