@@ -14,4 +14,12 @@ export const adminService = {
     })
     if (error) throw error
   },
+
+  async toggleBan(targetUserId, shouldBan) {
+    const { error } = await supabase.rpc('admin_toggle_user_ban', {
+      target_user_id: targetUserId,
+      should_ban: shouldBan,
+    })
+    if (error) throw error
+  },
 }

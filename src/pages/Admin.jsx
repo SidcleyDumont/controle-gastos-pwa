@@ -51,6 +51,19 @@ export default function Admin() {
     }
   }
 
+  const handleToggleBan = async (userId, isBanned) => {
+    if (!isBanned && !confirm('Desativar este usuário? Ele não conseguirá fazer login.')) return
+    setUpdating(userId + '_ban')
+    try {
+      await adminService.toggleBan(userId, !isBanned)
+      setUsers(u => u.map(x => x.id === userId ? { ...x, is_banned: !isBanned } : x))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUpdating(null)
+    }
+  }
+
   const handleRenew = async (userId) => {
     setUpdating(userId + '_renew')
     try {
@@ -120,8 +133,11 @@ export default function Admin() {
             </thead>
             <tbody>
               {users.map((u, idx) => (
-                <tr key={u.id} style={{ background: idx % 2 === 0 ? 'white' : '#fafafa', borderBottom: '1px solid #f1f5f9' }}>
-                  <td style={{ padding: '14px 16px', fontSize: '14px', color: '#1e293b', fontWeight: '500' }}>{u.email}</td>
+                <tr key={u.id} style={{ background: u.is_banned ? '#fef2f2' : idx % 2 === 0 ? 'white' : '#fafafa', borderBottom: '1px solid #f1f5f9', opacity: u.is_banned ? 0.75 : 1 }}>
+                  <td style={{ padding: '14px 16px', fontSize: '14px', color: u.is_banned ? '#dc2626' : '#1e293b', fontWeight: '500' }}>
+                    {u.email}
+                    {u.is_banned && <span style={{ marginLeft: '6px', fontSize: '11px', background: '#fca5a5', color: '#7f1d1d', borderRadius: '4px', padding: '1px 5px', fontWeight: '700' }}>INATIVO</span>}
+                  </td>
                   <td style={{ padding: '14px 16px', fontSize: '13px', color: '#64748b', whiteSpace: 'nowrap' }}>{formatDate(u.created_at?.slice(0, 10))}</td>
                   <td style={{ padding: '14px 16px' }}>
                     <span style={{
@@ -143,32 +159,47 @@ export default function Admin() {
                       </span>
                     ) : '-'}
                   </td>
-                  <td style={{ padding: '14px 16px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => handleTogglePlan(u.id, u.plan)}
-                      disabled={!!updating}
-                      style={{
-                        padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: updating ? 'default' : 'pointer',
-                        fontSize: '13px', fontWeight: '600', fontFamily: 'inherit',
-                        background: u.plan === 'pro' ? '#fff1f2' : 'linear-gradient(135deg, #1e40af, #2563eb)',
-                        color: u.plan === 'pro' ? '#dc2626' : 'white',
-                        opacity: updating ? 0.6 : 1,
-                      }}>
-                      {updating === u.id ? '...' : u.plan === 'pro' ? 'Revogar' : 'Ativar Pro'}
-                    </button>
-                    {u.plan === 'pro' && (
+                  <td style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
                       <button
-                        onClick={() => handleRenew(u.id)}
+                        onClick={() => handleTogglePlan(u.id, u.plan)}
+                        disabled={!!updating || u.is_banned}
+                        style={{
+                          padding: '6px 14px', borderRadius: '8px', border: 'none', cursor: (updating || u.is_banned) ? 'default' : 'pointer',
+                          fontSize: '13px', fontWeight: '600', fontFamily: 'inherit',
+                          background: u.plan === 'pro' ? '#fff1f2' : 'linear-gradient(135deg, #1e40af, #2563eb)',
+                          color: u.plan === 'pro' ? '#dc2626' : 'white',
+                          opacity: (updating || u.is_banned) ? 0.5 : 1,
+                        }}>
+                        {updating === u.id ? '...' : u.plan === 'pro' ? 'Revogar' : 'Ativar Pro'}
+                      </button>
+                      {u.plan === 'pro' && !u.is_banned && (
+                        <button
+                          onClick={() => handleRenew(u.id)}
+                          disabled={!!updating}
+                          style={{
+                            padding: '6px 14px', borderRadius: '8px', border: '1px solid #86efac', cursor: updating ? 'default' : 'pointer',
+                            fontSize: '13px', fontWeight: '600', fontFamily: 'inherit',
+                            background: '#f0fdf4', color: '#16a34a',
+                            opacity: updating ? 0.6 : 1,
+                          }}>
+                          {updating === u.id + '_renew' ? '...' : '+30 dias'}
+                        </button>
+                      )}
+                      <button
+                        onClick={() => handleToggleBan(u.id, u.is_banned)}
                         disabled={!!updating}
                         style={{
-                          padding: '6px 14px', borderRadius: '8px', border: '1px solid #86efac', cursor: updating ? 'default' : 'pointer',
+                          padding: '6px 14px', borderRadius: '8px', cursor: updating ? 'default' : 'pointer',
                           fontSize: '13px', fontWeight: '600', fontFamily: 'inherit',
-                          background: '#f0fdf4', color: '#16a34a',
+                          border: u.is_banned ? '1px solid #86efac' : '1px solid #fca5a5',
+                          background: u.is_banned ? '#f0fdf4' : '#fff1f2',
+                          color: u.is_banned ? '#16a34a' : '#dc2626',
                           opacity: updating ? 0.6 : 1,
                         }}>
-                        {updating === u.id + '_renew' ? '...' : '+30 dias'}
+                        {updating === u.id + '_ban' ? '...' : u.is_banned ? '✓ Reativar' : '⊘ Desativar'}
                       </button>
-                    )}
+                    </div>
                   </td>
                 </tr>
               ))}
