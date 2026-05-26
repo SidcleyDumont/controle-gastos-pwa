@@ -57,7 +57,7 @@ export default function PaywallBanner({ feature = 'este recurso' }) {
             <li>Faça um PIX de <strong>R$ 29,90</strong></li>
             <li>Chave PIX: <strong style={{ background: '#dcfce7', padding: '1px 6px', borderRadius: '4px' }}>{PIX_KEY}</strong></li>
             <li>Envie o comprovante para o mesmo e-mail</li>
-            <li>Acesso liberado em até 24h úteis</li>
+            <li>Em até 24 horas liberamos seu acesso</li>
           </ol>
         </div>
 
