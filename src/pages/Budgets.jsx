@@ -223,8 +223,6 @@ export default function Budgets() {
   const { user } = useAuth()
   const { isPro } = usePlan()
   const [month, setMonth] = useState(getMesAtual())
-
-  if (!isPro) return <PaywallBanner feature="Orçamentos por Categoria" />
   const [year, setYear] = useState(getAnoAtual())
   const [filterPeriod, setFilterPeriod] = useState('')
   const [modal, setModal] = useState({ open: false, data: null })
@@ -232,6 +230,8 @@ export default function Budgets() {
   const { data: budgets = [], isLoading: loadingBudgets, invalidate: invalidateBudgets } = useBudgets(user?.id)
   const { data: categories = [] } = useCategories(user?.id)
   const { data: transactions = [], isLoading: loadingTx } = useTransactions(user?.id, { month, year, type: 'Despesa' })
+
+  if (!isPro) return <PaywallBanner feature="Orçamentos por Categoria" />
 
   const isLoading = loadingBudgets || loadingTx
 

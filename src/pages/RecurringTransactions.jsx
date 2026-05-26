@@ -237,8 +237,6 @@ export default function RecurringTransactions() {
   const { user } = useAuth()
   const { isPro } = usePlan()
   const [filter, setFilter] = useState('')
-
-  if (!isPro) return <PaywallBanner feature="Transações Recorrentes" />
   const [modal, setModal] = useState({ open: false, data: null })
   const [genResult, setGenResult] = useState(null)
 
@@ -246,11 +244,13 @@ export default function RecurringTransactions() {
   const { data: categories = [] } = useCategories(user?.id)
 
   useEffect(() => {
-    if (!user) return
+    if (!user || !isPro) return
     recurringTransactionService.generatePending(user.id)
       .then(result => { if (result.generated > 0) setGenResult(result.generated) })
       .catch(err => console.error('[generatePending]', err))
-  }, [user])
+  }, [user, isPro])
+
+  if (!isPro) return <PaywallBanner feature="Transações Recorrentes" />
 
   const handleToggle = async (item) => {
     await recurringTransactionService.toggleActive(item.id, user.id, !item.active)
