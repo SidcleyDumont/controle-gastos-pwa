@@ -235,7 +235,7 @@ function RecurringCard({ item, onEdit, onToggle, onDelete }) {
 
 export default function RecurringTransactions() {
   const { user } = useAuth()
-  const { isPro } = usePlan()
+  const { isPro, settingsLoading } = usePlan()
   const [filter, setFilter] = useState('')
   const [modal, setModal] = useState({ open: false, data: null })
   const [genResult, setGenResult] = useState(null)
@@ -250,6 +250,7 @@ export default function RecurringTransactions() {
       .catch(err => console.error('[generatePending]', err))
   }, [user, isPro])
 
+  if (settingsLoading) return null
   if (!isPro) return <PaywallBanner feature="Transações Recorrentes" />
 
   const handleToggle = async (item) => {

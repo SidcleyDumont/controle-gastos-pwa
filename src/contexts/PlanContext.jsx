@@ -3,11 +3,11 @@ import { useAuth } from './AuthContext'
 import { useUserSettings } from '../hooks/useUserSettings'
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
-const PlanContext = createContext({ isPro: false, plan: 'free', daysUntilExpiry: null, isExpired: false })
+const PlanContext = createContext({ isPro: false, plan: 'free', daysUntilExpiry: null, isExpired: false, settingsLoading: true })
 
 export function PlanProvider({ children }) {
   const { user } = useAuth()
-  const { data: settings } = useUserSettings(user?.id)
+  const { data: settings, isLoading: settingsLoading } = useUserSettings(user?.id)
   const isAdmin = user?.email === ADMIN_EMAIL
 
   const expiresAt = settings?.plan_expires_at ? new Date(settings.plan_expires_at) : null
@@ -21,7 +21,7 @@ export function PlanProvider({ children }) {
   const isPro = isAdmin || (plan === 'pro' && !isExpired)
 
   return (
-    <PlanContext.Provider value={{ isPro, plan, daysUntilExpiry, isExpired }}>
+    <PlanContext.Provider value={{ isPro, plan, daysUntilExpiry, isExpired, settingsLoading }}>
       {children}
     </PlanContext.Provider>
   )

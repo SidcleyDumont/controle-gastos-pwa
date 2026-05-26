@@ -221,7 +221,7 @@ function QuinzenalCard({ budget, sp, onEdit, onDelete }) {
 
 export default function Budgets() {
   const { user } = useAuth()
-  const { isPro } = usePlan()
+  const { isPro, settingsLoading } = usePlan()
   const [month, setMonth] = useState(getMesAtual())
   const [year, setYear] = useState(getAnoAtual())
   const [filterPeriod, setFilterPeriod] = useState('')
@@ -231,6 +231,7 @@ export default function Budgets() {
   const { data: categories = [] } = useCategories(user?.id)
   const { data: transactions = [], isLoading: loadingTx } = useTransactions(user?.id, { month, year, type: 'Despesa' })
 
+  if (settingsLoading) return null
   if (!isPro) return <PaywallBanner feature="Orçamentos por Categoria" />
 
   const isLoading = loadingBudgets || loadingTx

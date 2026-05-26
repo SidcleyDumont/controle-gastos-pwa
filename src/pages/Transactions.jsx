@@ -40,7 +40,7 @@ function DueBadge({ due_date, status }) {
 
 export default function Transactions() {
   const { user } = useAuth()
-  const { isPro } = usePlan()
+  const { isPro, settingsLoading } = usePlan()
   const location = useLocation()
   const navigate = useNavigate()
   const fromCategory = location.state?.category_id ? location.state : null
@@ -60,6 +60,7 @@ export default function Transactions() {
   const { data: items = [], isLoading, invalidate } = useTransactions(user?.id, filters)
   const { data: cats = [] } = useCategories(user?.id)
 
+  if (settingsLoading) return null
   if (!isPro) return <PaywallBanner feature="Lançamentos" />
 
   const handleDelete = async (id) => {

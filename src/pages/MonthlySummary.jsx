@@ -11,10 +11,11 @@ import { S, getYearRange } from '../styles'
 
 export default function MonthlySummary() {
   const { user } = useAuth()
-  const { isPro } = usePlan()
+  const { isPro, settingsLoading } = usePlan()
   const [ano, setAno] = useState(getAnoAtual())
   const [pdfLoading, setPdfLoading] = useState(false)
 
+  if (settingsLoading) return null
   if (!isPro) return <PaywallBanner feature="Resumo Mensal Anual" />
 
   const { data: todos = [], isLoading } = useTransactions(user?.id, { year: ano })

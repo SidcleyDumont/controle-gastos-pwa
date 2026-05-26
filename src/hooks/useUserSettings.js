@@ -8,7 +8,7 @@ export function useUserSettings(userId) {
     queryKey: ['user_settings', userId],
     queryFn: () => userSettingsService.get(userId),
     enabled: !!userId,
-    staleTime: 10 * 60 * 1000,
+    staleTime: 0,
   })
 
   const invalidate = () =>
