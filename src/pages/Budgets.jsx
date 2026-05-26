@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { usePlan } from '../contexts/PlanContext'
+import PaywallBanner from '../components/PaywallBanner'
 import { budgetService } from '../services/budgetService'
 import { useBudgets } from '../hooks/useBudgets'
 import { useCategories } from '../hooks/useCategories'
@@ -219,7 +221,10 @@ function QuinzenalCard({ budget, sp, onEdit, onDelete }) {
 
 export default function Budgets() {
   const { user } = useAuth()
+  const { isPro } = usePlan()
   const [month, setMonth] = useState(getMesAtual())
+
+  if (!isPro) return <PaywallBanner feature="Orçamentos por Categoria" />
   const [year, setYear] = useState(getAnoAtual())
   const [filterPeriod, setFilterPeriod] = useState('')
   const [modal, setModal] = useState({ open: false, data: null })

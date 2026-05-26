@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { usePlan } from '../contexts/PlanContext'
+import PaywallBanner from '../components/PaywallBanner'
 import { useTransactions } from '../hooks/useTransactions'
 import { calcularResumoAnual } from '../utils/calculations'
 import { formatCurrency, formatPercent, getAnoAtual } from '../utils/formatters'
@@ -9,7 +11,10 @@ import { S, getYearRange } from '../styles'
 
 export default function MonthlySummary() {
   const { user } = useAuth()
+  const { isPro } = usePlan()
   const [ano, setAno] = useState(getAnoAtual())
+
+  if (!isPro) return <PaywallBanner feature="Resumo Mensal Anual" />
   const [pdfLoading, setPdfLoading] = useState(false)
 
   const { data: todos = [], isLoading } = useTransactions(user?.id, { year: ano })

@@ -3,6 +3,8 @@ import { useAuth } from '../contexts/AuthContext'
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
+
 const nav = [
   { to: '/dashboard', label: 'Dashboard', emoji: '📊' },
   { to: '/lancamentos', label: 'Lançamentos', emoji: '💳' },
@@ -71,7 +73,20 @@ export function Layout({ children }) {
           ))}
         </nav>
 
-        <div style={{ padding: '16px 8px', borderTop: '1px solid rgba(255,255,255,0.1)' }}>
+        <div style={{ padding: '16px 8px', borderTop: '1px solid rgba(255,255,255,0.1)', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          {user?.email === ADMIN_EMAIL && (
+            <NavLink to="/admin" title={collapsed ? 'Admin' : undefined} style={({ isActive }) => ({
+              display: 'flex', alignItems: 'center', gap: '10px',
+              padding: collapsed ? '10px 0' : '10px 12px',
+              justifyContent: collapsed ? 'center' : 'flex-start',
+              borderRadius: '10px', textDecoration: 'none', fontSize: '14px', fontWeight: '500',
+              background: isActive ? 'rgba(251,191,36,0.2)' : 'transparent',
+              color: '#fbbf24', whiteSpace: 'nowrap',
+            })}>
+              <span style={{ fontSize: '18px', flexShrink: 0 }}>🔧</span>
+              {!collapsed && 'Admin'}
+            </NavLink>
+          )}
           <button onClick={handleSignOut} title={collapsed ? 'Sair da conta' : undefined} style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
             padding: collapsed ? '10px 0' : '10px 12px',

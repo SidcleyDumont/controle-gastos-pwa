@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { AuthProvider, useAuth } from './contexts/AuthContext'
+import { PlanProvider } from './contexts/PlanContext'
 import { Layout } from './components/Layout'
 import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
@@ -11,6 +12,7 @@ import Settings from './pages/Settings'
 import Budgets from './pages/Budgets'
 import RecurringTransactions from './pages/RecurringTransactions'
 import ResetPassword from './pages/ResetPassword'
+import Admin from './pages/Admin'
 
 const IS_STAGING = import.meta.env.VITE_APP_ENV === 'staging'
 
@@ -41,7 +43,7 @@ const queryClient = new QueryClient({
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth()
   if (loading) return <div className="min-h-screen flex items-center justify-center text-gray-500">Carregando...</div>
-  return user ? <Layout>{children}</Layout> : <Navigate to="/login" />
+  return user ? <PlanProvider><Layout>{children}</Layout></PlanProvider> : <Navigate to="/login" />
 }
 
 function PublicRoute({ children }) {
@@ -66,6 +68,7 @@ export default function App() {
             <Route path="/recorrentes" element={<PrivateRoute><RecurringTransactions /></PrivateRoute>} />
             <Route path="/orcamentos" element={<PrivateRoute><Budgets /></PrivateRoute>} />
             <Route path="/configuracoes" element={<PrivateRoute><Settings /></PrivateRoute>} />
+            <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
         </BrowserRouter>

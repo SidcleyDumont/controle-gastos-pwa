@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
+import { usePlan } from '../contexts/PlanContext'
+import PaywallBanner from '../components/PaywallBanner'
 import { recurringTransactionService, getNextDueDate } from '../services/recurringTransactionService'
 import { useRecurring } from '../hooks/useRecurring'
 import { useCategories } from '../hooks/useCategories'
@@ -233,7 +235,10 @@ function RecurringCard({ item, onEdit, onToggle, onDelete }) {
 
 export default function RecurringTransactions() {
   const { user } = useAuth()
+  const { isPro } = usePlan()
   const [filter, setFilter] = useState('')
+
+  if (!isPro) return <PaywallBanner feature="Transações Recorrentes" />
   const [modal, setModal] = useState({ open: false, data: null })
   const [genResult, setGenResult] = useState(null)
 
