@@ -13,9 +13,9 @@ export default function MonthlySummary() {
   const { user } = useAuth()
   const { isPro } = usePlan()
   const [ano, setAno] = useState(getAnoAtual())
+  const [pdfLoading, setPdfLoading] = useState(false)
 
   if (!isPro) return <PaywallBanner feature="Resumo Mensal Anual" />
-  const [pdfLoading, setPdfLoading] = useState(false)
 
   const { data: todos = [], isLoading } = useTransactions(user?.id, { year: ano })
 
