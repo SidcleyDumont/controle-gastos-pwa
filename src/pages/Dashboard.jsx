@@ -153,19 +153,19 @@ export default function Dashboard() {
 
   const { data: lancamentos = [], isLoading: l1 } = useTransactions(user?.id, { month: mes, year: ano })
   const { data: todos = [], isLoading: l2 } = useTransactions(user?.id, { year: ano })
-  const { data: cats = [], invalidate: invalidateCats } = useCategories(user?.id)
+  const { data: cats = [], isLoading: catsLoading, invalidate: invalidateCats } = useCategories(user?.id)
   const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
 
   const loading = l1 || l2
   const goal = settings?.monthly_savings_goal ?? null
 
   useEffect(() => {
-    if (!user || cats === undefined) return
+    if (!user || catsLoading) return
     const key = `cg_onboarding_${user.id}`
     if (localStorage.getItem(key) === 'done') return
     if (cats.length === 0) setShowOnboarding(true)
     else localStorage.setItem(key, 'done')
-  }, [user, cats])
+  }, [user, cats, catsLoading])
 
   useEffect(() => {
     if (!user) return
