@@ -16,7 +16,7 @@ const nav = [
 ]
 
 export function Layout({ children }) {
-  const { signOut } = useAuth()
+  const { signOut, user } = useAuth()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
