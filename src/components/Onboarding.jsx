@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { categoryService } from '../services/categoryService'
+import { userSettingsService } from '../services/userSettingsService'
 
 const PRESETS = [
   { name: 'Alimentação',      type: 'Despesa',  emoji: '🍽️', on: true },
@@ -212,6 +213,7 @@ export default function Onboarding({ user, onComplete }) {
 
   const dismiss = () => {
     localStorage.setItem(`cg_onboarding_${user.id}`, 'done')
+    userSettingsService.upsert(user.id, { onboarding_completed: true }).catch(() => {})
     onComplete()
   }
 

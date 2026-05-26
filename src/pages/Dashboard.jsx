@@ -163,9 +163,13 @@ export default function Dashboard() {
     if (!user || catsLoading) return
     const key = `cg_onboarding_${user.id}`
     if (localStorage.getItem(key) === 'done') return
+    if (settings?.onboarding_completed) {
+      localStorage.setItem(key, 'done')
+      return
+    }
     if (cats.length === 0) setShowOnboarding(true)
     else localStorage.setItem(key, 'done')
-  }, [user, cats, catsLoading])
+  }, [user, cats, catsLoading, settings])
 
   useEffect(() => {
     if (!user) return
