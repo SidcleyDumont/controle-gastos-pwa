@@ -4,7 +4,7 @@ export const userSettingsService = {
   async get(userId) {
     const { data, error } = await supabase.rpc('get_my_settings')
     if (error) throw error
-    return data
+    return Array.isArray(data) ? (data[0] ?? null) : data
   },
 
   async upsert(userId, settings) {

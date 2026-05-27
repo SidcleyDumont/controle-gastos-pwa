@@ -3,6 +3,7 @@ import { useAuth } from '../contexts/AuthContext'
 import { usePlan } from '../contexts/PlanContext'
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
+import TrialBanner from './TrialBanner'
 
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
 
@@ -198,6 +199,7 @@ export function Layout({ children }) {
             {daysUntilExpiry <= 3 ? '🔴' : '⚠️'} Seu plano Pro vence em <strong>{daysUntilExpiry} dia{daysUntilExpiry !== 1 ? 's' : ''}</strong>. Renove via PIX para manter o acesso.
           </div>
         )}
+        <TrialBanner />
         {children}
       </main>
 

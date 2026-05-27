@@ -221,7 +221,7 @@ function QuinzenalCard({ budget, sp, onEdit, onDelete }) {
 
 export default function Budgets() {
   const { user } = useAuth()
-  const { isPro, settingsLoading } = usePlan()
+  const { hasProAccess: isPro, settingsLoading } = usePlan()
   const [month, setMonth] = useState(getMesAtual())
   const [year, setYear] = useState(getAnoAtual())
   const [filterPeriod, setFilterPeriod] = useState('')

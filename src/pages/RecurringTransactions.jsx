@@ -235,7 +235,7 @@ function RecurringCard({ item, onEdit, onToggle, onDelete }) {
 
 export default function RecurringTransactions() {
   const { user } = useAuth()
-  const { isPro, settingsLoading } = usePlan()
+  const { hasProAccess: isPro, settingsLoading } = usePlan()
   const [filter, setFilter] = useState('')
   const [modal, setModal] = useState({ open: false, data: null })
   const [genResult, setGenResult] = useState(null)
