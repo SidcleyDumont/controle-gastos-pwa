@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 
+const WA_URL = `https://wa.me/5583993500340?text=${encodeURIComponent('Olá! Vim pelo site planejofinanceiro.com.br e tenho interesse no Plano Pro. Poderia me ajudar? 😊')}`
+
 const screens = [
   { src: '/screenshots/dashboard.png', title: 'Dashboard', desc: 'Visão geral em tempo real — saldo, receitas, despesas e meta de poupança do mês.' },
   { src: '/screenshots/lancamentos.png', title: 'Lançamentos', desc: 'Registre e filtre receitas e despesas por período, categoria e situação.' },
@@ -256,7 +258,7 @@ export default function Landing() {
                 <div>
                   <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '14px', marginBottom: '4px' }}>Envie o comprovante</div>
                   <div style={{ color: '#64748b', fontSize: '13px', marginBottom: '8px' }}>Encaminhe pelo WhatsApp ou e-mail com seu nome e e-mail de cadastro no app.</div>
-                  <a href="https://wa.me/5583993500340" target="_blank" rel="noreferrer"
+                  <a href={WA_URL} target="_blank" rel="noreferrer"
                     style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#22c55e', color: 'white', borderRadius: '8px', padding: '6px 14px', fontSize: '13px', fontWeight: '700', textDecoration: 'none' }}>
                     💬 WhatsApp (83) 99350-0340
                   </a>
@@ -283,14 +285,14 @@ export default function Landing() {
         <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
           <a href="/termos" style={{ color: '#64748b', fontSize: '13px', textDecoration: 'none' }}>Termos de Uso</a>
           <a href="/privacidade" style={{ color: '#64748b', fontSize: '13px', textDecoration: 'none' }}>Política de Privacidade</a>
-          <a href="https://wa.me/5583993500340" target="_blank" rel="noreferrer" style={{ color: '#4ade80', fontSize: '13px', textDecoration: 'none' }}>💬 WhatsApp</a>
+          <a href={WA_URL} target="_blank" rel="noreferrer" style={{ color: '#4ade80', fontSize: '13px', textDecoration: 'none' }}>💬 WhatsApp</a>
           <a href="/login" style={{ color: '#64748b', fontSize: '13px', textDecoration: 'none' }}>Entrar</a>
         </div>
         <p style={{ color: '#334155', fontSize: '12px', margin: 0 }}>© {new Date().getFullYear()} Planejamento Financeiro. Todos os direitos reservados.</p>
       </footer>
 
       {/* Botão flutuante WhatsApp */}
-      <a href="https://wa.me/5583993500340" target="_blank" rel="noreferrer"
+      <a href={WA_URL} target="_blank" rel="noreferrer"
         style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#22c55e', color: 'white', borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', boxShadow: '0 4px 20px rgba(34,197,94,0.5)', textDecoration: 'none', zIndex: 999 }}
         title="Fale conosco no WhatsApp">
         💬
