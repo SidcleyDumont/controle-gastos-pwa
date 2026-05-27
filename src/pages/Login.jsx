@@ -135,7 +135,7 @@ export default function Login() {
   const showResend = msg.includes('Verifique seu e-mail') || msg.includes('reenviado')
 
   return (
-    <div className="screen-full" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+    <div className="screen-full" style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #1e40af 100%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '20px', gap: '16px' }}>
       <div style={{ position: 'fixed', top: '-80px', right: '-80px', width: '300px', height: '300px', borderRadius: '50%', background: 'rgba(96,165,250,0.12)', pointerEvents: 'none' }} />
       <div style={{ position: 'fixed', bottom: '-60px', left: '-60px', width: '250px', height: '250px', borderRadius: '50%', background: 'rgba(147,197,253,0.08)', pointerEvents: 'none' }} />
 
@@ -234,10 +234,10 @@ export default function Login() {
             </button>
           )}
         </div>
-        <div style={{ textAlign: 'center', marginTop: '20px' }}>
-          <a href="/termos" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none', marginRight: '16px' }}>Termos de Uso</a>
-          <a href="/privacidade" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>Política de Privacidade</a>
-        </div>
+      </div>
+      <div style={{ textAlign: 'center' }}>
+        <a href="/termos" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none', marginRight: '16px' }}>Termos de Uso</a>
+        <a href="/privacidade" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>Política de Privacidade</a>
       </div>
     </div>
   )
