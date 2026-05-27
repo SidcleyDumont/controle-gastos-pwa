@@ -15,6 +15,7 @@ import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/Admin'
 import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
+import Landing from './pages/Landing'
 
 const IS_STAGING = import.meta.env.VITE_APP_ENV === 'staging'
 
@@ -73,6 +74,7 @@ export default function App() {
             <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
             <Route path="/termos" element={<Terms />} />
             <Route path="/privacidade" element={<Privacy />} />
+            <Route path="/" element={<PublicRoute><Landing /></PublicRoute>} />
             <Route path="*" element={<Navigate to="/dashboard" />} />
           </Routes>
         </BrowserRouter>
