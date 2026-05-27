@@ -11,7 +11,7 @@ import { S, getYearRange } from '../styles'
 
 export default function MonthlySummary() {
   const { user } = useAuth()
-  const { isPro, settingsLoading } = usePlan()
+  const { hasProAccess: isPro, settingsLoading } = usePlan()
   const [ano, setAno] = useState(getAnoAtual())
   const [pdfLoading, setPdfLoading] = useState(false)
 

@@ -40,7 +40,7 @@ function DueBadge({ due_date, status }) {
 
 export default function Transactions() {
   const { user } = useAuth()
-  const { isPro, settingsLoading } = usePlan()
+  const { hasProAccess: isPro, settingsLoading } = usePlan()
   const location = useLocation()
   const navigate = useNavigate()
   const fromCategory = location.state?.category_id ? location.state : null
