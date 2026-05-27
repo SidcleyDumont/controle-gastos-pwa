@@ -1,4 +1,13 @@
 import { useNavigate } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+
+const screens = [
+  { src: '/screenshots/dashboard.png', title: 'Dashboard', desc: 'Visão geral em tempo real — saldo, receitas, despesas e meta de poupança do mês.' },
+  { src: '/screenshots/lancamentos.png', title: 'Lançamentos', desc: 'Registre e filtre receitas e despesas por período, categoria e situação.' },
+  { src: '/screenshots/resumo-mensal.png', title: 'Resumo Mensal', desc: 'Acompanhe a evolução financeira mês a mês com totais e % de poupança.' },
+  { src: '/screenshots/orcamentos.png', title: 'Orçamentos', desc: 'Defina limites por categoria e veja em tempo real quanto já gastou.' },
+  { src: '/screenshots/recorrentes.png', title: 'Recorrentes', desc: 'Cadastre contas fixas e elas são lançadas automaticamente todo mês.' },
+]
 
 const features = [
   { icon: '📊', title: 'Dashboard', desc: 'Visão geral das suas finanças em tempo real — saldo, receitas e despesas do mês.', free: true },
@@ -14,6 +23,73 @@ const steps = [
   { n: '2', title: 'Registre seus gastos', desc: 'Lance receitas e despesas. Organize por categorias e períodos.' },
   { n: '3', title: 'Analise e melhore', desc: 'Acompanhe seu saldo, veja onde está gastando mais e poupe mais.' },
 ]
+
+function Carousel() {
+  const [active, setActive] = useState(0)
+  const [animating, setAnimating] = useState(false)
+
+  useEffect(() => {
+    const t = setInterval(() => goTo((prev) => (prev + 1) % screens.length), 4000)
+    return () => clearInterval(t)
+  }, [])
+
+  const goTo = (indexOrFn) => {
+    setAnimating(true)
+    setTimeout(() => {
+      setActive(indexOrFn)
+      setAnimating(false)
+    }, 200)
+  }
+
+  const prev = () => goTo(i => (i - 1 + screens.length) % screens.length)
+  const next = () => goTo(i => (i + 1) % screens.length)
+
+  const s = screens[active]
+
+  return (
+    <div style={{ maxWidth: '900px', margin: '0 auto' }}>
+      {/* Frame */}
+      <div style={{ background: '#1e293b', borderRadius: '16px', padding: '10px 10px 0', boxShadow: '0 24px 64px rgba(0,0,0,0.35)', position: 'relative' }}>
+        {/* Browser bar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '0 8px 8px' }}>
+          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} />
+          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#f59e0b', display: 'inline-block' }} />
+          <span style={{ width: '10px', height: '10px', borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+          <div style={{ flex: 1, background: '#334155', borderRadius: '6px', padding: '3px 12px', fontSize: '11px', color: '#94a3b8', marginLeft: '8px' }}>planejofinanceiro.com.br</div>
+        </div>
+        {/* Screenshot */}
+        <div style={{ borderRadius: '8px 8px 0 0', overflow: 'hidden', lineHeight: 0 }}>
+          <img
+            src={s.src}
+            alt={s.title}
+            style={{
+              width: '100%', display: 'block',
+              opacity: animating ? 0 : 1,
+              transition: 'opacity 0.2s ease',
+            }}
+          />
+        </div>
+      </div>
+
+      {/* Caption + nav */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '24px', gap: '16px', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: '200px' }}>
+          <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '16px', marginBottom: '4px' }}>{s.title}</div>
+          <div style={{ color: '#64748b', fontSize: '14px', lineHeight: '1.6' }}>{s.desc}</div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+          <button onClick={prev} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>‹</button>
+          <div style={{ display: 'flex', gap: '6px' }}>
+            {screens.map((_, i) => (
+              <button key={i} onClick={() => goTo(i)} style={{ width: i === active ? '20px' : '8px', height: '8px', borderRadius: '99px', border: 'none', background: i === active ? '#1e40af' : '#e2e8f0', cursor: 'pointer', padding: 0, transition: 'all 0.3s ease' }} />
+            ))}
+          </div>
+          <button onClick={next} style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1px solid #e2e8f0', background: 'white', cursor: 'pointer', fontSize: '16px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#64748b' }}>›</button>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function Landing() {
   const navigate = useNavigate()
@@ -64,6 +140,15 @@ export default function Landing() {
           </div>
           <p style={{ color: '#64748b', fontSize: '13px', marginTop: '20px' }}>Grátis para sempre no plano básico. Upgrade por R$ 29,90/mês.</p>
         </div>
+      </section>
+
+      {/* Screenshots */}
+      <section style={{ padding: '72px 24px', background: '#f1f5f9', borderTop: '1px solid #e2e8f0' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h2 style={{ color: '#0f172a', fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: '800', margin: '0 0 12px' }}>Veja o sistema em ação</h2>
+          <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Interface limpa, rápida e funciona no celular como um app nativo.</p>
+        </div>
+        <Carousel />
       </section>
 
       {/* Features */}
