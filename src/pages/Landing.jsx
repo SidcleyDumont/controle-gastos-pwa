@@ -1,0 +1,203 @@
+import { useNavigate } from 'react-router-dom'
+
+const features = [
+  { icon: '📊', title: 'Dashboard', desc: 'Visão geral das suas finanças em tempo real — saldo, receitas e despesas do mês.', free: true },
+  { icon: '🏷️', title: 'Categorias', desc: 'Crie categorias personalizadas e organize seus gastos do seu jeito.', free: true },
+  { icon: '📅', title: 'Lançamentos', desc: 'Registre receitas e despesas, filtre por período, exporte para Excel ou CSV.', free: false },
+  { icon: '🔁', title: 'Recorrentes', desc: 'Cadastre contas fixas e elas aparecem automaticamente todo mês.', free: false },
+  { icon: '🎯', title: 'Orçamentos', desc: 'Defina limites por categoria e acompanhe o quanto já gastou.', free: false },
+  { icon: '📈', title: 'Resumo Mensal', desc: 'Relatório completo mês a mês com gráficos de evolução financeira.', free: false },
+]
+
+const steps = [
+  { n: '1', title: 'Crie sua conta', desc: 'Cadastro gratuito em menos de 1 minuto. Sem cartão de crédito.' },
+  { n: '2', title: 'Registre seus gastos', desc: 'Lance receitas e despesas. Organize por categorias e períodos.' },
+  { n: '3', title: 'Analise e melhore', desc: 'Acompanhe seu saldo, veja onde está gastando mais e poupe mais.' },
+]
+
+export default function Landing() {
+  const navigate = useNavigate()
+
+  return (
+    <div style={{ fontFamily: "-apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif", background: '#f8fafc', minHeight: '100vh' }}>
+
+      {/* Nav */}
+      <nav style={{ background: 'white', borderBottom: '1px solid #f1f5f9', padding: '0 24px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #1e40af, #2563eb)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>💰</div>
+          <span style={{ fontWeight: '800', color: '#0f172a', fontSize: '15px' }}>Planejamento Financeiro</span>
+        </div>
+        <button
+          onClick={() => navigate('/login')}
+          style={{ background: '#1e40af', color: 'white', border: 'none', borderRadius: '8px', padding: '8px 18px', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}
+        >
+          Entrar
+        </button>
+      </nav>
+
+      {/* Hero */}
+      <section style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1e40af 100%)', padding: '72px 24px 80px', textAlign: 'center' }}>
+        <div style={{ maxWidth: '680px', margin: '0 auto' }}>
+          <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', color: '#93c5fd', border: '1px solid rgba(147,197,253,0.3)', borderRadius: '99px', padding: '4px 16px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.08em', marginBottom: '24px' }}>
+            ORGANIZE · INVISTA · CONQUISTE
+          </span>
+          <h1 style={{ color: 'white', fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: '900', lineHeight: '1.15', margin: '0 0 20px', letterSpacing: '-0.02em' }}>
+            Controle suas finanças<br />
+            <span style={{ color: '#60a5fa' }}>de forma simples e eficiente</span>
+          </h1>
+          <p style={{ color: '#94a3b8', fontSize: '16px', lineHeight: '1.7', margin: '0 0 36px', maxWidth: '520px', marginLeft: 'auto', marginRight: 'auto' }}>
+            Registre receitas e despesas, acompanhe orçamentos, identifique onde está gastando mais e poupe mais todo mês.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <button
+              onClick={() => navigate('/login')}
+              style={{ background: 'linear-gradient(135deg, #2563eb, #1e40af)', color: 'white', border: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '15px', fontWeight: '800', cursor: 'pointer', boxShadow: '0 4px 20px rgba(37,99,235,0.5)' }}
+            >
+              🚀 Começar grátis
+            </button>
+            <button
+              onClick={() => navigate('/login')}
+              style={{ background: 'rgba(255,255,255,0.08)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '12px', padding: '14px 32px', fontSize: '15px', fontWeight: '700', cursor: 'pointer' }}
+            >
+              Já tenho conta
+            </button>
+          </div>
+          <p style={{ color: '#64748b', fontSize: '13px', marginTop: '20px' }}>Grátis para sempre no plano básico. Upgrade por R$ 29,90/mês.</p>
+        </div>
+      </section>
+
+      {/* Features */}
+      <section style={{ padding: '72px 24px', maxWidth: '900px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h2 style={{ color: '#0f172a', fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: '800', margin: '0 0 12px' }}>Tudo que você precisa para organizar as finanças</h2>
+          <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Plano gratuito já inclui Dashboard e Categorias. Upgrade desbloqueia tudo.</p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
+          {features.map(f => (
+            <div key={f.title} style={{ background: 'white', borderRadius: '14px', padding: '22px', border: f.free ? '1px solid #e2e8f0' : '1px solid #bfdbfe', position: 'relative', overflow: 'hidden' }}>
+              {!f.free && (
+                <span style={{ position: 'absolute', top: '14px', right: '14px', background: '#eff6ff', color: '#1e40af', fontSize: '10px', fontWeight: '800', padding: '2px 10px', borderRadius: '99px', letterSpacing: '0.05em' }}>PRO</span>
+              )}
+              {f.free && (
+                <span style={{ position: 'absolute', top: '14px', right: '14px', background: '#f0fdf4', color: '#16a34a', fontSize: '10px', fontWeight: '800', padding: '2px 10px', borderRadius: '99px', letterSpacing: '0.05em' }}>GRÁTIS</span>
+              )}
+              <div style={{ fontSize: '28px', marginBottom: '12px' }}>{f.icon}</div>
+              <div style={{ fontWeight: '700', color: '#0f172a', fontSize: '15px', marginBottom: '6px' }}>{f.title}</div>
+              <div style={{ color: '#64748b', fontSize: '13px', lineHeight: '1.6' }}>{f.desc}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Como funciona */}
+      <section style={{ background: 'white', padding: '72px 24px', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}>
+        <div style={{ maxWidth: '760px', margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{ color: '#0f172a', fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: '800', margin: '0 0 12px' }}>Como funciona</h2>
+          <p style={{ color: '#64748b', fontSize: '15px', margin: '0 0 48px' }}>Comece a controlar suas finanças em 3 passos simples.</p>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '24px' }}>
+            {steps.map(s => (
+              <div key={s.n} style={{ textAlign: 'center' }}>
+                <div style={{ width: '48px', height: '48px', background: 'linear-gradient(135deg, #1e40af, #2563eb)', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '20px', fontWeight: '900', color: 'white', margin: '0 auto 16px' }}>{s.n}</div>
+                <div style={{ fontWeight: '700', color: '#0f172a', fontSize: '15px', marginBottom: '8px' }}>{s.title}</div>
+                <div style={{ color: '#64748b', fontSize: '13px', lineHeight: '1.6' }}>{s.desc}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Preços */}
+      <section style={{ padding: '72px 24px', maxWidth: '760px', margin: '0 auto' }}>
+        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+          <h2 style={{ color: '#0f172a', fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: '800', margin: '0 0 12px' }}>Planos simples e acessíveis</h2>
+          <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Sem cobranças surpresa. Cancele quando quiser.</p>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
+
+          {/* Free */}
+          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e2e8f0' }}>
+            <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '18px', marginBottom: '6px' }}>Free</div>
+            <div style={{ fontSize: '32px', fontWeight: '900', color: '#0f172a', marginBottom: '4px' }}>R$ 0</div>
+            <div style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '24px' }}>para sempre</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+              {['Dashboard completo', 'Gestão de Categorias', 'Acesso pelo celular (PWA)'].map(item => (
+                <div key={item} style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px', color: '#374151' }}>
+                  <span style={{ color: '#16a34a', fontWeight: '700' }}>✓</span>{item}
+                </div>
+              ))}
+            </div>
+            <button onClick={() => navigate('/login')} style={{ width: '100%', background: '#f1f5f9', color: '#1e293b', border: 'none', borderRadius: '10px', padding: '12px', fontSize: '14px', fontWeight: '700', cursor: 'pointer' }}>
+              Começar grátis
+            </button>
+          </div>
+
+          {/* Pro */}
+          <div style={{ background: 'linear-gradient(135deg, #0f172a, #1e3a8a)', borderRadius: '16px', padding: '28px', border: '1px solid #1e40af', position: 'relative', overflow: 'hidden' }}>
+            <span style={{ position: 'absolute', top: '16px', right: '16px', background: '#fbbf24', color: '#78350f', fontSize: '10px', fontWeight: '800', padding: '3px 10px', borderRadius: '99px', letterSpacing: '0.05em' }}>MAIS POPULAR</span>
+            <div style={{ fontWeight: '800', color: '#93c5fd', fontSize: '18px', marginBottom: '6px' }}>⭐ Pro</div>
+            <div style={{ fontSize: '32px', fontWeight: '900', color: 'white', marginBottom: '4px' }}>R$ 29,90</div>
+            <div style={{ color: '#64748b', fontSize: '13px', marginBottom: '24px' }}>por mês</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
+              {['Tudo do plano Free', 'Lançamentos ilimitados', 'Transações Recorrentes', 'Orçamentos por categoria', 'Resumo Mensal com gráficos', 'Exportação Excel e CSV', 'Emails de resumo mensal'].map(item => (
+                <div key={item} style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px', color: item === 'Tudo do plano Free' ? '#94a3b8' : 'white' }}>
+                  <span style={{ color: '#4ade80', fontWeight: '700' }}>✓</span>{item}
+                </div>
+              ))}
+            </div>
+            <button onClick={() => document.getElementById('como-assinar').scrollIntoView({ behavior: 'smooth' })} style={{ width: '100%', background: 'linear-gradient(135deg, #2563eb, #1e40af)', color: 'white', border: 'none', borderRadius: '10px', padding: '12px', fontSize: '14px', fontWeight: '800', cursor: 'pointer', boxShadow: '0 4px 16px rgba(37,99,235,0.4)' }}>
+              Assinar Pro →
+            </button>
+          </div>
+        </div>
+      </section>
+
+      {/* Como assinar */}
+      <section id="como-assinar" style={{ background: 'white', padding: '72px 24px', borderTop: '1px solid #f1f5f9', borderBottom: '1px solid #f1f5f9' }}>
+        <div style={{ maxWidth: '560px', margin: '0 auto', textAlign: 'center' }}>
+          <h2 style={{ color: '#0f172a', fontSize: 'clamp(20px, 4vw, 28px)', fontWeight: '800', margin: '0 0 12px' }}>Como assinar o Plano Pro</h2>
+          <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '32px' }}>Ativação manual em até 24 horas.</p>
+          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '16px', padding: '28px', textAlign: 'left' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                <div style={{ width: '32px', height: '32px', background: '#1e40af', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '14px', flexShrink: 0 }}>1</div>
+                <div>
+                  <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '14px', marginBottom: '4px' }}>Faça um PIX de R$ 29,90</div>
+                  <div style={{ color: '#64748b', fontSize: '13px' }}>Chave PIX (e-mail):</div>
+                  <div style={{ fontWeight: '800', color: '#1e40af', fontSize: '15px', marginTop: '4px' }}>sidejoao89@gmail.com</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                <div style={{ width: '32px', height: '32px', background: '#1e40af', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '14px', flexShrink: 0 }}>2</div>
+                <div>
+                  <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '14px', marginBottom: '4px' }}>Envie o comprovante</div>
+                  <div style={{ color: '#64748b', fontSize: '13px' }}>Encaminhe para o mesmo e-mail com seu nome e e-mail de cadastro no app.</div>
+                </div>
+              </div>
+              <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+                <div style={{ width: '32px', height: '32px', background: '#16a34a', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '14px', flexShrink: 0 }}>3</div>
+                <div>
+                  <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '14px', marginBottom: '4px' }}>Acesso liberado</div>
+                  <div style={{ color: '#64748b', fontSize: '13px' }}>Em até 24 horas ativamos seu Plano Pro e você recebe confirmação por e-mail.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <button onClick={() => navigate('/login')} style={{ marginTop: '28px', background: 'linear-gradient(135deg, #1e40af, #2563eb)', color: 'white', border: 'none', borderRadius: '12px', padding: '14px 36px', fontSize: '15px', fontWeight: '800', cursor: 'pointer' }}>
+            Criar conta grátis primeiro →
+          </button>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer style={{ padding: '32px 24px', textAlign: 'center', background: '#0f172a' }}>
+        <div style={{ fontWeight: '800', color: 'white', fontSize: '14px', marginBottom: '12px' }}>💰 Planejamento Financeiro</div>
+        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '16px' }}>
+          <a href="/termos" style={{ color: '#64748b', fontSize: '13px', textDecoration: 'none' }}>Termos de Uso</a>
+          <a href="/privacidade" style={{ color: '#64748b', fontSize: '13px', textDecoration: 'none' }}>Política de Privacidade</a>
+          <a href="/login" style={{ color: '#64748b', fontSize: '13px', textDecoration: 'none' }}>Entrar</a>
+        </div>
+        <p style={{ color: '#334155', fontSize: '12px', margin: 0 }}>© {new Date().getFullYear()} Planejamento Financeiro. Todos os direitos reservados.</p>
+      </footer>
+    </div>
+  )
+}
