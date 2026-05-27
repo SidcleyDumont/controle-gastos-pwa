@@ -163,7 +163,14 @@ export default function Settings() {
               <p style={{ margin: '0 0 4px', fontWeight: '700' }}>Como assinar:</p>
               <p style={{ margin: '0 0 2px' }}>1. Faça um PIX de <strong>R$ 29,90</strong> para a chave:</p>
               <p style={{ margin: '0 0 8px', fontWeight: '700', color: '#1e40af', fontSize: '14px' }}>sidejoao89@gmail.com</p>
-              <p style={{ margin: 0, color: '#64748b' }}>2. Envie o comprovante para o mesmo e-mail. Em até 24 horas liberamos seu acesso.</p>
+              <p style={{ margin: '0 0 8px', color: '#64748b' }}>2. Envie o comprovante pelo WhatsApp ou e-mail com seu nome e e-mail de cadastro.</p>
+              <a
+                href={`https://wa.me/5583993500340?text=${encodeURIComponent('Olá! Realizei o pagamento do Plano Pro e gostaria de enviar o comprovante. 😊')}`}
+                target="_blank" rel="noreferrer"
+                style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#22c55e', color: 'white', borderRadius: '8px', padding: '7px 14px', fontSize: '13px', fontWeight: '700', textDecoration: 'none' }}
+              >
+                💬 Enviar pelo WhatsApp
+              </a>
             </div>
           </div>
         )}
