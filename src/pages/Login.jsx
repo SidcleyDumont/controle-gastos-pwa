@@ -234,6 +234,10 @@ export default function Login() {
             </button>
           )}
         </div>
+        <div style={{ textAlign: 'center', marginTop: '20px' }}>
+          <a href="/termos" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none', marginRight: '16px' }}>Termos de Uso</a>
+          <a href="/privacidade" style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', textDecoration: 'none' }}>Política de Privacidade</a>
+        </div>
       </div>
     </div>
   )
