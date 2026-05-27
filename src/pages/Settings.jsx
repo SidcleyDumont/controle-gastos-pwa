@@ -1,4 +1,5 @@
 import { useAuth } from '../contexts/AuthContext'
+import { usePlan } from '../contexts/PlanContext'
 import { useNavigate } from 'react-router-dom'
 import { transactionService } from '../services/transactionService'
 import { userSettingsService } from '../services/userSettingsService'
@@ -11,6 +12,7 @@ import { formatCurrency } from '../utils/formatters'
 
 export default function Settings() {
   const { user, signOut } = useAuth()
+  const { isPro, plan, daysUntilExpiry, isExpired } = usePlan()
   const navigate = useNavigate()
   const [importing, setImporting] = useState(false)
   const [msg, setMsg] = useState('')
@@ -116,6 +118,61 @@ export default function Settings() {
             <div style={{ fontSize: '13px', color: '#64748b' }}>{user?.email}</div>
           </div>
         </div>
+      </div>
+
+      {/* Plano */}
+      <div style={{ ...S.card, padding: '20px 24px' }}>
+        <p style={S.sectionTitle}>⭐ Meu Plano</p>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: isPro ? '16px' : '0' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{
+              display: 'inline-block', padding: '4px 14px', borderRadius: '99px', fontSize: '13px', fontWeight: '700',
+              background: isExpired ? '#fff1f2' : isPro ? '#f0fdf4' : '#f8fafc',
+              color: isExpired ? '#dc2626' : isPro ? '#16a34a' : '#64748b',
+              border: `1px solid ${isExpired ? '#fca5a5' : isPro ? '#86efac' : '#e2e8f0'}`,
+            }}>
+              {isExpired ? '❌ Expirado' : isPro ? '⭐ Pro' : 'Free'}
+            </span>
+            {isPro && !isExpired && daysUntilExpiry !== null && (
+              <span style={{ fontSize: '13px', color: daysUntilExpiry <= 3 ? '#dc2626' : daysUntilExpiry <= 7 ? '#d97706' : '#64748b', fontWeight: '600' }}>
+                Vence em {daysUntilExpiry} dia{daysUntilExpiry !== 1 ? 's' : ''}
+              </span>
+            )}
+            {isPro && !isExpired && daysUntilExpiry === null && (
+              <span style={{ fontSize: '13px', color: '#64748b' }}>Sem data de vencimento</span>
+            )}
+          </div>
+          {isPro && settings?.plan_expires_at && (
+            <span style={{ fontSize: '13px', color: '#94a3b8' }}>
+              Vencimento: {new Date(settings.plan_expires_at).toLocaleDateString('pt-BR')}
+            </span>
+          )}
+        </div>
+
+        {(isExpired || !isPro) && (
+          <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '12px', padding: '16px' }}>
+            <p style={{ margin: '0 0 8px', fontWeight: '700', color: '#1e40af', fontSize: '14px' }}>
+              {isExpired ? '🔄 Renovar Plano Pro' : '🚀 Fazer Upgrade para Pro'}
+            </p>
+            <p style={{ margin: '0 0 12px', fontSize: '13px', color: '#1e3a8a', lineHeight: '1.6' }}>
+              {isExpired
+                ? 'Seu plano expirou. Renove para recuperar o acesso a Lançamentos, Recorrentes, Orçamentos e Resumo Mensal.'
+                : 'Desbloqueie Lançamentos, Recorrentes, Orçamentos e Resumo Mensal por apenas R$ 29,90/mês.'}
+            </p>
+            <div style={{ background: 'white', borderRadius: '8px', padding: '12px 14px', fontSize: '13px', color: '#1e293b' }}>
+              <p style={{ margin: '0 0 4px', fontWeight: '700' }}>Como assinar:</p>
+              <p style={{ margin: '0 0 2px' }}>1. Faça um PIX de <strong>R$ 29,90</strong> para a chave:</p>
+              <p style={{ margin: '0 0 8px', fontWeight: '700', color: '#1e40af', fontSize: '14px' }}>sidejoao89@gmail.com</p>
+              <p style={{ margin: 0, color: '#64748b' }}>2. Envie o comprovante para o mesmo e-mail. Em até 24 horas liberamos seu acesso.</p>
+            </div>
+          </div>
+        )}
+
+        {isPro && !isExpired && (
+          <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#15803d' }}>
+            Você tem acesso completo a todos os recursos do sistema. Para renovar, faça um PIX de <strong>R$ 29,90</strong> para <strong>sidejoao89@gmail.com</strong> e envie o comprovante.
+          </div>
+        )}
       </div>
 
       {/* Meta de Poupança */}
