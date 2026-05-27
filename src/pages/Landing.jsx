@@ -255,7 +255,11 @@ export default function Landing() {
                 <div style={{ width: '32px', height: '32px', background: '#1e40af', color: 'white', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '14px', flexShrink: 0 }}>2</div>
                 <div>
                   <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '14px', marginBottom: '4px' }}>Envie o comprovante</div>
-                  <div style={{ color: '#64748b', fontSize: '13px' }}>Encaminhe para o mesmo e-mail com seu nome e e-mail de cadastro no app.</div>
+                  <div style={{ color: '#64748b', fontSize: '13px', marginBottom: '8px' }}>Encaminhe pelo WhatsApp ou e-mail com seu nome e e-mail de cadastro no app.</div>
+                  <a href="https://wa.me/5583993500340" target="_blank" rel="noreferrer"
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: '#22c55e', color: 'white', borderRadius: '8px', padding: '6px 14px', fontSize: '13px', fontWeight: '700', textDecoration: 'none' }}>
+                    💬 WhatsApp (83) 99350-0340
+                  </a>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
@@ -276,13 +280,21 @@ export default function Landing() {
       {/* Footer */}
       <footer style={{ padding: '32px 24px', textAlign: 'center', background: '#0f172a' }}>
         <div style={{ fontWeight: '800', color: 'white', fontSize: '14px', marginBottom: '12px' }}>💰 Planejamento Financeiro</div>
-        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '16px' }}>
+        <div style={{ display: 'flex', gap: '24px', justifyContent: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
           <a href="/termos" style={{ color: '#64748b', fontSize: '13px', textDecoration: 'none' }}>Termos de Uso</a>
           <a href="/privacidade" style={{ color: '#64748b', fontSize: '13px', textDecoration: 'none' }}>Política de Privacidade</a>
+          <a href="https://wa.me/5583993500340" target="_blank" rel="noreferrer" style={{ color: '#4ade80', fontSize: '13px', textDecoration: 'none' }}>💬 WhatsApp</a>
           <a href="/login" style={{ color: '#64748b', fontSize: '13px', textDecoration: 'none' }}>Entrar</a>
         </div>
         <p style={{ color: '#334155', fontSize: '12px', margin: 0 }}>© {new Date().getFullYear()} Planejamento Financeiro. Todos os direitos reservados.</p>
       </footer>
+
+      {/* Botão flutuante WhatsApp */}
+      <a href="https://wa.me/5583993500340" target="_blank" rel="noreferrer"
+        style={{ position: 'fixed', bottom: '24px', right: '24px', background: '#22c55e', color: 'white', borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '26px', boxShadow: '0 4px 20px rgba(34,197,94,0.5)', textDecoration: 'none', zIndex: 999 }}
+        title="Fale conosco no WhatsApp">
+        💬
+      </a>
     </div>
   )
 }
