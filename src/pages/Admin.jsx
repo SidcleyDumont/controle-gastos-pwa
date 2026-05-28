@@ -14,7 +14,7 @@ export default function Admin() {
   const [updating, setUpdating] = useState(null)
   const [error, setError] = useState('')
   const [page, setPage] = useState(1)
-  const PER_PAGE = 10
+  const PER_PAGE = 5
 
   useEffect(() => {
     if (!user) return
