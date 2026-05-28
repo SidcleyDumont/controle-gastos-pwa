@@ -19,7 +19,7 @@ const features = [
   { icon: '🎯', title: 'Orçamentos', desc: 'Defina limites por categoria e acompanhe o quanto já gastou.', free: false },
   { icon: '📈', title: 'Resumo Mensal', desc: 'Relatório completo mês a mês com gráficos de evolução financeira.', free: false },
   { icon: '📋', title: 'Duplicar Lançamentos', desc: 'Copie os lançamentos do mês anterior com um clique — ideal para despesas fixas.', free: false },
-  { icon: '🌙', title: 'Tema Escuro', desc: 'Interface com modo escuro para conforto visual a qualquer hora do dia.', free: true },
+  { icon: '🌙', title: 'Tema Escuro', desc: 'Interface com modo escuro para conforto visual a qualquer hora do dia.', free: true, noBadge: true },
 ]
 
 const steps = [
@@ -179,7 +179,7 @@ export default function Landing() {
               {!f.free && (
                 <span style={{ position: 'absolute', top: '14px', right: '14px', background: '#eff6ff', color: '#1e40af', fontSize: '10px', fontWeight: '800', padding: '2px 10px', borderRadius: '99px', letterSpacing: '0.05em' }}>PRO</span>
               )}
-              {f.free && (
+              {f.free && !f.noBadge && (
                 <span style={{ position: 'absolute', top: '14px', right: '14px', background: '#f0fdf4', color: '#16a34a', fontSize: '10px', fontWeight: '800', padding: '2px 10px', borderRadius: '99px', letterSpacing: '0.05em' }}>GRÁTIS</span>
               )}
               <div style={{ fontSize: '28px', marginBottom: '12px' }}>{f.icon}</div>
