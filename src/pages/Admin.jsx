@@ -13,6 +13,8 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(null)
   const [error, setError] = useState('')
+  const [page, setPage] = useState(1)
+  const PER_PAGE = 10
 
   useEffect(() => {
     if (!user) return
@@ -22,6 +24,7 @@ export default function Admin() {
 
   const load = async () => {
     setLoading(true)
+    setPage(1)
     try {
       const data = await adminService.listUsers()
       setUsers(data)
@@ -79,6 +82,8 @@ export default function Admin() {
 
   const total = users.length
   const pros = users.filter(u => u.plan === 'pro').length
+  const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
+  const pageUsers = users.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -132,7 +137,7 @@ export default function Admin() {
               </tr>
             </thead>
             <tbody>
-              {users.map((u, idx) => (
+              {pageUsers.map((u, idx) => (
                 <tr key={u.id} style={{ background: u.is_banned ? '#fef2f2' : idx % 2 === 0 ? 'white' : '#fafafa', borderBottom: '1px solid #f1f5f9', opacity: u.is_banned ? 0.75 : 1 }}>
                   <td style={{ padding: '14px 16px', fontSize: '14px', color: u.is_banned ? '#dc2626' : '#1e293b', fontWeight: '500' }}>
                     {u.email}
@@ -206,7 +211,55 @@ export default function Admin() {
             </tbody>
           </table>
         )}
+
+        {!loading && totalPages > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '14px 16px', borderTop: '1px solid #f1f5f9', background: '#fafafa' }}>
+            <span style={{ fontSize: '13px', color: '#64748b' }}>
+              Página {page} de {totalPages} · {total} usuário(s)
+            </span>
+            <div style={{ display: 'flex', gap: '6px' }}>
+              <button
+                onClick={() => setPage(1)}
+                disabled={page === 1}
+                style={paginBtn(page === 1)}>«</button>
+              <button
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+                disabled={page === 1}
+                style={paginBtn(page === 1)}>‹ Anterior</button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || Math.abs(p - page) <= 1)
+                .reduce((acc, p, i, arr) => {
+                  if (i > 0 && p - arr[i - 1] > 1) acc.push('…')
+                  acc.push(p)
+                  return acc
+                }, [])
+                .map((p, i) => typeof p === 'string' ? (
+                  <span key={`ellipsis-${i}`} style={{ padding: '6px 4px', fontSize: '13px', color: '#94a3b8' }}>…</span>
+                ) : (
+                  <button key={p} onClick={() => setPage(p)} style={paginBtn(false, p === page)}>{p}</button>
+                ))
+              }
+              <button
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                disabled={page === totalPages}
+                style={paginBtn(page === totalPages)}>Próxima ›</button>
+              <button
+                onClick={() => setPage(totalPages)}
+                disabled={page === totalPages}
+                style={paginBtn(page === totalPages)}>»</button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
+}
+
+function paginBtn(disabled, active = false) {
+  return {
+    padding: '6px 12px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+    cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit', border: 'none',
+    background: active ? '#1e40af' : disabled ? '#f1f5f9' : '#e2e8f0',
+    color: active ? 'white' : disabled ? '#cbd5e1' : '#475569',
+  }
 }
