@@ -323,11 +323,12 @@ export default function Dashboard() {
             ) : (
               <ResponsiveContainer width="100%" height={220}>
                 <PieChart>
-                  <Pie data={dadosPeriodo} dataKey="valor" nameKey="name" cx="50%" cy="50%" outerRadius={85} innerRadius={40}
-                    label={({ name, percent }) => `${name} ${(percent*100).toFixed(0)}%`} labelLine={false}>
+                  <Pie data={dadosPeriodo} dataKey="valor" nameKey="name" cx="50%" cy="45%" outerRadius={75} innerRadius={35}
+                    label={({ percent }) => `${(percent*100).toFixed(0)}%`} labelLine={false}>
                     {dadosPeriodo.map((_, i) => <Cell key={i} fill={COLORS[i]} />)}
                   </Pie>
                   <Tooltip formatter={v => formatCurrency(v)} contentStyle={{ borderRadius: '10px', border: '1px solid #e2e8f0', fontSize: '13px' }} />
+                  <Legend wrapperStyle={{ fontSize: '13px', paddingTop: '4px' }} />
                 </PieChart>
               </ResponsiveContainer>
             )}

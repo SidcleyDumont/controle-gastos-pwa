@@ -16,6 +16,7 @@ import Admin from './pages/Admin'
 import Terms from './pages/Terms'
 import Privacy from './pages/Privacy'
 import Landing from './pages/Landing'
+import { ThemeProvider } from './contexts/ThemeContext'
 
 const IS_STAGING = import.meta.env.VITE_APP_ENV === 'staging'
 
@@ -57,6 +58,7 @@ function PublicRoute({ children }) {
 
 export default function App() {
   return (
+    <ThemeProvider>
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
         <StagingBanner />
@@ -80,5 +82,6 @@ export default function App() {
         </BrowserRouter>
       </AuthProvider>
     </QueryClientProvider>
+    </ThemeProvider>
   )
 }

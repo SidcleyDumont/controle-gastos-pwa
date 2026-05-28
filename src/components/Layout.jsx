@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { usePlan } from '../contexts/PlanContext'
+import { useTheme } from '../contexts/ThemeContext'
 import { useState } from 'react'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import TrialBanner from './TrialBanner'
@@ -20,6 +21,7 @@ const nav = [
 export function Layout({ children }) {
   const { signOut, user } = useAuth()
   const { daysUntilExpiry, isExpired } = usePlan()
+  const { isDark, toggleTheme } = useTheme()
   const navigate = useNavigate()
   const [open, setOpen] = useState(false)
   const [collapsed, setCollapsed] = useState(false)
@@ -90,6 +92,17 @@ export function Layout({ children }) {
               {!collapsed && 'Admin'}
             </NavLink>
           )}
+          <button onClick={toggleTheme} title={collapsed ? (isDark ? 'Tema claro' : 'Tema escuro') : undefined} style={{
+            width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
+            padding: collapsed ? '10px 0' : '10px 12px',
+            justifyContent: collapsed ? 'center' : 'flex-start',
+            borderRadius: '10px', border: 'none', cursor: 'pointer',
+            background: 'rgba(255,255,255,0.08)', color: '#bfdbfe', fontSize: '14px', fontWeight: '500',
+            whiteSpace: 'nowrap',
+          }}>
+            <span style={{ fontSize: '18px' }}>{isDark ? '☀️' : '🌙'}</span>
+            {!collapsed && (isDark ? 'Tema claro' : 'Tema escuro')}
+          </button>
           <button onClick={handleSignOut} title={collapsed ? 'Sair da conta' : undefined} style={{
             width: '100%', display: 'flex', alignItems: 'center', gap: '10px',
             padding: collapsed ? '10px 0' : '10px 12px',
@@ -132,9 +145,14 @@ export function Layout({ children }) {
           </div>
           <span style={{ color: 'white', fontWeight: '700', fontSize: '15px' }}>Planejamento Financeiro</span>
         </div>
-        <button onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' }}>
-          {open ? '✕' : '☰'}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button onClick={toggleTheme} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', borderRadius: '8px', color: 'white', fontSize: '18px', cursor: 'pointer', width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {isDark ? '☀️' : '🌙'}
+          </button>
+          <button onClick={() => setOpen(!open)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '24px', cursor: 'pointer' }}>
+            {open ? '✕' : '☰'}
+          </button>
+        </div>
       </div>
 
       {/* Mobile Menu */}
@@ -176,7 +194,7 @@ export function Layout({ children }) {
       {/* Main Content */}
       <main style={{
         flex: 1, marginLeft: `${sidebarWidth}px`, minHeight: '100vh',
-        padding: '32px 28px', background: '#f1f5f9',
+        padding: '32px 28px', background: 'var(--bg-body)',
         transition: 'margin-left 0.25s ease',
       }} className="main-content">
         {isExpired && (
