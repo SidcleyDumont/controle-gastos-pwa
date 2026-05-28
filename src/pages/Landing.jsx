@@ -157,9 +157,21 @@ export default function Landing() {
 
       {/* Features */}
       <section style={{ padding: '72px 24px', maxWidth: '900px', margin: '0 auto' }}>
-        <div style={{ textAlign: 'center', marginBottom: '48px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <h2 style={{ color: '#0f172a', fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: '800', margin: '0 0 12px' }}>Tudo que você precisa para organizar as finanças</h2>
-          <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Experimente tudo por 7 dias grátis. Depois, plano Free inclui Dashboard e Categorias — Pro desbloqueia tudo.</p>
+          <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Após o trial, plano Free inclui Dashboard e Categorias — Pro desbloqueia tudo.</p>
+        </div>
+
+        {/* Banner trial */}
+        <div style={{ background: 'linear-gradient(135deg, #ecfdf5, #d1fae5)', border: '1.5px solid #6ee7b7', borderRadius: '14px', padding: '16px 24px', display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '32px', maxWidth: '900px', margin: '0 auto 32px' }}>
+          <span style={{ fontSize: '28px', flexShrink: 0 }}>🎁</span>
+          <div>
+            <div style={{ fontWeight: '800', color: '#065f46', fontSize: '15px', marginBottom: '2px' }}>Todos os recursos liberados gratuitamente nos primeiros 7 dias!</div>
+            <div style={{ color: '#047857', fontSize: '13px' }}>Crie sua conta agora e teste tudo — sem cartão de crédito. Depois escolha continuar no Free ou assinar o Pro.</div>
+          </div>
+          <button onClick={() => navigate('/login')} style={{ marginLeft: 'auto', flexShrink: 0, background: '#10b981', color: 'white', border: 'none', borderRadius: '10px', padding: '10px 20px', fontSize: '13px', fontWeight: '800', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            Testar grátis →
+          </button>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
           {features.map(f => (
