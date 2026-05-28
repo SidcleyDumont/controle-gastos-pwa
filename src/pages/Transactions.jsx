@@ -364,8 +364,12 @@ export default function Transactions() {
       {showDuplicate && (
         <DuplicateModal
           user={user}
-          currentMonth={filters.month || getMesAtual()}
-          currentYear={filters.year || getAnoAtual()}
+          currentMonth={filters.month || (getMesAtual() < 12 ? getMesAtual() + 1 : 1)}
+          currentYear={
+            filters.month
+              ? (filters.year || getAnoAtual())
+              : (getMesAtual() < 12 ? getAnoAtual() : getAnoAtual() + 1)
+          }
           onClose={() => setShowDuplicate(false)}
           onSuccess={invalidate}
         />
