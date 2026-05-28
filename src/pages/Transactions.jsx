@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { usePlan } from '../contexts/PlanContext'
 import PaywallBanner from '../components/PaywallBanner'
@@ -10,6 +10,7 @@ import { formatCurrency, formatDate, MESES, TIPOS, getMesAtual, getAnoAtual } fr
 import { SituacaoBadge, Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import TransactionModal from '../components/TransactionModal'
+import { Modal } from '../components/ui/Modal'
 import { S, getYearRange } from '../styles'
 
 const iconBtn = {
@@ -38,6 +39,113 @@ function DueBadge({ due_date, status }) {
   )
 }
 
+function DuplicateModal({ onClose, onSuccess, user, currentMonth, currentYear }) {
+  const prevMonth = currentMonth > 1 ? currentMonth - 1 : 12
+  const prevYear  = currentMonth > 1 ? currentYear  : currentYear - 1
+
+  const { data: prevItems = [], isLoading } = useTransactions(user?.id, { month: prevMonth, year: prevYear })
+  const [selected, setSelected] = useState([])
+  const [duplicating, setDuplicating] = useState(false)
+  const [msg, setMsg] = useState('')
+
+  useEffect(() => {
+    if (prevItems.length > 0) setSelected(prevItems.map(i => i.id))
+  }, [prevItems])
+
+  const allSelected = selected.length === prevItems.length && prevItems.length > 0
+  const toggleAll = () => setSelected(allSelected ? [] : prevItems.map(i => i.id))
+  const toggle = (id) => setSelected(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])
+
+  const handleDuplicate = async () => {
+    if (selected.length === 0) return
+    setDuplicating(true)
+    setMsg('')
+    try {
+      const toCreate = prevItems.filter(i => selected.includes(i.id))
+      for (const item of toCreate) {
+        const origDay = new Date(item.date + 'T00:00:00').getDate()
+        const lastDay = new Date(currentYear, currentMonth, 0).getDate()
+        const day = Math.min(origDay, lastDay)
+        const newDate = `${currentYear}-${String(currentMonth).padStart(2,'0')}-${String(day).padStart(2,'0')}`
+        await transactionService.create(user.id, {
+          date: newDate, period: item.period, type: item.type,
+          description: item.description, original_value: item.original_value,
+          status: item.type === 'Receita' ? 'Pendente' : 'A pagar',
+          payment_method: item.payment_method, origin: item.origin || '',
+          category_id: item.category_id || null,
+        })
+      }
+      setMsg(`✅ ${toCreate.length} lançamento(s) duplicado(s) para ${MESES[currentMonth - 1]}!`)
+      setTimeout(() => { onSuccess(); onClose() }, 1800)
+    } catch (err) {
+      setMsg('❌ Erro ao duplicar: ' + err.message)
+      setDuplicating(false)
+    }
+  }
+
+  return (
+    <Modal onClose={onClose} title={`Duplicar lançamentos para ${MESES[currentMonth - 1]}`} maxWidth="520px">
+      <div style={S.modal.body}>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: 0 }}>
+          Selecione os lançamentos de <strong>{MESES[prevMonth - 1]}/{prevYear}</strong> que deseja copiar para <strong>{MESES[currentMonth - 1]}/{currentYear}</strong>. Os novos lançamentos serão criados com status <em>A pagar / Pendente</em>.
+        </p>
+
+        {msg && (
+          <div style={{ background: msg.startsWith('✅') ? '#f0fdf4' : '#fff1f2', border: `1px solid ${msg.startsWith('✅') ? '#86efac' : '#fca5a5'}`, color: msg.startsWith('✅') ? '#15803d' : '#b91c1c', borderRadius: '10px', padding: '10px 14px', fontSize: '13px' }}>
+            {msg}
+          </div>
+        )}
+
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)' }}>Carregando...</div>
+        ) : prevItems.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '24px', color: 'var(--text-muted)', fontSize: '14px' }}>
+            Nenhum lançamento encontrado em {MESES[prevMonth - 1]}/{prevYear}.
+          </div>
+        ) : (
+          <>
+            {/* Selecionar todos */}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '8px 12px', background: 'var(--bg-hover)', borderRadius: '8px' }}>
+              <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '700', color: 'var(--text-primary)' }}>
+                <input type="checkbox" checked={allSelected} onChange={toggleAll} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+                {allSelected ? 'Desmarcar todos' : 'Selecionar todos'} ({prevItems.length})
+              </label>
+              <span style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{selected.length} selecionado(s)</span>
+            </div>
+
+            {/* Lista */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', maxHeight: '320px', overflowY: 'auto' }}>
+              {prevItems.map(item => (
+                <label key={item.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 12px', background: selected.includes(item.id) ? (item.type === 'Receita' ? '#f0fdf4' : '#fff1f2') : 'var(--bg-card)', border: `1px solid ${selected.includes(item.id) ? (item.type === 'Receita' ? '#86efac' : '#fca5a5') : 'var(--border)'}`, borderRadius: '10px', cursor: 'pointer', transition: 'all 0.15s' }}>
+                  <input type="checkbox" checked={selected.includes(item.id)} onChange={() => toggle(item.id)} style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</div>
+                    <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>{item.period} · {item.categories?.name || 'Sem categoria'} · {formatDate(item.date)}</div>
+                  </div>
+                  <span style={{ fontWeight: '700', fontSize: '13px', color: item.type === 'Receita' ? '#16a34a' : '#dc2626', whiteSpace: 'nowrap', flexShrink: 0 }}>
+                    {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </>
+        )}
+
+        <div style={S.modal.footer}>
+          <button onClick={onClose} style={S.modal.cancelBtn}>Cancelar</button>
+          <button
+            onClick={handleDuplicate}
+            disabled={duplicating || selected.length === 0 || !!msg.startsWith('✅')}
+            style={{ ...S.modal.submitBtn(duplicating), flex: 2, opacity: selected.length === 0 ? 0.5 : 1 }}
+          >
+            {duplicating ? 'Duplicando...' : `📋 Duplicar ${selected.length} lançamento(s)`}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 export default function Transactions() {
   const { user } = useAuth()
   const { hasProAccess: isPro, settingsLoading } = usePlan()
@@ -46,6 +154,7 @@ export default function Transactions() {
   const fromCategory = location.state?.category_id ? location.state : null
 
   const [modal, setModal] = useState({ open: false, data: null })
+  const [showDuplicate, setShowDuplicate] = useState(false)
   const [filters, setFilters] = useState({
     month: '', year: getAnoAtual(), type: '', period: '', status: '',
     category_id: fromCategory?.category_id || ''
@@ -90,6 +199,9 @@ export default function Transactions() {
         <div className="header-actions">
           <Button variant="secondary" onClick={() => transactionService.exportCSV(user.id)}>
             ↓ Exportar CSV
+          </Button>
+          <Button variant="secondary" onClick={() => setShowDuplicate(true)} title="Duplicar lançamentos do mês anterior para o mês atual">
+            📋 Duplicar mês anterior
           </Button>
           <Button variant="primary" onClick={() => setModal({ open: true, data: null })}>
             + Novo lançamento
@@ -246,6 +358,20 @@ export default function Transactions() {
           cats={cats}
           onClose={() => setModal({ open: false, data: null })}
           onSave={invalidate}
+        />
+      )}
+
+      {showDuplicate && (
+        <DuplicateModal
+          user={user}
+          currentMonth={filters.month || (getMesAtual() < 12 ? getMesAtual() + 1 : 1)}
+          currentYear={
+            filters.month
+              ? (filters.year || getAnoAtual())
+              : (getMesAtual() < 12 ? getAnoAtual() : getAnoAtual() + 1)
+          }
+          onClose={() => setShowDuplicate(false)}
+          onSuccess={invalidate}
         />
       )}
     </div>
