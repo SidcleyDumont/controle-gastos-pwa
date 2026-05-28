@@ -18,10 +18,12 @@ const features = [
   { icon: '🔁', title: 'Recorrentes', desc: 'Cadastre contas fixas e elas aparecem automaticamente todo mês.', free: false },
   { icon: '🎯', title: 'Orçamentos', desc: 'Defina limites por categoria e acompanhe o quanto já gastou.', free: false },
   { icon: '📈', title: 'Resumo Mensal', desc: 'Relatório completo mês a mês com gráficos de evolução financeira.', free: false },
+  { icon: '📋', title: 'Duplicar Lançamentos', desc: 'Copie os lançamentos do mês anterior com um clique — ideal para despesas fixas.', free: false },
+  { icon: '🌙', title: 'Tema Escuro', desc: 'Interface com modo escuro para conforto visual a qualquer hora do dia.', free: true },
 ]
 
 const steps = [
-  { n: '1', title: 'Crie sua conta', desc: 'Cadastro gratuito em menos de 1 minuto. Sem cartão de crédito.' },
+  { n: '1', title: 'Crie sua conta grátis', desc: 'Cadastro em menos de 1 minuto. Sem cartão de crédito. 7 dias com acesso completo.' },
   { n: '2', title: 'Registre seus gastos', desc: 'Lance receitas e despesas. Organize por categorias e períodos.' },
   { n: '3', title: 'Analise e melhore', desc: 'Acompanhe seu saldo, veja onde está gastando mais e poupe mais.' },
 ]
@@ -117,7 +119,7 @@ export default function Landing() {
       <section style={{ background: 'linear-gradient(135deg, #0f172a 0%, #1e3a8a 60%, #1e40af 100%)', padding: '72px 24px 80px', textAlign: 'center' }}>
         <div style={{ maxWidth: '680px', margin: '0 auto' }}>
           <span style={{ display: 'inline-block', background: 'rgba(255,255,255,0.1)', color: '#93c5fd', border: '1px solid rgba(147,197,253,0.3)', borderRadius: '99px', padding: '4px 16px', fontSize: '12px', fontWeight: '700', letterSpacing: '0.08em', marginBottom: '24px' }}>
-            ORGANIZE · INVISTA · CONQUISTE
+            🎁 7 DIAS GRÁTIS · SEM CARTÃO DE CRÉDITO
           </span>
           <h1 style={{ color: 'white', fontSize: 'clamp(28px, 6vw, 48px)', fontWeight: '900', lineHeight: '1.15', margin: '0 0 20px', letterSpacing: '-0.02em' }}>
             Controle suas finanças<br />
@@ -131,7 +133,7 @@ export default function Landing() {
               onClick={() => navigate('/login')}
               style={{ background: 'linear-gradient(135deg, #2563eb, #1e40af)', color: 'white', border: 'none', borderRadius: '12px', padding: '14px 32px', fontSize: '15px', fontWeight: '800', cursor: 'pointer', boxShadow: '0 4px 20px rgba(37,99,235,0.5)' }}
             >
-              🚀 Começar grátis
+              🚀 Testar grátis por 7 dias
             </button>
             <button
               onClick={() => navigate('/login')}
@@ -140,7 +142,7 @@ export default function Landing() {
               Já tenho conta
             </button>
           </div>
-          <p style={{ color: '#64748b', fontSize: '13px', marginTop: '20px' }}>Grátis para sempre no plano básico. Upgrade por R$ 29,90/mês.</p>
+          <p style={{ color: '#64748b', fontSize: '13px', marginTop: '20px' }}>7 dias com acesso completo. Depois, plano Free ou Pro a partir de R$ 29,90/mês.</p>
         </div>
       </section>
 
@@ -157,7 +159,7 @@ export default function Landing() {
       <section style={{ padding: '72px 24px', maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '48px' }}>
           <h2 style={{ color: '#0f172a', fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: '800', margin: '0 0 12px' }}>Tudo que você precisa para organizar as finanças</h2>
-          <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Plano gratuito já inclui Dashboard e Categorias. Upgrade desbloqueia tudo.</p>
+          <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Experimente tudo por 7 dias grátis. Depois, plano Free inclui Dashboard e Categorias — Pro desbloqueia tudo.</p>
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))', gap: '16px' }}>
           {features.map(f => (
@@ -202,12 +204,16 @@ export default function Landing() {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '20px' }}>
 
           {/* Free */}
-          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e2e8f0' }}>
+          <div style={{ background: 'white', borderRadius: '16px', padding: '28px', border: '1px solid #e2e8f0', position: 'relative', overflow: 'hidden' }}>
+            <span style={{ position: 'absolute', top: '16px', right: '16px', background: '#f0fdf4', color: '#16a34a', fontSize: '10px', fontWeight: '800', padding: '3px 10px', borderRadius: '99px', letterSpacing: '0.05em' }}>7 DIAS GRÁTIS</span>
             <div style={{ fontWeight: '800', color: '#0f172a', fontSize: '18px', marginBottom: '6px' }}>Free</div>
             <div style={{ fontSize: '32px', fontWeight: '900', color: '#0f172a', marginBottom: '4px' }}>R$ 0</div>
-            <div style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '24px' }}>para sempre</div>
+            <div style={{ color: '#94a3b8', fontSize: '13px', marginBottom: '8px' }}>para sempre</div>
+            <div style={{ background: '#fffbeb', border: '1px solid #fde68a', borderRadius: '8px', padding: '8px 12px', fontSize: '12px', color: '#92400e', marginBottom: '20px', fontWeight: '600' }}>
+              🎁 Primeiros 7 dias com acesso total ao plano Pro
+            </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-              {['Dashboard completo', 'Gestão de Categorias', 'Acesso pelo celular (PWA)'].map(item => (
+              {['Dashboard completo', 'Gestão de Categorias', 'Acesso pelo celular (PWA)', 'Tema claro e escuro'].map(item => (
                 <div key={item} style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px', color: '#374151' }}>
                   <span style={{ color: '#16a34a', fontWeight: '700' }}>✓</span>{item}
                 </div>
@@ -225,7 +231,7 @@ export default function Landing() {
             <div style={{ fontSize: '32px', fontWeight: '900', color: 'white', marginBottom: '4px' }}>R$ 29,90</div>
             <div style={{ color: '#64748b', fontSize: '13px', marginBottom: '24px' }}>por mês</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-              {['Tudo do plano Free', 'Lançamentos ilimitados', 'Transações Recorrentes', 'Orçamentos por categoria', 'Resumo Mensal com gráficos', 'Exportação Excel e CSV', 'Emails de resumo mensal'].map(item => (
+              {['Tudo do plano Free', 'Lançamentos ilimitados', 'Duplicar lançamentos do mês', 'Transações Recorrentes', 'Orçamentos por categoria', 'Resumo Mensal com gráficos', 'Exportação Excel e CSV'].map(item => (
                 <div key={item} style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px', color: item === 'Tudo do plano Free' ? '#94a3b8' : 'white' }}>
                   <span style={{ color: '#4ade80', fontWeight: '700' }}>✓</span>{item}
                 </div>
