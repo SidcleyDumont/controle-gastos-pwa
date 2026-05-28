@@ -1,7 +1,33 @@
 @import "tailwindcss";
 
+:root {
+  --bg-body:    #f1f5f9;
+  --bg-card:    #ffffff;
+  --bg-input:   #ffffff;
+  --bg-hover:   #f8fafc;
+  --text-primary:   #0f172a;
+  --text-secondary: #64748b;
+  --text-muted:     #94a3b8;
+  --border:       #f1f5f9;
+  --border-input: #e2e8f0;
+  --shadow: rgba(0,0,0,0.05);
+}
+
+[data-theme="dark"] {
+  --bg-body:    #0f172a;
+  --bg-card:    #1e293b;
+  --bg-input:   #0f172a;
+  --bg-hover:   #334155;
+  --text-primary:   #e2e8f0;
+  --text-secondary: #94a3b8;
+  --text-muted:     #64748b;
+  --border:       #334155;
+  --border-input: #475569;
+  --shadow: rgba(0,0,0,0.3);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background: #f1f5f9; color: #1e293b; }
+body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background: var(--bg-body); color: var(--text-primary); transition: background 0.2s, color 0.2s; }
 #root { min-height: 100vh; min-height: 100svh; }
 
 /* Corrige o 100vh no Safari iOS (barra de endereço dinâmica) */
