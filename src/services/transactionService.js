@@ -27,12 +27,12 @@ export const transactionService = {
 
   async create(userId, data) {
     const safe = pick(data, ALLOWED_CREATE)
-    const d = new Date(safe.date)
+    const [year, month] = safe.date.split('-').map(Number)
     const payload = {
       ...safe,
       user_id: userId,
-      month: d.getMonth() + 1,
-      year: d.getFullYear(),
+      month,
+      year,
       income_value: safe.type === 'Receita' ? Number(safe.original_value) : 0,
       expense_value: safe.type === 'Despesa' ? Number(safe.original_value) : 0,
     }
@@ -43,11 +43,11 @@ export const transactionService = {
 
   async update(id, userId, data) {
     const safe = pick(data, ALLOWED_UPDATE)
-    const d = new Date(safe.date)
+    const [year, month] = safe.date.split('-').map(Number)
     const payload = {
       ...safe,
-      month: d.getMonth() + 1,
-      year: d.getFullYear(),
+      month,
+      year,
       income_value: safe.type === 'Receita' ? Number(safe.original_value) : 0,
       expense_value: safe.type === 'Despesa' ? Number(safe.original_value) : 0,
       // Reativa alerta se due_date foi alterado
