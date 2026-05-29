@@ -157,6 +157,8 @@ export default function Transactions() {
   const [showDuplicate, setShowDuplicate] = useState(false)
   const [bulkMode, setBulkMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState([])
+  const [page, setPage] = useState(1)
+  const PER_PAGE = 15
   const [filters, setFilters] = useState({
     month: '', year: getAnoAtual(), type: '', period: '', status: '',
     category_id: fromCategory?.category_id || ''
@@ -173,6 +175,7 @@ export default function Transactions() {
 
   if (settingsLoading) return null
   if (!isPro) return <PaywallBanner feature="Lançamentos" />
+
 
   const handleDelete = async (id) => {
     if (!confirm('Excluir este lançamento?')) return
@@ -197,10 +200,14 @@ export default function Transactions() {
     return 0
   })
 
+  const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE))
+  const safePage = Math.min(page, totalPages)
+  const pageItems = sorted.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
+
   const allSelected = selectedIds.length > 0 && selectedIds.length === sorted.length
   const toggleAll = () => setSelectedIds(allSelected ? [] : sorted.map(i => i.id))
-  const toggleSort = (field) => setSort(s => ({ field, dir: s.field === field && s.dir === 'asc' ? 'desc' : 'asc' }))
-  const setFilter = (key, val) => setFilters(f => ({ ...f, [key]: val }))
+  const toggleSort = (field) => { setPage(1); setSort(s => ({ field, dir: s.field === field && s.dir === 'asc' ? 'desc' : 'asc' })) }
+  const setFilter = (key, val) => { setPage(1); setFilters(f => ({ ...f, [key]: val })) }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -320,7 +327,7 @@ export default function Transactions() {
               <tbody>
                 {sorted.length === 0 ? (
                   <tr><td colSpan={bulkMode ? 10 : 9} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '15px' }}>Nenhum lançamento encontrado</td></tr>
-                ) : sorted.map((item, idx) => (
+                ) : pageItems.map((item, idx) => (
                   <tr key={item.id} style={{ background: selectedIds.includes(item.id) ? '#fef2f2' : idx % 2 === 0 ? 'white' : '#fafafa', cursor: bulkMode ? 'pointer' : 'default' }}
                     onClick={bulkMode ? () => toggleSelect(item.id) : undefined}>
                     {bulkMode && (
@@ -367,12 +374,12 @@ export default function Transactions() {
               <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8', fontSize: '15px' }}>
                 Nenhum lançamento encontrado
               </div>
-            ) : sorted.map((item, idx) => (
+            ) : pageItems.map((item, idx) => (
               <div key={item.id}
                 onClick={bulkMode ? () => toggleSelect(item.id) : undefined}
                 style={{
                   padding: '14px 16px',
-                  borderBottom: idx < sorted.length - 1 ? '1px solid #f1f5f9' : 'none',
+                  borderBottom: idx < pageItems.length - 1 ? '1px solid #f1f5f9' : 'none',
                   background: selectedIds.includes(item.id) ? '#fef2f2' : idx % 2 === 0 ? 'white' : '#fafafa',
                   cursor: bulkMode ? 'pointer' : 'default',
                   display: 'flex', gap: '12px', alignItems: 'flex-start',
@@ -414,6 +421,29 @@ export default function Transactions() {
               </div>
             ))}
           </div>
+
+          {/* Paginação */}
+          {totalPages > 1 && (
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', padding: '14px 16px', borderTop: '1px solid var(--border)', background: 'var(--bg-hover)' }}>
+              <span style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+                {(safePage - 1) * PER_PAGE + 1}–{Math.min(safePage * PER_PAGE, sorted.length)} de {sorted.length} registro(s)
+              </span>
+              <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+                <button onClick={() => setPage(1)} disabled={safePage === 1} style={txPaginBtn(safePage === 1)}>«</button>
+                <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1} style={txPaginBtn(safePage === 1)}>‹</button>
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                  .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i-1] > 1) acc.push('…'); acc.push(p); return acc }, [])
+                  .map((p, i) => typeof p === 'string'
+                    ? <span key={`e${i}`} style={{ padding: '6px 2px', fontSize: '13px', color: 'var(--text-muted)' }}>…</span>
+                    : <button key={p} onClick={() => setPage(p)} style={txPaginBtn(false, p === safePage)}>{p}</button>
+                  )
+                }
+                <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages} style={txPaginBtn(safePage === totalPages)}>›</button>
+                <button onClick={() => setPage(totalPages)} disabled={safePage === totalPages} style={txPaginBtn(safePage === totalPages)}>»</button>
+              </div>
+            </div>
+          )}
         </>)}
       </div>
 
@@ -441,4 +471,15 @@ export default function Transactions() {
       )}
     </div>
   )
+}
+
+function txPaginBtn(disabled, active = false) {
+  return {
+    padding: '6px 11px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+    cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit', border: 'none',
+    background: active ? '#1e40af' : disabled ? 'var(--bg-hover)' : 'var(--bg-card)',
+    color: active ? 'white' : disabled ? 'var(--text-muted)' : 'var(--text-secondary)',
+    boxShadow: active ? '0 2px 8px rgba(30,64,175,0.2)' : 'none',
+    border: active ? 'none' : '1px solid var(--border-input)',
+  }
 }
