@@ -171,6 +171,8 @@ export default function Transactions() {
   }
 
   const { data: items = [], isLoading, invalidate } = useTransactions(user?.id, filters)
+  // Todos os lançamentos do ano para o autocomplete (sem filtro de mês/tipo/etc)
+  const { data: allItems = [] } = useTransactions(user?.id, { year: filters.year || getAnoAtual() })
   const { data: cats = [] } = useCategories(user?.id)
 
   if (settingsLoading) return null
@@ -472,7 +474,7 @@ export default function Transactions() {
         <TransactionModal
           data={modal.data}
           cats={cats}
-          items={items}
+          items={allItems}
           isDuplicate={modal.isDuplicate}
           onClose={() => setModal({ open: false, data: null, isDuplicate: false })}
           onSave={invalidate}
