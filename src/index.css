@@ -77,19 +77,19 @@ body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background
   .table-desktop { display: none !important; }
   .mobile-card-list { display: flex; flex-direction: column; }
 
-  /* Botões de ação: grade 2×N no mobile */
+  /* Botões de ação: coluna única no mobile */
   .header-actions {
     width: 100%;
-    flex-wrap: wrap;
+    flex-direction: column;
   }
   .header-actions > button {
-    flex: 1 1 calc(50% - 4px);
+    width: 100%;
     justify-content: center;
-    padding: 8px 10px !important;
-    font-size: 13px !important;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
   }
 
-  /* Trocar label longo pelo curto no mobile */
-  .btn-label-short { display: inline; }
-  .btn-label-full  { display: none; }
+  /* No mobile, mostrar label completo */
+  .btn-label-short { display: none; }
+  .btn-label-full  { display: inline; }
 }
