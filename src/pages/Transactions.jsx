@@ -329,7 +329,7 @@ export default function Transactions() {
           {/* Desktop: tabela */}
           <div className="table-desktop" style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
-              <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
+              <thead style={{ background: 'var(--bg-hover)', borderBottom: '2px solid var(--border)' }}>
                 <tr>
                   {bulkMode && <th style={{ ...S.th, width: '40px' }} />}
                   {[['date','Data'],['description','Descrição'],['type','Tipo'],['period','Período'],['categories.name','Categoria'],['original_value','Valor'],['status','Situação'],['payment_method','Pagamento']].map(([f, l]) => (
@@ -344,7 +344,7 @@ export default function Transactions() {
                 {sorted.length === 0 ? (
                   <tr><td colSpan={bulkMode ? 10 : 9} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '15px' }}>Nenhum lançamento encontrado</td></tr>
                 ) : pageItems.map((item, idx) => (
-                  <tr key={item.id} style={{ background: selectedIds.includes(item.id) ? '#fef2f2' : idx % 2 === 0 ? 'white' : '#fafafa', cursor: bulkMode ? 'pointer' : 'default' }}
+                  <tr key={item.id} style={{ background: selectedIds.includes(item.id) ? '#fef2f2' : idx % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-hover)', cursor: bulkMode ? 'pointer' : 'default' }}
                     onClick={bulkMode ? () => toggleSelect(item.id) : undefined}>
                     {bulkMode && (
                       <td style={{ ...S.td, width: '40px' }}>
@@ -352,15 +352,15 @@ export default function Transactions() {
                       </td>
                     )}
                     <td style={S.td}>{formatDate(item.date)}</td>
-                    <td style={{ ...S.td, maxWidth: '220px', fontWeight: '500', color: '#1e293b' }}>
+                    <td style={{ ...S.td, maxWidth: '220px', fontWeight: '600' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'nowrap' }}>
                         <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.description}</span>
                         <DueBadge due_date={item.due_date} status={item.status} />
                       </div>
                     </td>
                     <td style={S.td}><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
-                    <td style={{ ...S.td, color: '#64748b' }}>{item.period}</td>
-                    <td style={{ ...S.td, color: '#64748b' }}>{item.categories?.name || '-'}</td>
+                    <td style={{ ...S.td, color: 'var(--text-secondary)' }}>{item.period}</td>
+                    <td style={{ ...S.td, color: 'var(--text-secondary)' }}>{item.categories?.name || '-'}</td>
                     <td style={{ ...S.td, fontWeight: '700', color: item.type === 'Receita' ? '#16a34a' : '#dc2626', whiteSpace: 'nowrap' }}>
                       {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
                     </td>
@@ -401,7 +401,7 @@ export default function Transactions() {
                 style={{
                   padding: '14px 16px',
                   borderBottom: idx < pageItems.length - 1 ? '1px solid #f1f5f9' : 'none',
-                  background: selectedIds.includes(item.id) ? '#fef2f2' : idx % 2 === 0 ? 'white' : '#fafafa',
+                  background: selectedIds.includes(item.id) ? '#fef2f2' : idx % 2 === 0 ? 'var(--bg-card)' : 'var(--bg-hover)',
                   cursor: bulkMode ? 'pointer' : 'default',
                   display: 'flex', gap: '12px', alignItems: 'flex-start',
                 }}>
@@ -419,7 +419,7 @@ export default function Transactions() {
                       {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
                     </span>
                   </div>
-                  <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px', marginBottom: '4px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                  <div style={{ fontWeight: '600', color: 'var(--text-primary)', fontSize: '14px', marginBottom: '4px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                     {item.description}
                     <DueBadge due_date={item.due_date} status={item.status} />
                   </div>
