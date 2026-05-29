@@ -155,6 +155,8 @@ export default function Transactions() {
 
   const [modal, setModal] = useState({ open: false, data: null })
   const [showDuplicate, setShowDuplicate] = useState(false)
+  const [bulkMode, setBulkMode] = useState(false)
+  const [selectedIds, setSelectedIds] = useState([])
   const [filters, setFilters] = useState({
     month: '', year: getAnoAtual(), type: '', period: '', status: '',
     category_id: fromCategory?.category_id || ''
@@ -178,6 +180,16 @@ export default function Transactions() {
     invalidate()
   }
 
+  const exitBulkMode = () => { setBulkMode(false); setSelectedIds([]) }
+  const toggleSelect = (id) => setSelectedIds(s => s.includes(id) ? s.filter(x => x !== id) : [...s, id])
+
+  const handleBulkDelete = async () => {
+    if (!confirm(`Excluir ${selectedIds.length} lançamento(s) selecionado(s)? Esta ação não pode ser desfeita.`)) return
+    for (const id of selectedIds) await transactionService.delete(id, user.id)
+    exitBulkMode()
+    invalidate()
+  }
+
   const sorted = [...items].sort((a, b) => {
     const va = a[sort.field], vb = b[sort.field]
     if (va < vb) return sort.dir === 'asc' ? -1 : 1
@@ -185,6 +197,8 @@ export default function Transactions() {
     return 0
   })
 
+  const allSelected = selectedIds.length > 0 && selectedIds.length === sorted.length
+  const toggleAll = () => setSelectedIds(allSelected ? [] : sorted.map(i => i.id))
   const toggleSort = (field) => setSort(s => ({ field, dir: s.field === field && s.dir === 'asc' ? 'desc' : 'asc' }))
   const setFilter = (key, val) => setFilters(f => ({ ...f, [key]: val }))
 
@@ -197,15 +211,22 @@ export default function Transactions() {
           <p style={S.pageSubtitle}>{items.length} registro(s) encontrado(s)</p>
         </div>
         <div className="header-actions">
-          <Button variant="secondary" onClick={() => transactionService.exportCSV(user.id)}>
-            ↓ Exportar CSV
-          </Button>
-          <Button variant="secondary" onClick={() => setShowDuplicate(true)} title="Duplicar lançamentos do mês anterior para o mês atual">
-            📋 Duplicar mês anterior
-          </Button>
-          <Button variant="primary" onClick={() => setModal({ open: true, data: null })}>
-            + Novo lançamento
-          </Button>
+          {bulkMode ? (
+            <Button variant="secondary" onClick={exitBulkMode}>✕ Cancelar seleção</Button>
+          ) : (<>
+            <Button variant="secondary" onClick={() => transactionService.exportCSV(user.id)}>
+              ↓ Exportar CSV
+            </Button>
+            <Button variant="secondary" onClick={() => setShowDuplicate(true)} title="Duplicar lançamentos do mês anterior para o mês atual">
+              📋 Duplicar mês anterior
+            </Button>
+            <Button variant="secondary" onClick={() => setBulkMode(true)}>
+              ☑ Selecionar
+            </Button>
+            <Button variant="primary" onClick={() => setModal({ open: true, data: null })}>
+              + Novo lançamento
+            </Button>
+          </>)}
         </div>
       </div>
 
@@ -252,6 +273,29 @@ export default function Transactions() {
         </div>
       </div>
 
+      {/* Barra de seleção em massa */}
+      {bulkMode && (
+        <div style={{ background: selectedIds.length > 0 ? '#fff1f2' : 'var(--bg-card)', border: `1px solid ${selectedIds.length > 0 ? '#fca5a5' : 'var(--border-input)'}`, borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', transition: 'all 0.2s' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
+            <input type="checkbox" checked={allSelected} onChange={toggleAll} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+            {allSelected ? 'Desmarcar todos' : 'Selecionar todos'} ({sorted.length})
+          </label>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+            {selectedIds.length > 0 && (
+              <span style={{ fontSize: '13px', color: '#dc2626', fontWeight: '700' }}>
+                {selectedIds.length} selecionado(s)
+              </span>
+            )}
+            <button
+              onClick={handleBulkDelete}
+              disabled={selectedIds.length === 0}
+              style={{ padding: '8px 18px', borderRadius: '8px', border: 'none', background: selectedIds.length > 0 ? '#dc2626' : '#e2e8f0', color: selectedIds.length > 0 ? 'white' : '#94a3b8', fontSize: '13px', fontWeight: '700', cursor: selectedIds.length > 0 ? 'pointer' : 'default', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+              🗑️ Excluir selecionados
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Table / Cards */}
       <div style={{ ...S.card, overflow: 'hidden' }}>
         {isLoading ? (
@@ -262,6 +306,7 @@ export default function Transactions() {
             <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
               <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
                 <tr>
+                  {bulkMode && <th style={{ ...S.th, width: '40px' }} />}
                   {[['date','Data'],['description','Descrição'],['type','Tipo'],['period','Período'],['categories.name','Categoria'],['original_value','Valor'],['status','Situação'],['payment_method','Pagamento']].map(([f, l]) => (
                     <th key={f} style={S.th} onClick={() => toggleSort(f)}>
                       {l} {sort.field === f ? (sort.dir === 'asc' ? '↑' : '↓') : ''}
@@ -272,9 +317,15 @@ export default function Transactions() {
               </thead>
               <tbody>
                 {sorted.length === 0 ? (
-                  <tr><td colSpan={9} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '15px' }}>Nenhum lançamento encontrado</td></tr>
+                  <tr><td colSpan={bulkMode ? 10 : 9} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '15px' }}>Nenhum lançamento encontrado</td></tr>
                 ) : sorted.map((item, idx) => (
-                  <tr key={item.id} style={{ background: idx % 2 === 0 ? 'white' : '#fafafa' }}>
+                  <tr key={item.id} style={{ background: selectedIds.includes(item.id) ? '#fef2f2' : idx % 2 === 0 ? 'white' : '#fafafa', cursor: bulkMode ? 'pointer' : 'default' }}
+                    onClick={bulkMode ? () => toggleSelect(item.id) : undefined}>
+                    {bulkMode && (
+                      <td style={{ ...S.td, width: '40px' }}>
+                        <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} onClick={e => e.stopPropagation()} style={{ width: '15px', height: '15px', cursor: 'pointer' }} />
+                      </td>
+                    )}
                     <td style={S.td}>{formatDate(item.date)}</td>
                     <td style={{ ...S.td, maxWidth: '220px', fontWeight: '500', color: '#1e293b' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'nowrap' }}>
@@ -315,36 +366,48 @@ export default function Transactions() {
                 Nenhum lançamento encontrado
               </div>
             ) : sorted.map((item, idx) => (
-              <div key={item.id} style={{
-                padding: '14px 16px',
-                borderBottom: idx < sorted.length - 1 ? '1px solid #f1f5f9' : 'none',
-                background: idx % 2 === 0 ? 'white' : '#fafafa',
-              }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                    <Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge>
-                    <SituacaoBadge situacao={item.status} />
+              <div key={item.id}
+                onClick={bulkMode ? () => toggleSelect(item.id) : undefined}
+                style={{
+                  padding: '14px 16px',
+                  borderBottom: idx < sorted.length - 1 ? '1px solid #f1f5f9' : 'none',
+                  background: selectedIds.includes(item.id) ? '#fef2f2' : idx % 2 === 0 ? 'white' : '#fafafa',
+                  cursor: bulkMode ? 'pointer' : 'default',
+                  display: 'flex', gap: '12px', alignItems: 'flex-start',
+                }}>
+                {bulkMode && (
+                  <input type="checkbox" checked={selectedIds.includes(item.id)} onChange={() => toggleSelect(item.id)} onClick={e => e.stopPropagation()}
+                    style={{ width: '18px', height: '18px', cursor: 'pointer', marginTop: '2px', flexShrink: 0 }} />
+                )}
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '6px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                      <Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge>
+                      <SituacaoBadge situacao={item.status} />
+                    </div>
+                    <span style={{ fontWeight: '700', color: item.type === 'Receita' ? '#16a34a' : '#dc2626', fontSize: '15px', whiteSpace: 'nowrap', marginLeft: '8px' }}>
+                      {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
+                    </span>
                   </div>
-                  <span style={{ fontWeight: '700', color: item.type === 'Receita' ? '#16a34a' : '#dc2626', fontSize: '15px', whiteSpace: 'nowrap', marginLeft: '8px' }}>
-                    {item.type === 'Receita' ? '+' : '-'}{formatCurrency(item.original_value)}
-                  </span>
-                </div>
-                <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px', marginBottom: '4px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
-                  {item.description}
-                  <DueBadge due_date={item.due_date} status={item.status} />
-                </div>
-                <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '10px' }}>
-                  <span>{formatDate(item.date)}</span>
-                  <span>·</span>
-                  <span>{item.period}</span>
-                  {item.categories?.name && <><span>·</span><span>{item.categories.name}</span></>}
-                  {item.payment_method && <><span>·</span><span>{item.payment_method}</span></>}
-                </div>
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button style={{ flex: 1, padding: '7px 0', border: '1px solid #e2e8f0', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '13px', color: '#475569', fontFamily: 'inherit' }}
-                    onClick={() => setModal({ open: true, data: item })}>✏️ Editar</button>
-                  <button style={{ flex: 1, padding: '7px 0', border: '1px solid #fca5a5', borderRadius: '8px', background: '#fff1f2', cursor: 'pointer', fontSize: '13px', color: '#dc2626', fontFamily: 'inherit' }}
-                    onClick={() => handleDelete(item.id)}>🗑️ Excluir</button>
+                  <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '14px', marginBottom: '4px', display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                    {item.description}
+                    <DueBadge due_date={item.due_date} status={item.status} />
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#64748b', display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: bulkMode ? '0' : '10px' }}>
+                    <span>{formatDate(item.date)}</span>
+                    <span>·</span>
+                    <span>{item.period}</span>
+                    {item.categories?.name && <><span>·</span><span>{item.categories.name}</span></>}
+                    {item.payment_method && <><span>·</span><span>{item.payment_method}</span></>}
+                  </div>
+                  {!bulkMode && (
+                    <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
+                      <button style={{ flex: 1, padding: '7px 0', border: '1px solid #e2e8f0', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '13px', color: '#475569', fontFamily: 'inherit' }}
+                        onClick={() => setModal({ open: true, data: item })}>✏️ Editar</button>
+                      <button style={{ flex: 1, padding: '7px 0', border: '1px solid #fca5a5', borderRadius: '8px', background: '#fff1f2', cursor: 'pointer', fontSize: '13px', color: '#dc2626', fontFamily: 'inherit' }}
+                        onClick={() => handleDelete(item.id)}>🗑️ Excluir</button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
