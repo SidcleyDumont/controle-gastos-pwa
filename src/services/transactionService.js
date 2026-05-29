@@ -18,8 +18,12 @@ export const transactionService = {
     if (filters.year) q = q.eq('year', filters.year)
     if (filters.type) q = q.eq('type', filters.type)
     if (filters.period) q = q.eq('period', filters.period)
-    if (filters.status) q = q.eq('status', filters.status)
-    if (filters.category_id) q = q.eq('category_id', filters.category_id)
+    const statusArr = Array.isArray(filters.status) ? filters.status : (filters.status ? [filters.status] : [])
+    if (statusArr.length === 1) q = q.eq('status', statusArr[0])
+    else if (statusArr.length > 1) q = q.in('status', statusArr)
+    const catArr = Array.isArray(filters.category_id) ? filters.category_id : (filters.category_id ? [filters.category_id] : [])
+    if (catArr.length === 1) q = q.eq('category_id', catArr[0])
+    else if (catArr.length > 1) q = q.in('category_id', catArr)
     const { data, error } = await q
     if (error) throw error
     return data

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { usePlan } from '../contexts/PlanContext'
 import PaywallBanner from '../components/PaywallBanner'
@@ -16,6 +16,81 @@ import { S, getYearRange } from '../styles'
 const iconBtn = {
   padding: '6px', border: 'none', borderRadius: '8px', cursor: 'pointer',
   background: 'transparent', color: '#94a3b8', fontSize: '15px', fontFamily: 'inherit',
+}
+
+function MultiSelect({ value = [], onChange, options, placeholder }) {
+  const [open, setOpen] = useState(false)
+  const ref = useRef(null)
+
+  useEffect(() => {
+    const close = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    document.addEventListener('mousedown', close)
+    return () => document.removeEventListener('mousedown', close)
+  }, [])
+
+  const toggle = (val) =>
+    onChange(value.includes(val) ? value.filter(v => v !== val) : [...value, val])
+
+  const label = value.length === 0
+    ? placeholder
+    : value.length === 1
+      ? options.find(o => o.value === value[0])?.label || value[0]
+      : value.length === 2
+        ? value.map(v => options.find(o => o.value === v)?.label || v).join(', ')
+        : `${value.length} selecionados`
+
+  const active = value.length > 0
+
+  return (
+    <div ref={ref} style={{ position: 'relative' }}>
+      <button type="button" onClick={() => setOpen(o => !o)} style={{
+        ...S.selectFilter, display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        width: '100%', gap: '6px', cursor: 'pointer',
+        background: active ? '#eff6ff' : 'var(--bg-input)',
+        borderColor: active ? '#93c5fd' : 'var(--border-input)',
+        color: active ? '#1e40af' : 'var(--text-primary)',
+        fontWeight: active ? '600' : '400',
+      }}>
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, textAlign: 'left' }}>
+          {label}
+        </span>
+        <span style={{ flexShrink: 0, fontSize: '9px' }}>{open ? '▲' : '▼'}</span>
+      </button>
+
+      {open && (
+        <div style={{
+          position: 'absolute', top: 'calc(100% + 4px)', left: 0, zIndex: 200,
+          minWidth: '100%', background: 'var(--bg-card)',
+          border: '1px solid var(--border-input)', borderRadius: '10px',
+          boxShadow: '0 8px 24px rgba(0,0,0,0.15)', overflow: 'hidden',
+        }}>
+          {options.map(({ label: l, value: v }, i) => (
+            <label key={v} style={{
+              display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 12px',
+              cursor: 'pointer', userSelect: 'none',
+              borderBottom: i < options.length - 1 ? '1px solid var(--border)' : 'none',
+              background: value.includes(v) ? 'var(--bg-hover)' : 'none',
+            }}>
+              <input type="checkbox" checked={value.includes(v)} onChange={() => toggle(v)}
+                style={{ width: '15px', height: '15px', cursor: 'pointer', flexShrink: 0 }} />
+              <span style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: value.includes(v) ? '700' : '400', whiteSpace: 'nowrap' }}>
+                {l}
+              </span>
+            </label>
+          ))}
+          {active && (
+            <button type="button" onClick={() => { onChange([]); setOpen(false) }} style={{
+              width: '100%', padding: '8px 12px', fontSize: '12px', fontWeight: '600',
+              color: '#dc2626', background: 'var(--bg-hover)', border: 'none',
+              borderTop: '1px solid var(--border)', cursor: 'pointer', fontFamily: 'inherit',
+            }}>
+              ✕ Limpar seleção
+            </button>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
 
 function getDueDays(due_date, status) {
@@ -160,13 +235,14 @@ export default function Transactions() {
   const [page, setPage] = useState(1)
   const PER_PAGE = 15
   const [filters, setFilters] = useState({
-    month: '', year: getAnoAtual(), type: '', period: '', status: '',
-    category_id: fromCategory?.category_id || ''
+    month: '', year: getAnoAtual(), type: '', period: '',
+    status: [],
+    category_id: fromCategory?.category_id ? [fromCategory.category_id] : [],
   })
   const [sort, setSort] = useState({ field: 'date', dir: 'desc' })
 
   const clearCategoryFilter = () => {
-    setFilters(f => ({ ...f, category_id: '' }))
+    setFilters(f => ({ ...f, category_id: [] }))
     navigate('/lancamentos', { replace: true, state: null })
   }
 
@@ -287,14 +363,18 @@ export default function Transactions() {
             <option value="">Todos os períodos</option>
             {['Quinzena', 'Final do Mês'].map(p => <option key={p} value={p}>{p}</option>)}
           </select>
-          <select style={S.selectFilter} value={filters.status} onChange={e => setFilter('status', e.target.value)}>
-            <option value="">Todas as situações</option>
-            {['Pago', 'A pagar', 'Recebido', 'Pendente'].map(s => <option key={s} value={s}>{s}</option>)}
-          </select>
-          <select style={S.selectFilter} value={filters.category_id} onChange={e => setFilter('category_id', e.target.value)}>
-            <option value="">Todas as categorias</option>
-            {cats.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-          </select>
+          <MultiSelect
+            value={filters.status}
+            onChange={val => { setPage(1); setFilters(f => ({ ...f, status: val })) }}
+            options={['Pago', 'A pagar', 'Recebido', 'Pendente'].map(s => ({ label: s, value: s }))}
+            placeholder="Todas as situações"
+          />
+          <MultiSelect
+            value={filters.category_id}
+            onChange={val => { setPage(1); setFilters(f => ({ ...f, category_id: val })) }}
+            options={cats.map(c => ({ label: c.name, value: c.id }))}
+            placeholder="Todas as categorias"
+          />
         </div>
       </div>
 
