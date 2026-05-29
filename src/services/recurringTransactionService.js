@@ -101,24 +101,31 @@ export const recurringTransactionService = {
   },
 
   async countGenerated(userId, recurringId) {
-    const { count, error } = await supabase
-      .from('transactions')
-      .select('id', { count: 'exact', head: true })
-      .eq('user_id', userId)
-      .eq('recurring_id', recurringId)
-    if (error) return 0
-    return count || 0
+    try {
+      const { count, error } = await supabase
+        .from('transactions')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId)
+        .eq('recurring_id', recurringId)
+      if (error) return 0
+      return count || 0
+    } catch {
+      return 0
+    }
   },
 
   async generatePending(userId) {
     const templates = (await this.list(userId)).filter(t => t.active)
     if (!templates.length) return { generated: 0 }
 
-    const { data: existing } = await supabase
+    const { data: existing, error: existingError } = await supabase
       .from('transactions')
       .select('date, recurring_id')
       .eq('user_id', userId)
       .not('recurring_id', 'is', null)
+
+    // Se a coluna recurring_id não existir no banco, aborta silenciosamente
+    if (existingError) return { generated: 0 }
 
     const existingKeys = new Set((existing || []).map(t => `${t.recurring_id}|${t.date}`))
     const toInsert = []
