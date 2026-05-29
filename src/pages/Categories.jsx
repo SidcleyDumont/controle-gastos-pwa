@@ -69,6 +69,8 @@ export default function Categories() {
   const navigate = useNavigate()
   const [modal, setModal] = useState({ open: false, data: null })
   const [filter, setFilter] = useState('')
+  const [page, setPage] = useState(1)
+  const PER_PAGE = 10
 
   const verLancamentos = (item) => {
     navigate('/lancamentos', { state: { category_id: item.id, category_name: item.name } })
@@ -83,6 +85,10 @@ export default function Categories() {
   }
 
   const filtered = items.filter(c => !filter || c.type === filter)
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE))
+  const safePage = Math.min(page, totalPages)
+  const pageItems = filtered.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
+  const handleFilter = (val) => { setPage(1); setFilter(val) }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -99,7 +105,7 @@ export default function Categories() {
       {/* Filter pills */}
       <div style={{ display: 'flex', gap: '8px' }}>
         {[['', 'Todos'], ['Receita', 'Receitas'], ['Despesa', 'Despesas']].map(([val, label]) => (
-          <button key={val} onClick={() => setFilter(val)} style={S.pillBtn(filter === val)}>{label}</button>
+          <button key={val} onClick={() => handleFilter(val)} style={S.pillBtn(filter === val)}>{label}</button>
         ))}
       </div>
 
@@ -119,7 +125,7 @@ export default function Categories() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr><td colSpan={5} style={{ textAlign: 'center', padding: '48px', color: '#94a3b8', fontSize: '15px' }}>Nenhuma categoria encontrada</td></tr>
-              ) : filtered.map((item, idx) => (
+              ) : pageItems.map((item, idx) => (
                 <tr key={item.id} style={{ background: idx % 2 === 0 ? 'white' : '#fafafa' }}>
                   <td style={S.td}><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
                   <td style={{ ...S.td, fontWeight: '600', color: '#1e293b' }}>{item.name}</td>
@@ -151,10 +157,10 @@ export default function Categories() {
             <div style={{ textAlign: 'center', padding: '48px 24px', color: '#94a3b8', fontSize: '15px' }}>
               Nenhuma categoria encontrada
             </div>
-          ) : filtered.map((item, idx) => (
+          ) : pageItems.map((item, idx) => (
             <div key={item.id} style={{
               padding: '14px 16px',
-              borderBottom: idx < filtered.length - 1 ? '1px solid #f1f5f9' : 'none',
+              borderBottom: idx < pageItems.length - 1 ? '1px solid #f1f5f9' : 'none',
               background: idx % 2 === 0 ? 'white' : '#fafafa',
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
@@ -180,6 +186,29 @@ export default function Categories() {
             </div>
           ))}
         </div>
+
+        {/* Paginação */}
+        {totalPages > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '10px', padding: '14px 16px', borderTop: '1px solid var(--border)', background: 'var(--bg-hover)' }}>
+            <span style={{ fontSize: '13px', color: 'var(--text-secondary)', whiteSpace: 'nowrap' }}>
+              {(safePage - 1) * PER_PAGE + 1}–{Math.min(safePage * PER_PAGE, filtered.length)} de {filtered.length} categoria(s)
+            </span>
+            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+              <button onClick={() => setPage(1)} disabled={safePage === 1} style={catPaginBtn(safePage === 1)}>«</button>
+              <button onClick={() => setPage(p => Math.max(1, p - 1))} disabled={safePage === 1} style={catPaginBtn(safePage === 1)}>‹</button>
+              {Array.from({ length: totalPages }, (_, i) => i + 1)
+                .filter(p => p === 1 || p === totalPages || Math.abs(p - safePage) <= 1)
+                .reduce((acc, p, i, arr) => { if (i > 0 && p - arr[i-1] > 1) acc.push('…'); acc.push(p); return acc }, [])
+                .map((p, i) => typeof p === 'string'
+                  ? <span key={`e${i}`} style={{ padding: '6px 2px', fontSize: '13px', color: 'var(--text-muted)' }}>…</span>
+                  : <button key={p} onClick={() => setPage(p)} style={catPaginBtn(false, p === safePage)}>{p}</button>
+                )
+              }
+              <button onClick={() => setPage(p => Math.min(totalPages, p + 1))} disabled={safePage === totalPages} style={catPaginBtn(safePage === totalPages)}>›</button>
+              <button onClick={() => setPage(totalPages)} disabled={safePage === totalPages} style={catPaginBtn(safePage === totalPages)}>»</button>
+            </div>
+          </div>
+        )}
       </div>
 
       {modal.open && (
@@ -191,4 +220,15 @@ export default function Categories() {
       )}
     </div>
   )
+}
+
+function catPaginBtn(disabled, active = false) {
+  return {
+    padding: '6px 11px', borderRadius: '8px', fontSize: '13px', fontWeight: '600',
+    cursor: disabled ? 'default' : 'pointer', fontFamily: 'inherit',
+    background: active ? '#1e40af' : disabled ? 'var(--bg-hover)' : 'var(--bg-card)',
+    color: active ? 'white' : disabled ? 'var(--text-muted)' : 'var(--text-secondary)',
+    border: active ? 'none' : '1px solid var(--border-input)',
+    boxShadow: active ? '0 2px 8px rgba(30,64,175,0.2)' : 'none',
+  }
 }
