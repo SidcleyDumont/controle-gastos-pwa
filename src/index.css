@@ -49,6 +49,10 @@ body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background
   flex-shrink: 0;
 }
 
+/* Labels de botão — versão longa (desktop) e curta (mobile) */
+.btn-label-short { display: none; }
+.btn-label-full  { display: inline; }
+
 /* Tabela visível apenas no desktop */
 .table-desktop { display: block; }
 
@@ -73,12 +77,19 @@ body { font-family: system-ui, -apple-system, 'Segoe UI', sans-serif; background
   .table-desktop { display: none !important; }
   .mobile-card-list { display: flex; flex-direction: column; }
 
-  /* Botões de ação ocupam largura total */
+  /* Botões de ação: coluna única no mobile */
   .header-actions {
     width: 100%;
+    flex-direction: column;
   }
   .header-actions > button {
-    flex: 1;
+    width: 100%;
     justify-content: center;
+    padding: 10px 16px !important;
+    font-size: 14px !important;
   }
+
+  /* No mobile, mostrar label completo */
+  .btn-label-short { display: none; }
+  .btn-label-full  { display: inline; }
 }
