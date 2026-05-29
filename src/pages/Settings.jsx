@@ -3,12 +3,99 @@ import { usePlan } from '../contexts/PlanContext'
 import { useNavigate } from 'react-router-dom'
 import { transactionService } from '../services/transactionService'
 import { userSettingsService } from '../services/userSettingsService'
+import { accountService } from '../services/accountService'
 import { useUserSettings } from '../hooks/useUserSettings'
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
 import { Button } from '../components/ui/Button'
+import { Modal } from '../components/ui/Modal'
 import { S, onFocus, onBlur } from '../styles'
 import { formatCurrency } from '../utils/formatters'
+
+function DeleteAccountModal({ onClose, onConfirm }) {
+  const [text, setText] = useState('')
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const confirmed = text === 'EXCLUIR'
+
+  const handle = async () => {
+    if (!confirmed || loading) return
+    setLoading(true)
+    setError('')
+    try {
+      await onConfirm()
+    } catch (err) {
+      setError(err.message)
+      setLoading(false)
+    }
+  }
+
+  return (
+    <Modal onClose={loading ? undefined : onClose} title="⚠️ Excluir conta e dados">
+      <div style={S.modal.body}>
+        {/* Aviso */}
+        <div style={{ background: '#fff1f2', border: '1px solid #fca5a5', borderRadius: '12px', padding: '14px 16px' }}>
+          <p style={{ fontWeight: '800', color: '#b91c1c', margin: '0 0 8px', fontSize: '14px' }}>
+            Esta ação é irreversível e permanente.
+          </p>
+          <p style={{ color: '#7f1d1d', fontSize: '13px', margin: '0 0 8px', lineHeight: '1.6' }}>
+            Os seguintes dados serão excluídos definitivamente:
+          </p>
+          <ul style={{ color: '#7f1d1d', fontSize: '13px', margin: '0 0 0 16px', lineHeight: '1.9' }}>
+            <li>Todos os lançamentos financeiros</li>
+            <li>Todas as categorias personalizadas</li>
+            <li>Todos os orçamentos</li>
+            <li>Todas as transações recorrentes</li>
+            <li>Configurações e meta de poupança</li>
+            <li>Sua conta de acesso ao sistema</li>
+          </ul>
+        </div>
+
+        {error && (
+          <div style={S.modal.errorAlert}>{error}</div>
+        )}
+
+        {/* Campo de confirmação */}
+        <div>
+          <label style={{ ...S.label, color: '#b91c1c' }}>
+            Para confirmar, digite <strong>EXCLUIR</strong> abaixo:
+          </label>
+          <input
+            value={text}
+            onChange={e => setText(e.target.value.toUpperCase())}
+            placeholder="EXCLUIR"
+            autoComplete="off"
+            style={{
+              ...S.input,
+              borderColor: confirmed ? '#dc2626' : 'var(--border-input)',
+              fontWeight: confirmed ? '700' : '400',
+              letterSpacing: '0.05em',
+            }}
+          />
+        </div>
+
+        <div style={S.modal.footer}>
+          <button onClick={onClose} disabled={loading} style={S.modal.cancelBtn}>
+            Cancelar
+          </button>
+          <button
+            onClick={handle}
+            disabled={!confirmed || loading}
+            style={{
+              flex: 2, padding: '11px', border: 'none', borderRadius: '10px',
+              background: confirmed && !loading ? '#dc2626' : '#fca5a5',
+              color: 'white', fontSize: '14px', fontWeight: '700',
+              cursor: confirmed && !loading ? 'pointer' : 'default',
+              fontFamily: 'inherit', transition: 'background 0.2s',
+            }}
+          >
+            {loading ? '⏳ Excluindo...' : '🗑️ Excluir permanentemente'}
+          </button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
 
 export default function Settings() {
   const { user, signOut } = useAuth()
@@ -16,6 +103,7 @@ export default function Settings() {
   const navigate = useNavigate()
   const [importing, setImporting] = useState(false)
   const [msg, setMsg] = useState('')
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
 
   const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
   const currentGoal = settings?.monthly_savings_goal ?? null
@@ -24,6 +112,12 @@ export default function Settings() {
   const [savingGoal, setSavingGoal] = useState(false)
 
   const handleSignOut = async () => { await signOut(); navigate('/login') }
+
+  const handleDeleteAccount = async () => {
+    await accountService.deleteAccount()
+    await signOut()
+    navigate('/')
+  }
 
   const handleExportExcel = async () => {
     const data = await transactionService.list(user.id)
@@ -252,6 +346,28 @@ export default function Settings() {
           🚪 Sair da conta
         </Button>
       </div>
+
+      {/* Zona de Perigo — LGPD */}
+      <div style={{ ...S.card, padding: '20px 24px', border: '1px solid #fca5a5', background: '#fff9f9' }}>
+        <p style={{ ...S.sectionTitle, color: '#b91c1c' }}>⚠️ Zona de Perigo</p>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.6' }}>
+          Em conformidade com a <strong>LGPD (Lei 13.709/2018)</strong>, você pode solicitar a exclusão completa da sua conta e de todos os dados financeiros vinculados a ela. Esta ação é <strong>permanente e irreversível</strong>.
+        </p>
+        <Button
+          variant="danger"
+          onClick={() => setShowDeleteModal(true)}
+          style={{ background: '#dc2626', color: 'white' }}
+        >
+          🗑️ Excluir minha conta e dados
+        </Button>
+      </div>
+
+      {showDeleteModal && (
+        <DeleteAccountModal
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleDeleteAccount}
+        />
+      )}
     </div>
   )
 }
