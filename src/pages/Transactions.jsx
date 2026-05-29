@@ -212,19 +212,21 @@ export default function Transactions() {
         </div>
         <div className="header-actions">
           {bulkMode ? (
-            <Button variant="secondary" onClick={exitBulkMode}>✕ Cancelar seleção</Button>
+            <Button variant="secondary" onClick={exitBulkMode}>
+              ✕ <span className="btn-label-full">Cancelar seleção</span><span className="btn-label-short">Cancelar</span>
+            </Button>
           ) : (<>
             <Button variant="secondary" onClick={() => transactionService.exportCSV(user.id)}>
-              ↓ Exportar CSV
+              ↓ <span className="btn-label-full">Exportar CSV</span><span className="btn-label-short">CSV</span>
             </Button>
             <Button variant="secondary" onClick={() => setShowDuplicate(true)} title="Duplicar lançamentos do mês anterior para o mês atual">
-              📋 Duplicar mês anterior
+              📋 <span className="btn-label-full">Duplicar mês anterior</span><span className="btn-label-short">Duplicar</span>
             </Button>
             <Button variant="secondary" onClick={() => setBulkMode(true)}>
-              ☑ Selecionar
+              ☑ <span className="btn-label-full">Selecionar</span><span className="btn-label-short">Selec.</span>
             </Button>
             <Button variant="primary" onClick={() => setModal({ open: true, data: null })}>
-              + Novo lançamento
+              + <span className="btn-label-full">Novo lançamento</span><span className="btn-label-short">Novo</span>
             </Button>
           </>)}
         </div>
@@ -275,22 +277,22 @@ export default function Transactions() {
 
       {/* Barra de seleção em massa */}
       {bulkMode && (
-        <div style={{ background: selectedIds.length > 0 ? '#fff1f2' : 'var(--bg-card)', border: `1px solid ${selectedIds.length > 0 ? '#fca5a5' : 'var(--border-input)'}`, borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', transition: 'all 0.2s' }}>
-          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>
-            <input type="checkbox" checked={allSelected} onChange={toggleAll} style={{ width: '16px', height: '16px', cursor: 'pointer' }} />
+        <div style={{ background: selectedIds.length > 0 ? '#fff1f2' : 'var(--bg-card)', border: `1px solid ${selectedIds.length > 0 ? '#fca5a5' : 'var(--border-input)'}`, borderRadius: '12px', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap', transition: 'all 0.2s' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: '600', color: 'var(--text-primary)', flex: 1, minWidth: '160px' }}>
+            <input type="checkbox" checked={allSelected} onChange={toggleAll} style={{ width: '16px', height: '16px', cursor: 'pointer', flexShrink: 0 }} />
             {allSelected ? 'Desmarcar todos' : 'Selecionar todos'} ({sorted.length})
           </label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
             {selectedIds.length > 0 && (
-              <span style={{ fontSize: '13px', color: '#dc2626', fontWeight: '700' }}>
+              <span style={{ fontSize: '13px', color: '#dc2626', fontWeight: '700', whiteSpace: 'nowrap' }}>
                 {selectedIds.length} selecionado(s)
               </span>
             )}
             <button
               onClick={handleBulkDelete}
               disabled={selectedIds.length === 0}
-              style={{ padding: '8px 18px', borderRadius: '8px', border: 'none', background: selectedIds.length > 0 ? '#dc2626' : '#e2e8f0', color: selectedIds.length > 0 ? 'white' : '#94a3b8', fontSize: '13px', fontWeight: '700', cursor: selectedIds.length > 0 ? 'pointer' : 'default', fontFamily: 'inherit', transition: 'all 0.2s' }}>
-              🗑️ Excluir selecionados
+              style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', background: selectedIds.length > 0 ? '#dc2626' : '#e2e8f0', color: selectedIds.length > 0 ? 'white' : '#94a3b8', fontSize: '13px', fontWeight: '700', cursor: selectedIds.length > 0 ? 'pointer' : 'default', fontFamily: 'inherit', transition: 'all 0.2s', whiteSpace: 'nowrap' }}>
+              🗑️ Excluir {selectedIds.length > 0 ? selectedIds.length : ''} {selectedIds.length > 0 ? 'item(s)' : 'selecionados'}
             </button>
           </div>
         </div>
