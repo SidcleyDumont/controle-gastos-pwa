@@ -10,8 +10,9 @@ const friendlyError = (msg) => {
   if (msg.includes('uuid')) return 'Selecione uma categoria válida ou deixe "Sem categoria".'
   if (msg.includes('network') || msg.includes('fetch')) return 'Sem conexão com a internet. Verifique sua rede.'
   if (msg.includes('JWT') || msg.includes('auth')) return 'Sessão expirada. Faça login novamente.'
-  if (msg.includes('violates')) return `Erro: ${msg}`
-  return `Erro: ${msg}`
+  if (msg.includes('payment_method')) return 'Forma de pagamento inválida. Selecione outra opção.'
+  if (msg.includes('violates')) return 'Dados inválidos. Verifique os campos e tente novamente.'
+  return 'Erro ao salvar. Tente novamente.'
 }
 
 export default function TransactionModal({ data, cats, onClose, onSave }) {
