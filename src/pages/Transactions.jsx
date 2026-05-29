@@ -153,7 +153,7 @@ export default function Transactions() {
   const navigate = useNavigate()
   const fromCategory = location.state?.category_id ? location.state : null
 
-  const [modal, setModal] = useState({ open: false, data: null })
+  const [modal, setModal] = useState({ open: false, data: null, isDuplicate: false })
   const [showDuplicate, setShowDuplicate] = useState(false)
   const [bulkMode, setBulkMode] = useState(false)
   const [selectedIds, setSelectedIds] = useState([])
@@ -181,6 +181,20 @@ export default function Transactions() {
     if (!confirm('Excluir este lançamento?')) return
     await transactionService.delete(id, user.id)
     invalidate()
+  }
+
+  const handleDuplicate = (item) => {
+    setModal({
+      open: true,
+      isDuplicate: true,
+      data: {
+        ...item,
+        id: undefined,
+        status: item.type === 'Receita' ? 'Pendente' : 'A pagar',
+        due_date: '',
+        date: new Date().toISOString().split('T')[0],
+      }
+    })
   }
 
   const exitBulkMode = () => { setBulkMode(false); setSelectedIds([]) }
@@ -351,10 +365,15 @@ export default function Transactions() {
                     <td style={S.td}><SituacaoBadge situacao={item.status} /></td>
                     <td style={{ ...S.td, color: '#64748b', whiteSpace: 'nowrap' }}>{item.payment_method}</td>
                     <td style={{ ...S.td, textAlign: 'right', whiteSpace: 'nowrap' }}>
-                      <button style={iconBtn} title="Editar" onClick={() => setModal({ open: true, data: item })}
+                      <button style={iconBtn} title="Editar" onClick={() => setModal({ open: true, data: item, isDuplicate: false })}
                         onMouseEnter={e => { e.target.style.background='#eff6ff'; e.target.style.color='#1e40af' }}
                         onMouseLeave={e => { e.target.style.background='transparent'; e.target.style.color='#94a3b8' }}>
                         ✏️
+                      </button>
+                      <button style={iconBtn} title="Duplicar" onClick={() => handleDuplicate(item)}
+                        onMouseEnter={e => { e.target.style.background='#f0fdf4'; e.target.style.color='#16a34a' }}
+                        onMouseLeave={e => { e.target.style.background='transparent'; e.target.style.color='#94a3b8' }}>
+                        📋
                       </button>
                       <button style={iconBtn} title="Excluir" onClick={() => handleDelete(item.id)}
                         onMouseEnter={e => { e.target.style.background='#fff1f2'; e.target.style.color='#dc2626' }}
@@ -412,7 +431,9 @@ export default function Transactions() {
                   {!bulkMode && (
                     <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
                       <button style={{ flex: 1, padding: '7px 0', border: '1px solid #e2e8f0', borderRadius: '8px', background: 'white', cursor: 'pointer', fontSize: '13px', color: '#475569', fontFamily: 'inherit' }}
-                        onClick={() => setModal({ open: true, data: item })}>✏️ Editar</button>
+                        onClick={() => setModal({ open: true, data: item, isDuplicate: false })}>✏️ Editar</button>
+                      <button style={{ flex: 1, padding: '7px 0', border: '1px solid #bbf7d0', borderRadius: '8px', background: '#f0fdf4', cursor: 'pointer', fontSize: '13px', color: '#16a34a', fontFamily: 'inherit' }}
+                        onClick={() => handleDuplicate(item)}>📋 Duplicar</button>
                       <button style={{ flex: 1, padding: '7px 0', border: '1px solid #fca5a5', borderRadius: '8px', background: '#fff1f2', cursor: 'pointer', fontSize: '13px', color: '#dc2626', fontFamily: 'inherit' }}
                         onClick={() => handleDelete(item.id)}>🗑️ Excluir</button>
                     </div>
@@ -451,7 +472,9 @@ export default function Transactions() {
         <TransactionModal
           data={modal.data}
           cats={cats}
-          onClose={() => setModal({ open: false, data: null })}
+          items={items}
+          isDuplicate={modal.isDuplicate}
+          onClose={() => setModal({ open: false, data: null, isDuplicate: false })}
           onSave={invalidate}
         />
       )}
