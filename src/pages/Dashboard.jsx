@@ -201,7 +201,7 @@ export default function Dashboard() {
     { name: 'Final do Mês', valor: resumo.finalMes },
   ].filter(d => d.valor > 0)
 
-  const categorias = lancamentos.filter(l => l.type === 'Despesa').reduce((acc, l) => {
+  const categorias = lancamentos.filter(l => l.type === 'Despesa' && l.status === 'Pago').reduce((acc, l) => {
     const cat = l.categories?.name || 'Sem categoria'
     acc[cat] = (acc[cat] || 0) + l.expense_value
     return acc
