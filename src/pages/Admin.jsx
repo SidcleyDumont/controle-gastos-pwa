@@ -31,6 +31,22 @@ function ExpiresLabel({ expires }) {
   )
 }
 
+function TrialDeadlineLabel({ trialExpires, plan }) {
+  if (plan === 'pro' || !trialExpires) return <span style={{ color: '#94a3b8' }}>-</span>
+  const ms      = new Date(trialExpires) - new Date()
+  const days    = Math.ceil(ms / 86400000)
+  const expired = ms < 0
+  const color   = expired ? '#dc2626' : days <= 3 ? '#dc2626' : days <= 7 ? '#d97706' : '#64748b'
+  return (
+    <div>
+      <span style={{ color, fontWeight: '600', fontSize: '13px' }}>{formatDate(trialExpires.slice(0, 10))}</span>
+      <span style={{ display: 'block', fontSize: '11px', color, fontWeight: '700', marginTop: '1px' }}>
+        {expired ? '⛔ Vencido' : days === 0 ? '⚠️ Vence hoje' : `⏳ ${days}d restante${days !== 1 ? 's' : ''}`}
+      </span>
+    </div>
+  )
+}
+
 function ExpiringBadge({ expires }) {
   if (!expires) return null
   const ms       = new Date(expires) - new Date()
@@ -262,7 +278,7 @@ export default function Admin() {
             <table style={{ width: '100%', borderCollapse: 'collapse' }}>
               <thead style={{ background: '#f8fafc', borderBottom: '2px solid #f1f5f9' }}>
                 <tr>
-                  {['E-mail', 'Cadastro', 'Plano', 'Ativado em', 'Vence em', 'Ação'].map(h => (
+                  {['E-mail', 'Cadastro', 'Plano', 'Ativado em', 'Vence em', 'Prazo Pagamento', 'Ação'].map(h => (
                     <th key={h} style={{ padding: '12px 16px', textAlign: 'left', fontSize: '11px', fontWeight: '700', color: '#94a3b8', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
@@ -284,6 +300,9 @@ export default function Admin() {
                     <td style={{ padding: '14px 16px', fontSize: '13px', whiteSpace: 'nowrap' }}>
                       <ExpiresLabel expires={u.plan_expires_at} />
                       <ExpiringBadge expires={u.plan_expires_at} />
+                    </td>
+                    <td style={{ padding: '14px 16px', fontSize: '13px' }}>
+                      <TrialDeadlineLabel trialExpires={u.trial_expires_at} plan={u.plan} />
                     </td>
                     <td style={{ padding: '14px 16px' }}>
                       {u.email !== ADMIN_EMAIL && <ActionButtons u={u} updating={updating} onPlan={handleTogglePlan} onRenew={handleRenew} onBan={handleToggleBan} onDelete={handleDeleteUser} />}
@@ -326,6 +345,12 @@ export default function Admin() {
                       <span style={{ fontWeight: '700', color: '#64748b' }}>Vence:</span>{' '}
                       <ExpiresLabel expires={u.plan_expires_at} />
                       <ExpiringBadge expires={u.plan_expires_at} />
+                    </span>
+                  )}
+                  {u.plan !== 'pro' && u.trial_expires_at && (
+                    <span style={{ fontSize: '12px' }}>
+                      <span style={{ fontWeight: '700', color: '#64748b' }}>Prazo pagamento:</span>{' '}
+                      <TrialDeadlineLabel trialExpires={u.trial_expires_at} plan={u.plan} />
                     </span>
                   )}
                 </div>
