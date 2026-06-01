@@ -235,7 +235,7 @@ export default function Transactions() {
   const [page, setPage] = useState(1)
   const PER_PAGE = 15
   const [filters, setFilters] = useState({
-    month: '', year: getAnoAtual(), type: '', period: '',
+    month: getMesAtual(), year: getAnoAtual(), type: '', period: '',
     status: [],
     category_id: fromCategory?.category_id ? [fromCategory.category_id] : [],
   })
