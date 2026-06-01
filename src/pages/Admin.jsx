@@ -286,7 +286,7 @@ export default function Admin() {
                       <ExpiringBadge expires={u.plan_expires_at} />
                     </td>
                     <td style={{ padding: '14px 16px' }}>
-                      <ActionButtons u={u} updating={updating} onPlan={handleTogglePlan} onRenew={handleRenew} onBan={handleToggleBan} onDelete={handleDeleteUser} />
+                      {u.email !== ADMIN_EMAIL && <ActionButtons u={u} updating={updating} onPlan={handleTogglePlan} onRenew={handleRenew} onBan={handleToggleBan} onDelete={handleDeleteUser} />}
                     </td>
                   </tr>
                 ))}
@@ -332,7 +332,7 @@ export default function Admin() {
 
                 {/* Linha 3: botões */}
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  <ActionButtons u={u} updating={updating} onPlan={handleTogglePlan} onRenew={handleRenew} onBan={handleToggleBan} onDelete={handleDeleteUser} />
+                  {u.email !== ADMIN_EMAIL && <ActionButtons u={u} updating={updating} onPlan={handleTogglePlan} onRenew={handleRenew} onBan={handleToggleBan} onDelete={handleDeleteUser} />}
                 </div>
               </div>
             ))}
