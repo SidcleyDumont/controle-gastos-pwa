@@ -33,7 +33,7 @@ export const adminService = {
     const token = session?.access_token
     if (!token) throw new Error('Não autenticado')
 
-    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/send-renewal-reminders`
+    const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/rapid-task`
     const res = await fetch(url, {
       method: 'POST',
       headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
