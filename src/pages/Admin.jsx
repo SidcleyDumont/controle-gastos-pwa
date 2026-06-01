@@ -31,7 +31,19 @@ function ExpiresLabel({ expires }) {
   )
 }
 
-function ActionButtons({ u, updating, onPlan, onRenew, onBan }) {
+function ExpiringBadge({ expires }) {
+  if (!expires) return null
+  const ms       = new Date(expires) - new Date()
+  const days     = Math.ceil(ms / 86400000)
+  if (days > 7 || days < 0) return null
+  return (
+    <span style={{ display: 'inline-block', marginLeft: '6px', padding: '1px 7px', borderRadius: '99px', fontSize: '11px', fontWeight: '700', background: days <= 2 ? '#fef2f2' : '#fffbeb', color: days <= 2 ? '#dc2626' : '#d97706', border: `1px solid ${days <= 2 ? '#fca5a5' : '#fde68a'}` }}>
+      ⚠️ {days === 0 ? 'Vence hoje' : `${days}d`}
+    </span>
+  )
+}
+
+function ActionButtons({ u, updating, onPlan, onRenew, onBan, onDelete }) {
   const btnBase = { padding: '7px 14px', borderRadius: '8px', fontSize: '13px', fontWeight: '600', fontFamily: 'inherit', cursor: 'pointer' }
   return (
     <>
@@ -48,16 +60,12 @@ function ActionButtons({ u, updating, onPlan, onRenew, onBan }) {
         {updating === u.id ? '...' : u.plan === 'pro' ? 'Revogar' : 'Ativar Pro'}
       </button>
       {u.plan === 'pro' && !u.is_banned && (
-        <button
-          onClick={() => onRenew(u.id)}
-          disabled={!!updating}
+        <button onClick={() => onRenew(u.id)} disabled={!!updating}
           style={{ ...btnBase, border: '1px solid #86efac', background: '#f0fdf4', color: '#16a34a', opacity: updating ? 0.6 : 1, cursor: updating ? 'default' : 'pointer' }}>
           {updating === u.id + '_renew' ? '...' : '+30 dias'}
         </button>
       )}
-      <button
-        onClick={() => onBan(u.id, u.is_banned)}
-        disabled={!!updating}
+      <button onClick={() => onBan(u.id, u.is_banned)} disabled={!!updating}
         style={{
           ...btnBase,
           border: u.is_banned ? '1px solid #86efac' : '1px solid #fca5a5',
@@ -67,6 +75,12 @@ function ActionButtons({ u, updating, onPlan, onRenew, onBan }) {
         }}>
         {updating === u.id + '_ban' ? '...' : u.is_banned ? '✓ Reativar' : '⊘ Desativar'}
       </button>
+      {u.is_banned && (
+        <button onClick={() => onDelete(u.id, u.email)} disabled={!!updating}
+          style={{ ...btnBase, border: '1px solid #7f1d1d', background: '#7f1d1d', color: 'white', opacity: updating ? 0.6 : 1, cursor: updating ? 'default' : 'pointer' }}>
+          {updating === u.id + '_del' ? '...' : '🗑️ Excluir'}
+        </button>
+      )}
     </>
   )
 }
@@ -78,6 +92,8 @@ export default function Admin() {
   const [loading, setLoading] = useState(true)
   const [updating, setUpdating] = useState(null)
   const [error, setError] = useState('')
+  const [reminderMsg, setReminderMsg] = useState('')
+  const [sendingReminders, setSendingReminders] = useState(false)
   const [page, setPage] = useState(1)
   const PER_PAGE = 5
 
@@ -132,6 +148,32 @@ export default function Admin() {
     }
   }
 
+  const handleDeleteUser = async (userId, email) => {
+    if (!confirm(`Excluir permanentemente o usuário ${email}?\n\nTodos os dados serão removidos e o e-mail ficará livre para novo cadastro.`)) return
+    setUpdating(userId + '_del')
+    try {
+      await adminService.deleteUser(userId)
+      setUsers(u => u.filter(x => x.id !== userId))
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setUpdating(null)
+    }
+  }
+
+  const handleSendReminders = async () => {
+    setSendingReminders(true)
+    setReminderMsg('')
+    try {
+      const result = await adminService.sendRenewalReminders()
+      setReminderMsg(`✅ ${result.sent} lembrete(s) enviado(s) de ${result.total} usuário(s) prestes a vencer.`)
+    } catch (err) {
+      setReminderMsg(`❌ Erro: ${err.message}`)
+    } finally {
+      setSendingReminders(false)
+    }
+  }
+
   const handleRenew = async (userId) => {
     setUpdating(userId + '_renew')
     try {
@@ -145,10 +187,15 @@ export default function Admin() {
     }
   }
 
-  const total = users.length
-  const pros = users.filter(u => u.plan === 'pro').length
+  const total    = users.length
+  const pros     = users.filter(u => u.plan === 'pro').length
+  const expiring = users.filter(u => {
+    if (!u.plan_expires_at) return false
+    const ms = new Date(u.plan_expires_at) - new Date()
+    return ms > 0 && ms <= 7 * 24 * 60 * 60 * 1000
+  }).length
   const totalPages = Math.max(1, Math.ceil(total / PER_PAGE))
-  const pageUsers = users.slice((page - 1) * PER_PAGE, page * PER_PAGE)
+  const pageUsers  = users.slice((page - 1) * PER_PAGE, page * PER_PAGE)
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -161,9 +208,15 @@ export default function Admin() {
             {total} usuário(s) · {pros} Pro · {total - pros} Free
           </p>
         </div>
-        <button onClick={load} style={{ padding: '8px 16px', border: '1px solid #e2e8f0', borderRadius: '10px', background: 'white', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', color: '#475569', fontWeight: '600' }}>
-          ↻ Atualizar
-        </button>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button onClick={handleSendReminders} disabled={sendingReminders}
+            style={{ padding: '8px 16px', border: 'none', borderRadius: '10px', background: sendingReminders ? '#93c5fd' : '#1e40af', color: 'white', cursor: sendingReminders ? 'default' : 'pointer', fontSize: '13px', fontFamily: 'inherit', fontWeight: '700', opacity: sendingReminders ? 0.7 : 1 }}>
+            {sendingReminders ? '⏳ Enviando...' : `📧 Enviar lembretes${expiring > 0 ? ` (${expiring})` : ''}`}
+          </button>
+          <button onClick={load} style={{ padding: '8px 16px', border: '1px solid #e2e8f0', borderRadius: '10px', background: 'white', cursor: 'pointer', fontSize: '13px', fontFamily: 'inherit', color: '#475569', fontWeight: '600' }}>
+            ↻ Atualizar
+          </button>
+        </div>
       </div>
 
       {error && (
@@ -172,14 +225,21 @@ export default function Admin() {
         </div>
       )}
 
+      {reminderMsg && (
+        <div style={{ background: reminderMsg.startsWith('✅') ? '#f0fdf4' : '#fff1f2', border: `1px solid ${reminderMsg.startsWith('✅') ? '#86efac' : '#fca5a5'}`, color: reminderMsg.startsWith('✅') ? '#15803d' : '#b91c1c', borderRadius: '12px', padding: '12px 16px', fontSize: '14px', fontWeight: '600' }}>
+          {reminderMsg}
+        </div>
+      )}
+
       {/* Cards de resumo */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '16px' }}>
         {[
-          { label: 'Total de usuários', value: total, color: '#1e40af', bg: '#eff6ff' },
-          { label: 'Plano Pro', value: pros, color: '#16a34a', bg: '#f0fdf4' },
-          { label: 'Plano Free', value: total - pros, color: '#dc2626', bg: '#fff1f2' },
+          { label: 'Total de usuários', value: total,       color: '#1e40af', bg: '#eff6ff' },
+          { label: 'Plano Pro',         value: pros,        color: '#16a34a', bg: '#f0fdf4' },
+          { label: 'Plano Free',        value: total - pros, color: '#64748b', bg: '#f8fafc' },
+          { label: 'Vence em 7 dias',   value: expiring,    color: expiring > 0 ? '#d97706' : '#94a3b8', bg: expiring > 0 ? '#fffbeb' : '#f8fafc' },
         ].map(({ label, value, color, bg }) => (
-          <div key={label} style={{ background: bg, borderRadius: '16px', padding: '20px', border: `1px solid ${color}22` }}>
+          <div key={label} style={{ background: bg, borderRadius: '16px', padding: '20px', border: `1px solid ${color}33` }}>
             <div style={{ fontSize: '28px', fontWeight: '800', color }}>{value}</div>
             <div style={{ fontSize: '13px', color: '#64748b', marginTop: '4px' }}>{label}</div>
           </div>
@@ -219,9 +279,10 @@ export default function Admin() {
                     </td>
                     <td style={{ padding: '14px 16px', fontSize: '13px', whiteSpace: 'nowrap' }}>
                       <ExpiresLabel expires={u.plan_expires_at} />
+                      <ExpiringBadge expires={u.plan_expires_at} />
                     </td>
                     <td style={{ padding: '14px 16px' }}>
-                      <ActionButtons u={u} updating={updating} onPlan={handleTogglePlan} onRenew={handleRenew} onBan={handleToggleBan} />
+                      <ActionButtons u={u} updating={updating} onPlan={handleTogglePlan} onRenew={handleRenew} onBan={handleToggleBan} onDelete={handleDeleteUser} />
                     </td>
                   </tr>
                 ))}
@@ -257,16 +318,17 @@ export default function Admin() {
                     </span>
                   )}
                   {u.plan_expires_at && (
-                    <span style={{ fontSize: '12px' }}>
+                    <span style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap' }}>
                       <span style={{ fontWeight: '700', color: '#64748b' }}>Vence:</span>{' '}
                       <ExpiresLabel expires={u.plan_expires_at} />
+                      <ExpiringBadge expires={u.plan_expires_at} />
                     </span>
                   )}
                 </div>
 
                 {/* Linha 3: botões */}
                 <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                  <ActionButtons u={u} updating={updating} onPlan={handleTogglePlan} onRenew={handleRenew} onBan={handleToggleBan} />
+                  <ActionButtons u={u} updating={updating} onPlan={handleTogglePlan} onRenew={handleRenew} onBan={handleToggleBan} onDelete={handleDeleteUser} />
                 </div>
               </div>
             ))}
