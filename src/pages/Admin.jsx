@@ -166,7 +166,11 @@ export default function Admin() {
     setReminderMsg('')
     try {
       const result = await adminService.sendRenewalReminders()
-      setReminderMsg(`✅ ${result.sent} lembrete(s) enviado(s) de ${result.total} usuário(s) prestes a vencer.`)
+      setReminderMsg(
+        result.sent === 0
+          ? '✅ Nenhum usuário com vencimento nos próximos 7 dias.'
+          : `✅ ${result.sent} lembrete(s) enviado(s) para usuários com plano vencendo em breve.`
+      )
     } catch (err) {
       setReminderMsg(`❌ Erro: ${err.message}`)
     } finally {
