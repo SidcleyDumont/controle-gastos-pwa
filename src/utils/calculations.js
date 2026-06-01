@@ -18,8 +18,10 @@ export function calcularResumoAnual(lancamentos) {
   return meses.map((nome, idx) => {
     const mes = idx + 1
     const doMes = lancamentos.filter(l => {
-      const d = new Date(l.date)
-      return d.getMonth() + 1 === mes
+      // Usa o campo 'month' do banco (sem timezone bug) ou extrai da string da data
+      if (l.month) return l.month === mes
+      const [, m] = (l.date || '').split('-').map(Number)
+      return m === mes
     })
     return { mes: nome, numero: mes, ...calcularResumoMes(doMes) }
   })
