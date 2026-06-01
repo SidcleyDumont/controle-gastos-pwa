@@ -15,10 +15,10 @@ export default function MonthlySummary() {
   const [ano, setAno] = useState(getAnoAtual())
   const [pdfLoading, setPdfLoading] = useState(false)
 
+  const { data: todos = [], isLoading } = useTransactions(isPro ? user?.id : null, { year: ano })
+
   if (settingsLoading) return null
   if (!isPro) return <PaywallBanner feature="Resumo Mensal Anual" />
-
-  const { data: todos = [], isLoading } = useTransactions(user?.id, { year: ano })
 
   const resumo = calcularResumoAnual(todos)
   const totais = resumo.reduce((acc, m) => ({
