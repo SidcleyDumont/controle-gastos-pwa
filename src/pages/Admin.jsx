@@ -38,12 +38,12 @@ function TrialDeadlineLabel({ trialExpires, plan }) {
   const expired = ms < 0
   const color   = expired ? '#dc2626' : days <= 3 ? '#dc2626' : days <= 7 ? '#d97706' : '#64748b'
   return (
-    <div>
+    <span style={{ display: 'flex', flexDirection: 'column', gap: '1px' }}>
       <span style={{ color, fontWeight: '600', fontSize: '13px' }}>{formatDate(trialExpires.slice(0, 10))}</span>
-      <span style={{ display: 'block', fontSize: '11px', color, fontWeight: '700', marginTop: '1px' }}>
+      <span style={{ fontSize: '11px', color, fontWeight: '700' }}>
         {expired ? '⛔ Vencido' : days === 0 ? '⚠️ Vence hoje' : `⏳ ${days}d restante${days !== 1 ? 's' : ''}`}
       </span>
-    </div>
+    </span>
   )
 }
 
