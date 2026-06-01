@@ -7,11 +7,20 @@ const APP_NAME       = 'Planejamento Financeiro'
 const APP_URL        = 'https://planejofinanceiro.com.br'
 const WA_URL         = 'https://wa.me/5583993500340'
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+}
+
 serve(async (req) => {
-  // Aceita chamada do admin (Authorization: Bearer <SUPABASE_ANON_KEY> + usuário autenticado)
+  // Responde preflight CORS
+  if (req.method === 'OPTIONS') {
+    return new Response('ok', { headers: corsHeaders })
+  }
+
   const authHeader = req.headers.get('Authorization') ?? ''
   if (!authHeader.startsWith('Bearer ')) {
-    return new Response('Unauthorized', { status: 401 })
+    return new Response('Unauthorized', { status: 401, headers: corsHeaders })
   }
 
   const supabase = createClient(
@@ -30,9 +39,9 @@ serve(async (req) => {
     .gte('plan_expires_at', now.toISOString())
     .lte('plan_expires_at', in7.toISOString())
 
-  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+  if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: corsHeaders })
   if (!expiring || expiring.length === 0) {
-    return new Response(JSON.stringify({ sent: 0, message: 'Nenhum usuário prestes a vencer' }), { status: 200 })
+    return new Response(JSON.stringify({ sent: 0, message: 'Nenhum usuário prestes a vencer' }), { status: 200, headers: corsHeaders })
   }
 
   // Busca e-mails dos usuários
@@ -72,7 +81,7 @@ serve(async (req) => {
     }
   }
 
-  return new Response(JSON.stringify({ sent, total: expiring.length, results }), { status: 200 })
+  return new Response(JSON.stringify({ sent, total: expiring.length, results }), { status: 200, headers: corsHeaders })
 })
 
 function buildRenewalHtml(email: string, daysLeft: number, expiresStr: string) {
