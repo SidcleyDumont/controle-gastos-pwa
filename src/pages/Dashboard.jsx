@@ -10,7 +10,7 @@ import { useUserSettings } from '../hooks/useUserSettings'
 import { useRecurring } from '../hooks/useRecurring'
 import Onboarding from '../components/Onboarding'
 import { Modal } from '../components/ui/Modal'
-import { calcularResumoMes, calcularScoreFinanceiro } from '../utils/calculations'
+import { calcularResumoMes } from '../utils/calculations'
 import { formatCurrency, formatPercent, MESES, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { StatCard } from '../components/ui/Card'
 import { StatusBadge } from '../components/ui/Badge'
@@ -160,15 +160,8 @@ export default function Dashboard() {
   const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
   const { data: recorrentes = [] } = useRecurring(user?.id)
 
-  // Mês anterior para comparativo
-  const prevMes = mes > 1 ? mes - 1 : 12
-  const prevAno = mes > 1 ? ano : ano - 1
-  const { data: lancamentosPrev = [] } = useTransactions(user?.id, { month: prevMes, year: prevAno })
-
   const loading = l1 || l2
 
-  const resumoPrev    = calcularResumoMes(lancamentosPrev)
-  const score         = calcularScoreFinanceiro(resumo)
   const gastosInvisiveis = recorrentes
     .filter(r => r.active && r.type === 'Despesa')
     .reduce((s, r) => s + r.amount / ({ Mensal: 1, Bimestral: 2, Trimestral: 3, Anual: 12 }[r.frequency] || 1), 0)
@@ -278,76 +271,13 @@ export default function Dashboard() {
           <StatusBadge status={resumo.status} />
         </div>
 
-        {/* Score Financeiro */}
-        <div style={{
-          background: `linear-gradient(135deg, ${score.color}18, ${score.color}08)`,
-          border: `1.5px solid ${score.color}44`,
-          borderRadius: '16px', padding: '18px 20px',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap',
-        }}>
-          <div>
-            <p style={{ margin: '0 0 4px', fontSize: '13px', fontWeight: '700', color: score.color }}>
-              {score.emoji} Score Financeiro
-            </p>
-            <p style={{ margin: '0 0 6px', fontSize: '32px', fontWeight: '900', color: score.color, lineHeight: 1 }}>
-              {score.score}<span style={{ fontSize: '16px', fontWeight: '600', color: 'var(--text-muted)' }}>/100</span>
-            </p>
-            <p style={{ margin: 0, fontSize: '13px', color: score.color, fontWeight: '700' }}>{score.nivel}</p>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', flex: 1, minWidth: '160px' }}>
-            {score.detalhes.map((d, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                <span>{d.ok === true ? '✅' : d.ok === false ? '❌' : '➖'}</span>
-                <span>{d.label}</span>
-              </div>
-            ))}
-          </div>
-          {/* Barra de progresso */}
-          <div style={{ width: '100%', height: '6px', background: 'var(--bg-hover)', borderRadius: '99px', overflow: 'hidden' }}>
-            <div style={{ height: '100%', width: `${score.score}%`, background: score.color, borderRadius: '99px', transition: 'width 0.8s ease' }} />
-          </div>
-        </div>
-
-        {/* Stat Cards com tooltip nativo (title) */}
+        {/* Stat Cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px' }}>
-          <div title="Total de receitas com status 'Recebido' no mês selecionado."><StatCard title="Receitas" value={formatCurrency(resumo.receita)} color="green" icon="💰" /></div>
-          <div title="Total de despesas com status 'Pago' no mês selecionado."><StatCard title="Despesas" value={formatCurrency(resumo.despesa)} color="red" icon="💸" /></div>
-          <div title="Diferença entre Receitas recebidas e Despesas pagas no mês."><StatCard title="Saldo" value={formatCurrency(resumo.saldo)} color={resumo.saldo >= 0 ? 'blue' : 'red'} icon="⚖️" /></div>
-          <div title="Percentual da renda que sobrou. Meta recomendada: acima de 10%."><StatCard title="% Poupança" value={formatPercent(resumo.poupanca)} color="purple" icon="🏦" /></div>
+          <StatCard title="Receitas" value={formatCurrency(resumo.receita)} color="green" icon="💰" />
+          <StatCard title="Despesas" value={formatCurrency(resumo.despesa)} color="red" icon="💸" />
+          <StatCard title="Saldo" value={formatCurrency(resumo.saldo)} color={resumo.saldo >= 0 ? 'blue' : 'red'} icon="⚖️" />
+          <StatCard title="% Poupança" value={formatPercent(resumo.poupanca)} color="purple" icon="🏦" />
         </div>
-
-        {/* Comparativo mês a mês */}
-        {(resumoPrev.receita > 0 || resumoPrev.despesa > 0) && (
-          <div style={{ ...S.card, padding: '16px 20px' }}>
-            <p style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-              📊 Comparativo vs mês anterior ({['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][prevMes - 1]})
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: '12px' }}>
-              {[
-                { label: 'Receitas', atual: resumo.receita, prev: resumoPrev.receita, positiveIsGood: true },
-                { label: 'Despesas', atual: resumo.despesa, prev: resumoPrev.despesa, positiveIsGood: false },
-                { label: 'Saldo',    atual: resumo.saldo,   prev: resumoPrev.saldo,   positiveIsGood: true },
-              ].map(({ label, atual, prev, positiveIsGood }) => {
-                const diff = prev > 0 ? ((atual - prev) / prev) * 100 : 0
-                const up = diff > 0
-                const good = positiveIsGood ? up : !up
-                const color = diff === 0 ? 'var(--text-muted)' : good ? '#16a34a' : '#dc2626'
-                return (
-                  <div key={label} style={{ background: 'var(--bg-hover)', borderRadius: '12px', padding: '12px 14px' }}>
-                    <p style={{ margin: '0 0 4px', fontSize: '12px', color: 'var(--text-muted)', fontWeight: '600' }}>{label}</p>
-                    <p style={{ margin: '0 0 2px', fontSize: '15px', fontWeight: '800', color: 'var(--text-primary)' }}>{formatCurrency(atual)}</p>
-                    {diff !== 0 && (
-                      <p style={{ margin: 0, fontSize: '12px', color, fontWeight: '700' }}>
-                        {up ? '▲' : '▼'} {Math.abs(diff).toFixed(1)}% vs anterior
-                      </p>
-                    )}
-                    {diff === 0 && <p style={{ margin: 0, fontSize: '12px', color: 'var(--text-muted)' }}>= igual ao anterior</p>}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        )}
 
         {/* Period cards */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
