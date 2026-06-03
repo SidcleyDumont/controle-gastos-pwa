@@ -324,7 +324,7 @@ export default function Dashboard() {
 
         {/* Comparativo mês a mês */}
         {(resumoPrev.receita > 0 || resumoPrev.despesa > 0) && (
-          <div style={{ ...require('../styles').S.card, padding: '16px 20px' }}>
+          <div style={{ ...S.card, padding: '16px 20px' }}>
             <p style={{ margin: '0 0 12px', fontSize: '13px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
               📊 Comparativo vs mês anterior ({['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][prevMes - 1]})
             </p>
