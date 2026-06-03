@@ -163,7 +163,7 @@ function heading(txt, level = 2) {
   const colors = [[], NAVY, BLUE, GRAY]
   paragraph(txt, { size: sizes[level], color: colors[level], bold: true, after: 2 })
 }
-function bullet(items, icon = '✓') {
+function bullet(items, icon = '+') {
   items.forEach(item => {
     doc.setFontSize(10.5)
     doc.setTextColor(...NAVY)
@@ -247,26 +247,26 @@ paragraph('O Planejamento Financeiro é um aplicativo web (PWA) desenvolvido par
 heading('Principais funcionalidades', 2)
 
 const features = [
-  ['📊', 'Dashboard', 'Visão completa das suas finanças: receitas, despesas, saldo, % de poupança e score financeiro — tudo em tempo real.'],
-  ['💳', 'Lançamentos', 'Registre receitas e despesas com filtros avançados, autocomplete inteligente e exportação para Excel.'],
-  ['🔄', 'Recorrentes', 'Cadastre salário, aluguel, plano de saúde uma vez — o sistema lança automaticamente todo mês.'],
-  ['🎯', 'Orçamentos', 'Defina limites por categoria e veja em tempo real o quanto já gastou. Alerta quando está próximo do teto.'],
-  ['💸', 'Gastos Invisíveis', 'Revela quanto sai automaticamente do seu bolso todo mês em débitos e assinaturas que você esqueceu.'],
-  ['📈', 'Resumo Mensal', 'Relatório completo mês a mês com evolução financeira e comparativo entre períodos.'],
-  ['🏆', 'Score Financeiro', 'Nota de 0 a 100 que mede sua saúde financeira. Acompanhe sua evolução e melhore seu score.'],
+  ['Dashboard',        BLUE,  'Visão completa: receitas, despesas, saldo, % poupança e score financeiro em tempo real.'],
+  ['Lancamentos',      GREEN, 'Registre receitas e despesas com filtros, autocomplete e exportacao para Excel.'],
+  ['Recorrentes',      NAVY,  'Cadastre salario e contas fixas uma vez — o sistema lanca automaticamente todo mes.'],
+  ['Orcamentos',       [120,50,150], 'Defina limites por categoria e veja em tempo real o quanto ja gastou.'],
+  ['Gastos Invisiveis',[220,100,10], 'Revela quanto sai automaticamente do seu bolso todo mes em debitos esquecidos.'],
+  ['Resumo Mensal',    [0,130,100],  'Relatorio completo mes a mes com evolucao financeira e comparativo de periodos.'],
+  ['Score Financeiro', BLUE,  'Nota de 0 a 100 que mede sua saude financeira. Acompanhe sua evolucao mensal.'],
 ]
 
-features.forEach(([icon, title, desc], i) => {
-  if (i > 0 && i % 3 === 0) y += 4
-  rect(MARGIN, y - 3, TEXT_W, 18, i % 2 === 0 ? LGRAY : WHITE)
-  text(icon, MARGIN + 3, y + 6, { size: 12 })
-  text(title, MARGIN + 14, y + 4, { color: BLUE, size: 10, bold: true })
+features.forEach(([title, color, desc], i) => {
+  rect(MARGIN, y - 3, TEXT_W, 20, i % 2 === 0 ? LGRAY : WHITE)
+  doc.setFillColor(...color)
+  doc.rect(MARGIN, y - 3, 3, 20, 'F')
+  text(title, MARGIN + 7, y + 4, { color, size: 10, bold: true })
   doc.setFontSize(9.5)
   doc.setTextColor(...GRAY)
   doc.setFont('helvetica', 'normal')
-  const lines = doc.splitTextToSize(desc, TEXT_W - 18)
-  doc.text(lines, MARGIN + 14, y + 10)
-  y += lines.length > 1 ? 20 : 18
+  const lines = doc.splitTextToSize(desc, TEXT_W - 10)
+  doc.text(lines, MARGIN + 7, y + 11)
+  y += lines.length > 1 ? 24 : 22
   if (y > H - 30) { addPage(); y = 20; pageFooter(doc.getNumberOfPages()) }
 })
 
@@ -332,11 +332,11 @@ paragraph('O recurso "Gastos Invisíveis" do Planejamento Financeiro App lista a
 
 heading('Como agir', 3)
 bullet([
-  'Abra o app → clique em "Gastos Invisíveis" no menu',
+  'Abra o app > clique em "Gastos Invisíveis" no menu',
   'Veja o total que sai automaticamente todo mês',
   'Para cada item, pergunte: "Uso isso pelo menos uma vez por semana?"',
   'Cancele o que não usa — R$ 50 cancelados = R$ 600/ano economizados',
-], '→')
+], '>')
 
 pageFooter(7)
 
