@@ -23,7 +23,22 @@ export function AuthProvider({ children }) {
 
   const appUrl = import.meta.env.VITE_APP_URL || window.location.origin
   const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password })
-  const signUp = (email, password) => supabase.auth.signUp({ email, password, options: { emailRedirectTo: `${appUrl}/login` } })
+  const signUp = async (email, password) => {
+    const result = await supabase.auth.signUp({
+      email: email.toLowerCase().trim(),
+      password,
+      options: { emailRedirectTo: `${appUrl}/login` },
+    })
+    // Dispara e-mail de boas-vindas via Edge Function (fire-and-forget — não bloqueia o cadastro)
+    if (!result.error && result.data?.user) {
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
+      fetch(`${supabaseUrl}/functions/v1/send-welcome-email`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${(await supabase.auth.getSession()).data.session?.access_token ?? ''}` },
+      }).catch(() => {}) // silencia erros — e-mail não deve impedir o cadastro
+    }
+    return result
+  }
   const signOut = () => supabase.auth.signOut()
   const resetPassword = (email) => supabase.auth.resetPasswordForEmail(email, { redirectTo: `${appUrl}/reset-password` })
   const resendConfirmation = (email) => supabase.auth.resend({ type: 'signup', email, options: { emailRedirectTo: `${appUrl}/login` } })
