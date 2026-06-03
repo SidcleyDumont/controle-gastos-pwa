@@ -308,16 +308,12 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Stat Cards */}
+        {/* Stat Cards com tooltip nativo (title) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px' }}>
-          <StatCard title="Receitas" value={formatCurrency(resumo.receita)} color="green" icon="💰"
-            tooltip="Total de receitas com status 'Recebido' no mês selecionado." />
-          <StatCard title="Despesas" value={formatCurrency(resumo.despesa)} color="red" icon="💸"
-            tooltip="Total de despesas com status 'Pago' no mês selecionado." />
-          <StatCard title="Saldo" value={formatCurrency(resumo.saldo)} color={resumo.saldo >= 0 ? 'blue' : 'red'} icon="⚖️"
-            tooltip="Diferença entre Receitas recebidas e Despesas pagas no mês." />
-          <StatCard title="% Poupança" value={formatPercent(resumo.poupanca)} color="purple" icon="🏦"
-            tooltip="Percentual da renda que sobrou. Meta recomendada: acima de 10%." />
+          <div title="Total de receitas com status 'Recebido' no mês selecionado."><StatCard title="Receitas" value={formatCurrency(resumo.receita)} color="green" icon="💰" /></div>
+          <div title="Total de despesas com status 'Pago' no mês selecionado."><StatCard title="Despesas" value={formatCurrency(resumo.despesa)} color="red" icon="💸" /></div>
+          <div title="Diferença entre Receitas recebidas e Despesas pagas no mês."><StatCard title="Saldo" value={formatCurrency(resumo.saldo)} color={resumo.saldo >= 0 ? 'blue' : 'red'} icon="⚖️" /></div>
+          <div title="Percentual da renda que sobrou. Meta recomendada: acima de 10%."><StatCard title="% Poupança" value={formatPercent(resumo.poupanca)} color="purple" icon="🏦" /></div>
         </div>
 
         {/* Comparativo mês a mês */}
