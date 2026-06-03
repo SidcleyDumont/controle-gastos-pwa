@@ -39,8 +39,17 @@ function InfoCard({ title, value, subtitle, color, icon, info }) {
           {info && (
             <button
               onClick={() => setOpen(o => !o)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: c.text, opacity: 0.5, padding: '0 2px', lineHeight: 1, fontFamily: 'inherit' }}
-              title={info}
+              onMouseEnter={() => setOpen(true)}
+              onMouseLeave={() => setOpen(false)}
+              style={{
+                background: open ? c.text : 'rgba(0,0,0,0.08)',
+                border: 'none', cursor: 'pointer',
+                fontSize: '11px', fontWeight: '700',
+                color: open ? 'white' : c.text,
+                padding: '1px 6px', lineHeight: '18px',
+                borderRadius: '99px', fontFamily: 'inherit',
+                transition: 'all 0.15s',
+              }}
             >ⓘ</button>
           )}
           {icon && <span style={{ fontSize: '22px', lineHeight: 1 }}>{icon}</span>}
@@ -50,16 +59,17 @@ function InfoCard({ title, value, subtitle, color, icon, info }) {
       {subtitle && <div style={{ fontSize: '12px', color: c.text, opacity: 0.7, marginTop: '4px' }}>{subtitle}</div>}
       {open && info && (
         <div
+          onMouseEnter={() => setOpen(true)}
+          onMouseLeave={() => setOpen(false)}
           onClick={() => setOpen(false)}
           style={{
-            position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0, zIndex: 50,
+            position: 'absolute', top: 'calc(100% + 6px)', left: 0, right: 0, zIndex: 100,
             background: '#0f172a', color: 'white', borderRadius: '10px',
-            padding: '10px 14px', fontSize: '12px', lineHeight: '1.6',
-            boxShadow: '0 8px 24px rgba(0,0,0,0.25)', cursor: 'pointer',
+            padding: '10px 14px', fontSize: '12px', lineHeight: '1.7',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.3)', cursor: 'pointer',
           }}
         >
           {info}
-          <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginTop: '4px' }}>Toque para fechar</span>
         </div>
       )}
     </div>
