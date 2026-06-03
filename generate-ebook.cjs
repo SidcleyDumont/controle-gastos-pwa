@@ -56,6 +56,21 @@ function pageFooter(pageNum) {
   text(`${pageNum}`, W - MARGIN, H - 6, { color: [100,120,180], size: 9 })
 }
 
+// ── Função hexágono (pointy-top, igual ao logo SVG) ───────────────────────
+function hexagon(cx, cy, r, color) {
+  doc.setFillColor(...color)
+  for (let i = 0; i < 6; i++) {
+    const a1 = (Math.PI / 3) * i + Math.PI / 6
+    const a2 = (Math.PI / 3) * (i + 1) + Math.PI / 6
+    doc.triangle(
+      cx, cy,
+      cx + r * Math.cos(a1), cy + r * Math.sin(a1),
+      cx + r * Math.cos(a2), cy + r * Math.sin(a2),
+      'F'
+    )
+  }
+}
+
 // ══════════════════════════════════════════════════════════════════════════
 // CAPA
 // ══════════════════════════════════════════════════════════════════════════
@@ -66,11 +81,9 @@ doc.triangle(W - 60, 0, W, 0, W, 80, 'F')
 doc.setFillColor(30, 64, 175)
 doc.triangle(W - 40, 0, W, 0, W, 50, 'F')
 
-// Hexágono decorativo
-doc.setFillColor(...GOLD)
-doc.circle(40, 40, 18, 'F')
-doc.setFillColor(...NAVY)
-doc.circle(40, 40, 14, 'F')
+// Hexágono logo — igual ao SVG do sistema
+hexagon(40, 40, 20, GOLD)
+hexagon(40, 40, 15, NAVY)
 text('PF', 40, 44, { color: WHITE, size: 14, bold: true, align: 'center' })
 
 // Nome do sistema
