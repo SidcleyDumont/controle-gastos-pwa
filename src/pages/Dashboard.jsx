@@ -20,6 +20,52 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pi
 
 const COLORS = ['#1e40af', '#dc2626', '#16a34a', '#9333ea']
 
+// Ícone ⓘ clicável com popover — funciona em desktop e mobile
+function InfoCard({ title, value, subtitle, color, icon, info }) {
+  const [open, setOpen] = useState(false)
+  const statColors = {
+    green:  { bg: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', border: '#86efac', text: '#15803d' },
+    red:    { bg: 'linear-gradient(135deg, #fff1f2, #fee2e2)', border: '#fca5a5', text: '#b91c1c' },
+    blue:   { bg: 'linear-gradient(135deg, #eff6ff, #dbeafe)', border: '#93c5fd', text: '#1d4ed8' },
+    purple: { bg: 'linear-gradient(135deg, #faf5ff, #f3e8ff)', border: '#d8b4fe', text: '#7e22ce' },
+    yellow: { bg: 'linear-gradient(135deg, #fffbeb, #fef3c7)', border: '#fcd34d', text: '#92400e' },
+  }
+  const c = statColors[color] || statColors.blue
+  return (
+    <div style={{ background: c.bg, borderRadius: '16px', border: `1px solid ${c.border}`, padding: '18px 20px', position: 'relative' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <span style={{ fontSize: '13px', fontWeight: '600', color: c.text, opacity: 0.85 }}>{title}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          {info && (
+            <button
+              onClick={() => setOpen(o => !o)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '14px', color: c.text, opacity: 0.5, padding: '0 2px', lineHeight: 1, fontFamily: 'inherit' }}
+              title={info}
+            >ⓘ</button>
+          )}
+          {icon && <span style={{ fontSize: '22px', lineHeight: 1 }}>{icon}</span>}
+        </div>
+      </div>
+      <div style={{ fontSize: '22px', fontWeight: '800', color: c.text }}>{value}</div>
+      {subtitle && <div style={{ fontSize: '12px', color: c.text, opacity: 0.7, marginTop: '4px' }}>{subtitle}</div>}
+      {open && info && (
+        <div
+          onClick={() => setOpen(false)}
+          style={{
+            position: 'absolute', top: 'calc(100% + 8px)', left: 0, right: 0, zIndex: 50,
+            background: '#0f172a', color: 'white', borderRadius: '10px',
+            padding: '10px 14px', fontSize: '12px', lineHeight: '1.6',
+            boxShadow: '0 8px 24px rgba(0,0,0,0.25)', cursor: 'pointer',
+          }}
+        >
+          {info}
+          <span style={{ display: 'block', fontSize: '11px', color: '#64748b', marginTop: '4px' }}>Toque para fechar</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function goalColor(percent) {
   if (percent >= 100) return '#16a34a'
   if (percent >= 80)  return '#1e40af'
@@ -275,12 +321,12 @@ export default function Dashboard() {
           <StatusBadge status={resumo.status} />
         </div>
 
-        {/* Stat Cards */}
+        {/* Stat Cards com ⓘ clicável */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px' }}>
-          <StatCard title="Receitas" value={formatCurrency(resumo.receita)} color="green" icon="💰" />
-          <StatCard title="Despesas" value={formatCurrency(resumo.despesa)} color="red" icon="💸" />
-          <StatCard title="Saldo" value={formatCurrency(resumo.saldo)} color={resumo.saldo >= 0 ? 'blue' : 'red'} icon="⚖️" />
-          <StatCard title="% Poupança" value={formatPercent(resumo.poupanca)} color="purple" icon="🏦" />
+          <InfoCard title="Receitas" value={formatCurrency(resumo.receita)} color="green" icon="💰" info="Total de receitas com status 'Recebido' no mês. Lançamentos pendentes não entram aqui." />
+          <InfoCard title="Despesas" value={formatCurrency(resumo.despesa)} color="red" icon="💸" info="Total de despesas com status 'Pago' no mês. Despesas 'A pagar' não são contabilizadas." />
+          <InfoCard title="Saldo" value={formatCurrency(resumo.saldo)} color={resumo.saldo >= 0 ? 'blue' : 'red'} icon="⚖️" info="Receitas recebidas menos Despesas pagas. Representa o que realmente entrou e saiu." />
+          <InfoCard title="% Poupança" value={formatPercent(resumo.poupanca)} color="purple" icon="🏦" info="Percentual da renda que sobrou. Meta: acima de 10%. Acima de 20% é excelente!" />
         </div>
 
         {/* Period cards */}
