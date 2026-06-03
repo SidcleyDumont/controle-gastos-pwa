@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
+import { BookOpen } from 'lucide-react'
 
 const WA_URL = `https://wa.me/5583993500340?text=${encodeURIComponent('Olá! Vim pelo site planejofinanceiro.com.br e tenho interesse no Plano Pro. Poderia me ajudar? 😊')}`
 
@@ -340,9 +341,9 @@ export default function Landing() {
 
       {/* Botão flutuante E-book */}
       <a href="/ebook-planejamento-financeiro.pdf" download="Guia-Planejamento-Financeiro.pdf"
-        style={{ position: 'fixed', bottom: '92px', right: '24px', background: '#1e40af', color: 'white', borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 4px 20px rgba(30,64,175,0.5)', textDecoration: 'none', zIndex: 999 }}
+        style={{ position: 'fixed', bottom: '92px', right: '24px', background: '#1e40af', color: 'white', borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(30,64,175,0.5)', textDecoration: 'none', zIndex: 999 }}
         title="Baixar e-book gratuito">
-        📥
+        <BookOpen size={24} />
       </a>
 
       {/* Botão flutuante WhatsApp */}
