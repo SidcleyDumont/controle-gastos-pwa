@@ -153,11 +153,7 @@ export default function Login() {
         {/* Logo */}
         <div style={{ textAlign: 'center', marginBottom: '32px' }}>
           <div style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: '14px' }}>
-            <div style={{ width: '92px', height: '92px', background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 6px 24px rgba(251,191,36,0.45)' }}>
-              <div style={{ width: '80px', height: '80px', background: 'linear-gradient(135deg, #0f172a, #1e3a8a)', clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <span style={{ color: 'white', fontSize: '26px', fontWeight: '900', letterSpacing: '-1px' }}>PF</span>
-              </div>
-            </div>
+            <img src="/icon-source.svg" alt="PF" style={{ width: '92px', height: '92px', borderRadius: '20px', boxShadow: '0 6px 24px rgba(251,191,36,0.45)' }} />
             <div>
               <h1 style={{ fontSize: '19px', fontWeight: '800', color: '#0f172a', margin: '0 0 5px', letterSpacing: '0.05em' }}>PLANEJAMENTO FINANCEIRO</h1>
               <p style={{ fontSize: '10px', fontWeight: '700', color: '#f59e0b', letterSpacing: '0.22em', margin: 0 }}>ORGANIZE · INVISTA · CONQUISTE</p>
