@@ -8,7 +8,6 @@ import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useUserSettings } from '../hooks/useUserSettings'
 import { useRecurring } from '../hooks/useRecurring'
-import { useBudgets } from '../hooks/useBudgets'
 import Onboarding from '../components/Onboarding'
 import { Modal } from '../components/ui/Modal'
 import { calcularResumoMes, calcularScoreFinanceiro } from '../utils/calculations'
@@ -160,7 +159,6 @@ export default function Dashboard() {
   const { data: cats = [], isLoading: catsLoading, invalidate: invalidateCats } = useCategories(user?.id)
   const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
   const { data: recorrentes = [] } = useRecurring(user?.id)
-  const { data: orcamentos = [] } = useBudgets(user?.id)
 
   // Mês anterior para comparativo
   const prevMes = mes > 1 ? mes - 1 : 12
@@ -170,7 +168,7 @@ export default function Dashboard() {
   const loading = l1 || l2
 
   const resumoPrev    = calcularResumoMes(lancamentosPrev)
-  const score         = calcularScoreFinanceiro(resumo, orcamentos)
+  const score         = calcularScoreFinanceiro(resumo)
   const gastosInvisiveis = recorrentes
     .filter(r => r.active && r.type === 'Despesa')
     .reduce((s, r) => s + r.amount / ({ Mensal: 1, Bimestral: 2, Trimestral: 3, Anual: 12 }[r.frequency] || 1), 0)
