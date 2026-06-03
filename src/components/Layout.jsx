@@ -55,7 +55,7 @@ export function Layout({ children }) {
         </div>
 
         {/* Nav */}
-        <nav style={{ flex: 1, padding: '16px 8px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <nav style={{ flex: 1, padding: '16px 8px', display: 'flex', flexDirection: 'column', gap: '4px', overflowY: 'auto', overflowX: 'hidden' }}>
           {nav.map(({ to, label, emoji }) => (
             <NavLink key={to} to={to} title={collapsed ? label : undefined} style={({ isActive }) => ({
               display: 'flex', alignItems: 'center', gap: '10px',
