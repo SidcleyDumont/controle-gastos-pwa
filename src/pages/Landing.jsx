@@ -297,6 +297,35 @@ export default function Landing() {
         </div>
       </section>
 
+      {/* Seção E-book */}
+      <section style={{ background: 'linear-gradient(135deg, #0f172a, #1e3a8a)', padding: '60px 24px' }}>
+        <div style={{ maxWidth: '700px', margin: '0 auto', display: 'flex', alignItems: 'center', gap: '40px', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ width: '120px', height: '160px', background: 'linear-gradient(135deg, #1e3a8a, #1e40af)', borderRadius: '8px', border: '3px solid #fbbf24', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 12px 40px rgba(0,0,0,0.4)', margin: '0 auto' }}>
+              <span style={{ fontSize: '36px' }}>📘</span>
+              <span style={{ color: '#fbbf24', fontSize: '10px', fontWeight: '800', textAlign: 'center', lineHeight: '1.3', padding: '0 8px' }}>DO CAOS AO CONTROLE</span>
+            </div>
+          </div>
+          <div style={{ flex: 1, minWidth: '260px' }}>
+            <span style={{ background: '#fbbf24', color: '#0f172a', fontSize: '11px', fontWeight: '800', padding: '3px 10px', borderRadius: '99px', letterSpacing: '0.05em' }}>E-BOOK GRATUITO</span>
+            <h2 style={{ color: 'white', fontSize: '24px', fontWeight: '800', margin: '12px 0 8px', lineHeight: '1.3' }}>
+              Do Caos ao Controle:<br />
+              <span style={{ color: '#fbbf24' }}>O Guia Prático de Planejamento Financeiro</span>
+            </h2>
+            <p style={{ color: '#94a3b8', fontSize: '14px', lineHeight: '1.7', margin: '0 0 20px' }}>
+              10 capítulos com estratégias práticas para organizar seu dinheiro, eliminar gastos invisíveis, montar orçamentos e poupar mais todo mês.
+            </p>
+            <a
+              href="/ebook-planejamento-financeiro.pdf"
+              download="Guia-Planejamento-Financeiro.pdf"
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fbbf24', color: '#0f172a', borderRadius: '10px', padding: '12px 24px', fontSize: '14px', fontWeight: '800', textDecoration: 'none', boxShadow: '0 4px 16px rgba(251,191,36,0.4)' }}
+            >
+              📥 Baixar e-book grátis
+            </a>
+          </div>
+        </div>
+      </section>
+
       {/* Footer */}
       <footer style={{ padding: '32px 24px', textAlign: 'center', background: '#0f172a' }}>
         <div style={{ fontWeight: '800', color: 'white', fontSize: '14px', marginBottom: '12px' }}>💰 Planejamento Financeiro</div>
