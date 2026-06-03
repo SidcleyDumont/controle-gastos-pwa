@@ -154,8 +154,12 @@ export default function Dashboard() {
   const [showGoalModal, setShowGoalModal] = useState(false)
   const [pdfLoading, setPdfLoading] = useState(false)
 
+  const prevMes = mes > 1 ? mes - 1 : 12
+  const prevAno = mes > 1 ? ano : ano - 1
+
   const { data: lancamentos = [], isLoading: l1 } = useTransactions(user?.id, { month: mes, year: ano })
   const { data: todos = [], isLoading: l2 } = useTransactions(user?.id, { year: ano })
+  const { data: lancamentosPrev = [] } = useTransactions(user?.id, { month: prevMes, year: prevAno })
   const { data: cats = [], isLoading: catsLoading, invalidate: invalidateCats } = useCategories(user?.id)
   const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
   const { data: recorrentes = [] } = useRecurring(user?.id)
@@ -284,6 +288,87 @@ export default function Dashboard() {
           <StatCard title="Despesas Quinzena" value={formatCurrency(resumo.quinzena)} color="yellow" icon="📅" />
           <StatCard title="Despesas Final do Mês" value={formatCurrency(resumo.finalMes)} color="yellow" icon="📆" />
         </div>
+
+        {/* Score Financeiro — calculado inline */}
+        {resumo.receita > 0 && (() => {
+          let sc = 0
+          const det = []
+          if (resumo.saldo >= 0) { sc += 25; det.push({ label: 'Saldo positivo no mês', ok: true }) }
+          else { det.push({ label: 'Saldo negativo no mês', ok: false }) }
+          const pct = resumo.poupanca || 0
+          if (pct >= 20) { sc += 40; det.push({ label: `Poupança excelente (${pct.toFixed(0)}%)`, ok: true }) }
+          else if (pct >= 10) { sc += 25; det.push({ label: `Poupança boa (${pct.toFixed(0)}%)`, ok: true }) }
+          else if (pct >= 5) { sc += 12; det.push({ label: `Poupança baixa (${pct.toFixed(0)}%)`, ok: false }) }
+          else { det.push({ label: 'Poupança abaixo de 5%', ok: false }) }
+          sc += 10; det.push({ label: 'Lançamentos registrados', ok: true })
+          sc = Math.min(100, sc + 10)
+          const nivel = sc >= 85 ? 'Excelente' : sc >= 70 ? 'Bom' : sc >= 50 ? 'Regular' : 'Atenção'
+          const cor = sc >= 85 ? '#2563eb' : sc >= 70 ? '#16a34a' : sc >= 50 ? '#d97706' : '#dc2626'
+          const emoji = sc >= 85 ? '🏆' : sc >= 70 ? '✅' : sc >= 50 ? '⚠️' : '🚨'
+          return (
+            <div style={{ background: `linear-gradient(135deg, ${cor}18, ${cor}08)`, border: `1.5px solid ${cor}44`, borderRadius: '16px', padding: '18px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px', marginBottom: '12px' }}>
+                <div>
+                  <p style={{ margin: '0 0 2px', fontSize: '13px', fontWeight: '700', color: cor }}>{emoji} Score Financeiro</p>
+                  <p style={{ margin: 0, fontSize: '28px', fontWeight: '900', color: cor, lineHeight: 1 }}>
+                    {sc}<span style={{ fontSize: '14px', fontWeight: '500', color: 'var(--text-muted)' }}>/100 — {nivel}</span>
+                  </p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                  {det.map((d, i) => (
+                    <span key={i} style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      {d.ok ? '✅' : '❌'} {d.label}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div style={{ height: '6px', background: 'var(--bg-hover)', borderRadius: '99px', overflow: 'hidden' }}>
+                <div style={{ height: '100%', width: `${sc}%`, background: cor, borderRadius: '99px', transition: 'width 0.8s ease' }} />
+              </div>
+            </div>
+          )
+        })()}
+
+        {/* Comparativo mês a mês — calculado inline */}
+        {(() => {
+          const prev = {
+            receita: lancamentosPrev.filter(l => l.type === 'Receita' && l.status === 'Recebido').reduce((s, l) => s + (l.income_value || 0), 0),
+            despesa: lancamentosPrev.filter(l => l.type === 'Despesa' && l.status === 'Pago').reduce((s, l) => s + (l.expense_value || 0), 0),
+          }
+          prev.saldo = prev.receita - prev.despesa
+          if (prev.receita === 0 && prev.despesa === 0) return null
+          const mesLabel = ['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'][prevMes - 1]
+          return (
+            <div style={{ ...S.card, padding: '16px 20px' }}>
+              <p style={{ margin: '0 0 12px', fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                📊 Comparativo vs {mesLabel}/{prevAno}
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
+                {[
+                  { label: 'Receitas', atual: resumo.receita, ant: prev.receita, good: true },
+                  { label: 'Despesas', atual: resumo.despesa, ant: prev.despesa, good: false },
+                  { label: 'Saldo',    atual: resumo.saldo,   ant: prev.saldo,   good: true },
+                ].map(({ label, atual, ant, good }) => {
+                  const diff = ant !== 0 ? ((atual - ant) / Math.abs(ant)) * 100 : 0
+                  const up = diff > 0
+                  const isGood = good ? up : !up
+                  const color = Math.abs(diff) < 0.5 ? 'var(--text-muted)' : isGood ? '#16a34a' : '#dc2626'
+                  return (
+                    <div key={label} style={{ background: 'var(--bg-hover)', borderRadius: '12px', padding: '10px 12px' }}>
+                      <p style={{ margin: '0 0 3px', fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600' }}>{label}</p>
+                      <p style={{ margin: '0 0 2px', fontSize: '14px', fontWeight: '800', color: 'var(--text-primary)' }}>{formatCurrency(atual)}</p>
+                      {Math.abs(diff) >= 0.5 && (
+                        <p style={{ margin: 0, fontSize: '11px', color, fontWeight: '700' }}>
+                          {up ? '▲' : '▼'} {Math.abs(diff).toFixed(1)}%
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* Card Gastos Invisíveis */}
         {gastosInvisiveis > 0 && (
