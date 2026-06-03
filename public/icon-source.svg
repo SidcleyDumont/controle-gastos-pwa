@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#0f172a"/>
+      <stop offset="100%" style="stop-color:#1e3a8a"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#fbbf24"/>
+      <stop offset="100%" style="stop-color:#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="chartGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3"/>
+      <stop offset="100%" style="stop-color:#60a5fa;stop-opacity:0.8"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Fundo arredondado -->
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#bgGrad)"/>
+
+  <!-- Brilho sutil no topo -->
+  <ellipse cx="256" cy="80" rx="220" ry="80" fill="rgba(255,255,255,0.04)"/>
+
+  <!-- Gráfico de barras subindo (fundo) -->
+  <g opacity="0.25">
+    <rect x="72" y="320" width="52" height="110" rx="8" fill="#3b82f6"/>
+    <rect x="144" y="270" width="52" height="160" rx="8" fill="#3b82f6"/>
+    <rect x="216" y="220" width="52" height="210" rx="8" fill="#3b82f6"/>
+    <rect x="288" y="170" width="52" height="260" rx="8" fill="#3b82f6"/>
+    <rect x="360" y="130" width="52" height="300" rx="8" fill="#3b82f6"/>
+  </g>
+
+  <!-- Hexágono dourado central -->
+  <polygon
+    points="256,90 326,130 326,210 256,250 186,210 186,130"
+    fill="url(#goldGrad)"
+    opacity="0.95"
+  />
+  <!-- Hexágono interno escuro -->
+  <polygon
+    points="256,108 310,140 310,204 256,236 202,204 202,140"
+    fill="#0f172a"
+  />
+
+  <!-- Letras PF -->
+  <text
+    x="256" y="193"
+    font-family="'Segoe UI', Arial, sans-serif"
+    font-size="72"
+    font-weight="900"
+    fill="white"
+    text-anchor="middle"
+    letter-spacing="-3"
+  >PF</text>
+
+  <!-- Linha de tendência subindo -->
+  <polyline
+    points="80,390 150,340 230,300 320,260 420,200"
+    stroke="#fbbf24"
+    stroke-width="12"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.9"
+  />
+  <!-- Ponto final da linha (seta para cima) -->
+  <circle cx="420" cy="200" r="14" fill="#fbbf24" opacity="0.9"/>
+
+  <!-- Seta indicando crescimento -->
+  <polygon points="420,162 440,200 400,200" fill="#fbbf24" opacity="0.9"/>
+
+  <!-- Texto inferior -->
+  <text
+    x="256" y="470"
+    font-family="'Segoe UI', Arial, sans-serif"
+    font-size="36"
+    font-weight="700"
+    fill="#fbbf24"
+    text-anchor="middle"
+    letter-spacing="4"
+    opacity="0.85"
+  >FINANCEIRO</text>
+</svg>
