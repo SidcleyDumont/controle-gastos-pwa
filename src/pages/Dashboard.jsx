@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { recurringTransactionService } from '../services/recurringTransactionService'
 import { userSettingsService } from '../services/userSettingsService'
 import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useUserSettings } from '../hooks/useUserSettings'
+import { useRecurring } from '../hooks/useRecurring'
 import Onboarding from '../components/Onboarding'
 import { Modal } from '../components/ui/Modal'
 import { calcularResumoMes } from '../utils/calculations'
@@ -144,6 +146,7 @@ function GoalModal({ currentGoal, onClose, onSave }) {
 
 export default function Dashboard() {
   const { user } = useAuth()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
   const [mes, setMes] = useState(getMesAtual())
   const [ano, setAno] = useState(getAnoAtual())
@@ -155,8 +158,13 @@ export default function Dashboard() {
   const { data: todos = [], isLoading: l2 } = useTransactions(user?.id, { year: ano })
   const { data: cats = [], isLoading: catsLoading, invalidate: invalidateCats } = useCategories(user?.id)
   const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
+  const { data: recorrentes = [] } = useRecurring(user?.id)
 
   const loading = l1 || l2
+
+  const gastosInvisiveis = recorrentes
+    .filter(r => r.active && r.type === 'Despesa')
+    .reduce((s, r) => s + r.amount / ({ Mensal: 1, Bimestral: 2, Trimestral: 3, Anual: 12 }[r.frequency] || 1), 0)
   const goal = settings?.monthly_savings_goal ?? null
 
   useEffect(() => {
@@ -276,6 +284,28 @@ export default function Dashboard() {
           <StatCard title="Despesas Quinzena" value={formatCurrency(resumo.quinzena)} color="yellow" icon="📅" />
           <StatCard title="Despesas Final do Mês" value={formatCurrency(resumo.finalMes)} color="yellow" icon="📆" />
         </div>
+
+        {/* Card Gastos Invisíveis */}
+        {gastosInvisiveis > 0 && (
+          <button onClick={() => navigate('/gastos-invisiveis')} style={{
+            width: '100%', textAlign: 'left', cursor: 'pointer', fontFamily: 'inherit',
+            background: 'linear-gradient(135deg, #1e293b, #334155)',
+            borderRadius: '16px', padding: '18px 20px', border: 'none',
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+          }}>
+            <div>
+              <p style={{ margin: '0 0 4px', fontSize: '12px', color: '#94a3b8', fontWeight: '600', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+                💸 Gastos Invisíveis
+              </p>
+              <p style={{ margin: '0 0 2px', fontSize: '22px', fontWeight: '900', color: '#f87171' }}>
+                {formatCurrency(gastosInvisiveis)}<span style={{ fontSize: '13px', fontWeight: '500', color: '#94a3b8' }}>/mês</span>
+              </p>
+              <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>saem automaticamente no piloto automático</p>
+            </div>
+            <span style={{ fontSize: '20px', color: '#64748b', flexShrink: 0 }}>›</span>
+          </button>
+        )}
 
         {/* Meta de Poupança */}
         {goal ? (

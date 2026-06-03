@@ -15,6 +15,7 @@ const nav = [
   { to: '/resumo', label: 'Resumo Mensal', emoji: '📅' },
   { to: '/recorrentes', label: 'Recorrentes', emoji: '🔄' },
   { to: '/orcamentos', label: 'Orçamentos', emoji: '🎯' },
+  { to: '/gastos-invisiveis', label: 'Gastos Invisíveis', emoji: '💸' },
   { to: '/configuracoes', label: 'Configurações', emoji: '⚙️' },
 ]
 
