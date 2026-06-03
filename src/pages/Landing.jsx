@@ -104,7 +104,7 @@ export default function Landing() {
       {/* Nav */}
       <nav style={{ background: 'white', borderBottom: '1px solid #f1f5f9', padding: '0 24px', height: '60px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'sticky', top: 0, zIndex: 100 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '32px', height: '32px', background: 'linear-gradient(135deg, #1e40af, #2563eb)', borderRadius: '8px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '16px' }}>💰</div>
+          <img src="/icon-source.svg" alt="PF" style={{ width: '36px', height: '36px', borderRadius: '8px' }} />
           <span style={{ fontWeight: '800', color: '#0f172a', fontSize: '15px' }}>Planejamento Financeiro</span>
         </div>
         <button
@@ -337,6 +337,13 @@ export default function Landing() {
         </div>
         <p style={{ color: '#334155', fontSize: '12px', margin: 0 }}>© {new Date().getFullYear()} Planejamento Financeiro. Todos os direitos reservados.</p>
       </footer>
+
+      {/* Botão flutuante E-book */}
+      <a href="/ebook-planejamento-financeiro.pdf" download="Guia-Planejamento-Financeiro.pdf"
+        style={{ position: 'fixed', bottom: '92px', right: '24px', background: '#1e40af', color: 'white', borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '24px', boxShadow: '0 4px 20px rgba(30,64,175,0.5)', textDecoration: 'none', zIndex: 999 }}
+        title="Baixar e-book gratuito">
+        📥
+      </a>
 
       {/* Botão flutuante WhatsApp */}
       <a href={WA_URL} target="_blank" rel="noreferrer"
