@@ -44,12 +44,8 @@ export function Layout({ children }) {
 
         {/* Logo */}
         <div style={{ padding: '20px', borderBottom: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
-          {/* Hexágono mini */}
-          <div style={{ width: '46px', height: '46px', background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <div style={{ width: '38px', height: '38px', background: 'linear-gradient(135deg, #0f172a, #1e3a8a)', clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontSize: '13px', fontWeight: '900' }}>PF</span>
-            </div>
-          </div>
+          {/* Logo SVG */}
+          <img src="/icon-source.svg" alt="PF" style={{ width: '46px', height: '46px', borderRadius: '10px', flexShrink: 0 }} />
           {!collapsed && (
             <div style={{ overflow: 'hidden' }}>
               <div style={{ color: 'white', fontWeight: '700', fontSize: '13px', lineHeight: 1.3 }}>Planejamento Financeiro</div>
@@ -138,12 +134,8 @@ export function Layout({ children }) {
         padding: '0 16px', boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
       }} className="show-mobile">
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {/* Hexágono mini mobile */}
-          <div style={{ width: '36px', height: '36px', background: 'linear-gradient(135deg, #f59e0b, #fbbf24)', clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <div style={{ width: '28px', height: '28px', background: 'linear-gradient(135deg, #0f172a, #1e3a8a)', clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <span style={{ color: 'white', fontSize: '10px', fontWeight: '900' }}>PF</span>
-            </div>
-          </div>
+          {/* Logo SVG mobile */}
+          <img src="/icon-source.svg" alt="PF" style={{ width: '36px', height: '36px', borderRadius: '8px', flexShrink: 0 }} />
           <span style={{ color: 'white', fontWeight: '700', fontSize: '15px' }}>Planejamento Financeiro</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
