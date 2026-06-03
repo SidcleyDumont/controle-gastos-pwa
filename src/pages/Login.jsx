@@ -36,12 +36,16 @@ function PasswordStrengthBar({ password }) {
 const ERROR_MAP = {
   'Invalid login credentials': 'E-mail ou senha incorretos.',
   'Email not confirmed': 'Confirme seu e-mail antes de entrar. Verifique sua caixa de entrada.',
-  'User already registered': 'Este e-mail já está cadastrado. Faça login ou recupere sua senha.',
+  'User already registered': 'Já existe uma conta cadastrada com este e-mail. Utilize outro e-mail ou acesse sua conta existente.',
+  'already registered': 'Já existe uma conta cadastrada com este e-mail. Utilize outro e-mail ou acesse sua conta existente.',
+  'already been registered': 'Já existe uma conta cadastrada com este e-mail. Utilize outro e-mail ou acesse sua conta existente.',
   'Password should be at least': 'A senha deve ter pelo menos 8 caracteres.',
   'signup_disabled': 'Cadastro temporariamente indisponível.',
   'rate limited': 'Muitas tentativas. Aguarde alguns minutos e tente novamente.',
   'sending confirmation email': 'Não foi possível enviar o e-mail de confirmação. Tente novamente em alguns minutos.',
   'Error sending': 'Falha ao enviar e-mail de confirmação. Verifique se o endereço está correto.',
+  'invalid email': 'Informe um e-mail válido.',
+  'Unable to validate email': 'E-mail inválido ou não reconhecido.',
 }
 
 function friendlyAuthError(msg = '') {
@@ -56,7 +60,9 @@ export default function Login() {
   const [mode, setMode] = useState('login')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [msg, setMsg] = useState(location.state?.msg || '')
@@ -73,10 +79,14 @@ export default function Login() {
   const strength = useMemo(() => getPasswordStrength(password), [password])
 
   const validate = () => {
-    if (!email.includes('@')) return 'Informe um e-mail válido.'
+    if (!email.includes('@') || !email.includes('.')) return 'Informe um e-mail válido.'
     if (mode !== 'reset') {
       if (password.length < 8) return 'A senha deve ter pelo menos 8 caracteres.'
-      if (mode === 'register' && strength < 2) return 'Escolha uma senha mais segura — adicione números ou símbolos.'
+      if (mode === 'register') {
+        if (strength < 2) return 'Escolha uma senha mais segura — adicione números ou símbolos.'
+        if (!confirmPassword) return 'Por favor, confirme sua senha.'
+        if (password !== confirmPassword) return 'As senhas informadas não conferem. Verifique e tente novamente.'
+      }
     }
     return null
   }
@@ -130,7 +140,7 @@ export default function Login() {
     boxSizing: 'border-box', transition: 'border-color 0.15s',
   }
 
-  const switchMode = (next) => { setMode(next); setError(''); setMsg(''); setResendCountdown(0) }
+  const switchMode = (next) => { setMode(next); setError(''); setMsg(''); setResendCountdown(0); setConfirmPassword('') }
 
   const showResend = msg.includes('Verifique seu e-mail') || msg.includes('reenviado')
 
@@ -205,6 +215,50 @@ export default function Login() {
                 </button>
               </div>
               {mode === 'register' && <PasswordStrengthBar password={password} />}
+            </div>
+          )}
+
+          {mode === 'register' && (
+            <div>
+              <label style={{ fontSize: '13px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '6px' }}>
+                Confirmar senha
+              </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
+                  required
+                  placeholder="••••••••"
+                  autoComplete="new-password"
+                  style={{
+                    ...inputStyle,
+                    paddingRight: '44px',
+                    borderColor: confirmPassword && password !== confirmPassword ? '#ef4444' : confirmPassword && password === confirmPassword ? '#16a34a' : '#e2e8f0',
+                  }}
+                  onFocus={e => e.target.style.borderColor = '#1e40af'}
+                  onBlur={e => {
+                    if (confirmPassword && password !== confirmPassword) e.target.style.borderColor = '#ef4444'
+                    else if (confirmPassword && password === confirmPassword) e.target.style.borderColor = '#16a34a'
+                    else e.target.style.borderColor = '#e2e8f0'
+                  }}
+                />
+                <button type="button" onClick={() => setShowConfirmPassword(v => !v)} tabIndex={-1}
+                  style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', padding: '4px', color: '#94a3b8', display: 'flex', alignItems: 'center' }}
+                  aria-label={showConfirmPassword ? 'Ocultar senha' : 'Mostrar senha'}>
+                  {showConfirmPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              {confirmPassword && password !== confirmPassword && (
+                <p style={{ fontSize: '11px', color: '#ef4444', fontWeight: '600', marginTop: '5px' }}>
+                  ✕ As senhas não conferem
+                </p>
+              )}
+              {confirmPassword && password === confirmPassword && (
+                <p style={{ fontSize: '11px', color: '#16a34a', fontWeight: '600', marginTop: '5px' }}>
+                  ✓ Senhas conferem
+                </p>
+              )}
             </div>
           )}
 
