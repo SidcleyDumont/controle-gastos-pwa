@@ -11,6 +11,7 @@ import MonthlySummary from './pages/MonthlySummary'
 import Settings from './pages/Settings'
 import Budgets from './pages/Budgets'
 import RecurringTransactions from './pages/RecurringTransactions'
+import InvisibleExpenses from './pages/InvisibleExpenses'
 import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/Admin'
 import Terms from './pages/Terms'
@@ -72,6 +73,7 @@ export default function App() {
             <Route path="/resumo" element={<PrivateRoute><MonthlySummary /></PrivateRoute>} />
             <Route path="/recorrentes" element={<PrivateRoute><RecurringTransactions /></PrivateRoute>} />
             <Route path="/orcamentos" element={<PrivateRoute><Budgets /></PrivateRoute>} />
+            <Route path="/gastos-invisiveis" element={<PrivateRoute><InvisibleExpenses /></PrivateRoute>} />
             <Route path="/configuracoes" element={<PrivateRoute><Settings /></PrivateRoute>} />
             <Route path="/admin" element={<PrivateRoute><Admin /></PrivateRoute>} />
             <Route path="/termos" element={<Terms />} />
