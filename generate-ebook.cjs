@@ -1,4 +1,4 @@
-// Gerador do E-book PDF — "Do Caos ao Controle"
+// Gerador do E-book PDF - "Do Caos ao Controle"
 // Executar com: node generate-ebook.cjs
 // Requer: npm install jspdf
 
@@ -81,7 +81,7 @@ doc.triangle(W - 60, 0, W, 0, W, 80, 'F')
 doc.setFillColor(30, 64, 175)
 doc.triangle(W - 40, 0, W, 0, W, 50, 'F')
 
-// Hexágono logo — igual ao SVG do sistema
+// Hexágono logo - igual ao SVG do sistema
 hexagon(40, 40, 20, GOLD)
 hexagon(40, 40, 15, NAVY)
 text('PF', 40, 44, { color: WHITE, size: 14, bold: true, align: 'center' })
@@ -104,7 +104,7 @@ text('O Guia Prático de Planejamento', MARGIN, 155, { color: [148,163,184], siz
 text('Financeiro Pessoal', MARGIN, 164, { color: [148,163,184], size: 14 })
 
 // Descrição
-const desc = 'Aprenda a organizar suas finanças, identificar gastos invisíveis, montar orçamentos e poupar mais todo mês — com o sistema que já faz tudo por você.'
+const desc = 'Aprenda a organizar suas finanças, identificar gastos invisíveis, montar orçamentos e poupar mais todo mês - com o sistema que já faz tudo por você.'
 doc.setFontSize(10)
 doc.setTextColor(203, 213, 225)
 doc.setFont('helvetica', 'normal')
@@ -121,7 +121,7 @@ text('Organize  ·  Invista  ·  Conquiste', W / 2, H - 22, { color: GOLD, size:
 text('Controle seu dinheiro. Conquiste seus sonhos.', W / 2, H - 13, { color: [148,163,184], size: 9, align: 'center' })
 
 // ══════════════════════════════════════════════════════════════════════════
-// PÁGINA 2 — ÍNDICE
+// PÁGINA 2 - ÍNDICE
 // ══════════════════════════════════════════════════════════════════════════
 addPage()
 rect(0, 0, W, 35, NAVY)
@@ -131,13 +131,13 @@ const chapters = [
   ['01', 'Por que seu dinheiro some todo mês?',          '03'],
   ['02', 'Os 4 pilares do controle financeiro',          '05'],
   ['03', 'Conheça o Planejamento Financeiro App',        '07'],
-  ['04', 'Como usar o sistema — passo a passo',         '10'],
+  ['04', 'Como usar o sistema - passo a passo',         '10'],
   ['05', 'Gastos Invisíveis: o ladrão silencioso',      '14'],
   ['06', 'Orçamentos que realmente funcionam',          '16'],
   ['07', 'Score Financeiro: meça sua saúde financeira', '18'],
   ['08', 'Dicas práticas para poupar mais',             '20'],
   ['09', 'Plano de ação em 30 dias',                    '22'],
-  ['10', 'Como começar agora — gratuitamente',          '24'],
+  ['10', 'Como começar agora - gratuitamente',          '24'],
 ]
 
 let yIdx = 50
@@ -153,7 +153,7 @@ chapters.forEach(([num, title, page], i) => {
 pageFooter(2)
 
 // ══════════════════════════════════════════════════════════════════════════
-// PÁGINA 3 — CAPÍTULO 1
+// PÁGINA 3 - CAPÍTULO 1
 // ══════════════════════════════════════════════════════════════════════════
 addPage()
 rect(0, 0, W, 35, BLUE)
@@ -202,7 +202,7 @@ function highlight(txt, color = BLUE) {
 
 paragraph('Você recebe seu salário, paga as contas e, no final do mês, se pergunta: "Para onde foi tudo?" Se isso soa familiar, saiba que você não está sozinho.')
 paragraph('Segundo pesquisas do SPC Brasil, mais de 70% dos brasileiros não sabem quanto gastam por mês. O dinheiro some em pequenas despesas do dia a dia, assinaturas esquecidas, compras por impulso e gastos que consideramos "pequenos demais para anotar".')
-highlight('Fact: Uma pessoa que gasta R$ 15,00 por dia em cafés e lanches gasta R$ 450,00 por mês — R$ 5.400,00 por ano.')
+highlight('Fact: Uma pessoa que gasta R$ 15,00 por dia em cafés e lanches gasta R$ 450,00 por mês - R$ 5.400,00 por ano.')
 heading('Os 3 grandes vilões do seu bolso', 3)
 bullet([
   'Gastos invisíveis: assinaturas, mensalidades e débitos automáticos que somam sem você perceber',
@@ -213,7 +213,7 @@ paragraph('A boa notícia? Tudo isso tem solução. E começa com uma ferramenta
 pageFooter(3)
 
 // ══════════════════════════════════════════════════════════════════════════
-// PÁGINA 4 — CAPÍTULO 2
+// PÁGINA 4 - CAPÍTULO 2
 // ══════════════════════════════════════════════════════════════════════════
 addPage(); y = 20
 rect(0, 0, W, 35, BLUE)
@@ -243,11 +243,11 @@ pilares.forEach(([title, color, desc]) => {
   y += 30
 })
 
-paragraph('O Planejamento Financeiro App implementa exatamente esses 4 pilares em uma interface simples que funciona no seu celular como um app nativo — sem precisar baixar nada da loja.')
+paragraph('O Planejamento Financeiro App implementa exatamente esses 4 pilares em uma interface simples que funciona no seu celular como um app nativo - sem precisar baixar nada da loja.')
 pageFooter(4)
 
 // ══════════════════════════════════════════════════════════════════════════
-// PÁGINA 5 — CAPÍTULO 3
+// PÁGINA 5 - CAPÍTULO 3
 // ══════════════════════════════════════════════════════════════════════════
 addPage(); y = 20
 rect(0, 0, W, 35, NAVY)
@@ -262,7 +262,7 @@ heading('Principais funcionalidades', 2)
 const features = [
   ['Dashboard',        BLUE,  'Visão completa: receitas, despesas, saldo, % poupança e score financeiro em tempo real.'],
   ['Lancamentos',      GREEN, 'Registre receitas e despesas com filtros, autocomplete e exportacao para Excel.'],
-  ['Recorrentes',      NAVY,  'Cadastre salario e contas fixas uma vez — o sistema lanca automaticamente todo mes.'],
+  ['Recorrentes',      NAVY,  'Cadastre salario e contas fixas uma vez - o sistema lanca automaticamente todo mes.'],
   ['Orcamentos',       [120,50,150], 'Defina limites por categoria e veja em tempo real o quanto ja gastou.'],
   ['Gastos Invisiveis',[220,100,10], 'Revela quanto sai automaticamente do seu bolso todo mes em debitos esquecidos.'],
   ['Resumo Mensal',    [0,130,100],  'Relatorio completo mes a mes com evolucao financeira e comparativo de periodos.'],
@@ -286,19 +286,19 @@ features.forEach(([title, color, desc], i) => {
 pageFooter(5)
 
 // ══════════════════════════════════════════════════════════════════════════
-// PÁGINA 6 — CAPÍTULO 4 (Como usar)
+// PÁGINA 6 - CAPÍTULO 4 (Como usar)
 // ══════════════════════════════════════════════════════════════════════════
 addPage(); y = 20
 rect(0, 0, W, 35, BLUE)
 text('CAPÍTULO 04', MARGIN, 14, { color: GOLD, size: 9, bold: true })
-text('Como usar o sistema — passo a passo', MARGIN, 26, { color: WHITE, size: 15, bold: true })
+text('Como usar o sistema - passo a passo', MARGIN, 26, { color: WHITE, size: 15, bold: true })
 y = 48
 
 const steps = [
   ['PASSO 1', 'Crie sua conta gratuita', 'Acesse planejofinanceiro.com.br e clique em "Criar nova conta". Em menos de 1 minuto você terá acesso a todas as funcionalidades por 15 dias gratuitamente.', BLUE],
   ['PASSO 2', 'Configure suas categorias', 'Vá em Categorias e crie grupos para seus gastos: Alimentação, Transporte, Lazer, Saúde, etc. Isso facilita a análise posterior.', GREEN],
   ['PASSO 3', 'Cadastre suas recorrentes', 'Em Recorrentes, adicione tudo que se repete todo mês: salário, aluguel, planos, mensalidades. O sistema lança automaticamente.', [9,130,100]],
-  ['PASSO 4', 'Lance seus gastos diários', 'Em Lançamentos, registre cada receita e despesa. Use o autocomplete — ao digitar "iFood", ele preenche categoria e valor automaticamente.', NAVY],
+  ['PASSO 4', 'Lance seus gastos diários', 'Em Lançamentos, registre cada receita e despesa. Use o autocomplete - ao digitar "iFood", ele preenche categoria e valor automaticamente.', NAVY],
   ['PASSO 5', 'Defina seus orçamentos', 'Em Orçamentos, coloque limites por categoria. "Máximo R$ 600 em alimentação este mês." O sistema avisa quando se aproximar do teto.', [120,50,150]],
 ]
 
@@ -320,7 +320,7 @@ steps.forEach(([label, title, desc, color], i) => {
 pageFooter(6)
 
 // ══════════════════════════════════════════════════════════════════════════
-// PÁGINA 7 — GASTOS INVISÍVEIS
+// PÁGINA 7 - GASTOS INVISÍVEIS
 // ══════════════════════════════════════════════════════════════════════════
 addPage(); y = 20
 rect(0, 0, W, 35, [15, 23, 42])
@@ -328,17 +328,17 @@ text('CAPÍTULO 05', MARGIN, 14, { color: GOLD, size: 9, bold: true })
 text('Gastos Invisíveis: o ladrão silencioso', MARGIN, 26, { color: WHITE, size: 15, bold: true })
 y = 48
 
-paragraph('Você sabe exatamente quanto paga de assinatura de streaming? E de academia? E de aplicativos que mal usa? Esses são os gastos invisíveis — pequenos individualmente, mas devastadores quando somados.')
+paragraph('Você sabe exatamente quanto paga de assinatura de streaming? E de academia? E de aplicativos que mal usa? Esses são os gastos invisíveis - pequenos individualmente, mas devastadores quando somados.')
 highlight('Uma pessoa com apenas 8 assinaturas e mensalidades típicas pode gastar R$ 400 a R$ 800 por mês sem perceber.')
 
 heading('Exemplos comuns de gastos invisíveis', 3)
 bullet([
-  'Streaming: Netflix, Amazon Prime, Disney+, Globoplay — R$ 100-200/mês',
-  'Música: Spotify, Deezer — R$ 22-30/mês',
-  'Armazenamento: Google Drive, iCloud — R$ 10-35/mês',
-  'Academia e planos de saúde — R$ 80-300/mês',
-  'Assinaturas de apps e ferramentas — R$ 30-100/mês',
-  'Débito automático de serviços esquecidos — valores variados',
+  'Streaming: Netflix, Amazon Prime, Disney+, Globoplay - R$ 100-200/mês',
+  'Música: Spotify, Deezer - R$ 22-30/mês',
+  'Armazenamento: Google Drive, iCloud - R$ 10-35/mês',
+  'Academia e planos de saúde - R$ 80-300/mês',
+  'Assinaturas de apps e ferramentas - R$ 30-100/mês',
+  'Débito automático de serviços esquecidos - valores variados',
 ])
 
 paragraph('O recurso "Gastos Invisíveis" do Planejamento Financeiro App lista automaticamente todos os seus débitos recorrentes, calcula o total mensal e anual, e mostra qual percentual da sua renda vai para o piloto automático.')
@@ -348,13 +348,13 @@ bullet([
   'Abra o app > clique em "Gastos Invisíveis" no menu',
   'Veja o total que sai automaticamente todo mês',
   'Para cada item, pergunte: "Uso isso pelo menos uma vez por semana?"',
-  'Cancele o que não usa — R$ 50 cancelados = R$ 600/ano economizados',
+  'Cancele o que não usa - R$ 50 cancelados = R$ 600/ano economizados',
 ], '>')
 
 pageFooter(7)
 
 // ══════════════════════════════════════════════════════════════════════════
-// PÁGINA 8 — SCORE FINANCEIRO
+// PÁGINA 8 - SCORE FINANCEIRO
 // ══════════════════════════════════════════════════════════════════════════
 addPage(); y = 20
 rect(0, 0, W, 35, BLUE)
@@ -365,10 +365,10 @@ y = 48
 paragraph('Assim como existe o score de crédito, o Score Financeiro do Planejamento Financeiro App mede a saúde das suas finanças pessoais em uma nota de 0 a 100.')
 
 const scores = [
-  ['0 – 49',  'ATENÇÃO',    RED,   'Saldo negativo, poupança baixa. Hora de agir imediatamente.'],
-  ['50 – 69', 'REGULAR',    GOLD,  'Você está controlando, mas há espaço para melhorar.'],
-  ['70 – 84', 'BOM',        GREEN, 'Finanças saudáveis. Continue assim e busque crescer.'],
-  ['85 – 100','EXCELENTE',  BLUE,  'Você domina suas finanças. Hora de investir mais!'],
+  ['0 - 49',  'ATENÇÃO',    RED,   'Saldo negativo, poupança baixa. Hora de agir imediatamente.'],
+  ['50 - 69', 'REGULAR',    GOLD,  'Você está controlando, mas há espaço para melhorar.'],
+  ['70 - 84', 'BOM',        GREEN, 'Finanças saudáveis. Continue assim e busque crescer.'],
+  ['85 - 100','EXCELENTE',  BLUE,  'Você domina suas finanças. Hora de investir mais!'],
 ]
 
 y += 4
@@ -386,7 +386,7 @@ y += 4
 heading('Como melhorar seu score', 3)
 bullet([
   'Mantenha o saldo positivo todos os meses',
-  'Aumente sua taxa de poupança — cada 5% conta pontos',
+  'Aumente sua taxa de poupança - cada 5% conta pontos',
   'Respeite os orçamentos por categoria',
   'Registre todos os lançamentos consistentemente',
 ])
@@ -394,7 +394,7 @@ highlight('Acompanhar o score mensalmente cria o hábito de melhoria contínua. 
 pageFooter(8)
 
 // ══════════════════════════════════════════════════════════════════════════
-// PÁGINA 9 — PLANO 30 DIAS
+// PÁGINA 9 - PLANO 30 DIAS
 // ══════════════════════════════════════════════════════════════════════════
 addPage(); y = 20
 rect(0, 0, W, 35, NAVY)
@@ -402,7 +402,7 @@ text('CAPÍTULO 09', MARGIN, 14, { color: GOLD, size: 9, bold: true })
 text('Plano de ação em 30 dias', MARGIN, 26, { color: WHITE, size: 15, bold: true })
 y = 48
 
-paragraph('Transformar sua relação com o dinheiro não acontece da noite para o dia — mas 30 dias é suficiente para criar novos hábitos. Siga este plano:')
+paragraph('Transformar sua relação com o dinheiro não acontece da noite para o dia - mas 30 dias é suficiente para criar novos hábitos. Siga este plano:')
 
 const plan = [
   ['SEMANA 1', [30,64,175], 'Configuração inicial', [
@@ -433,7 +433,7 @@ const plan = [
 
 plan.forEach(([week, color, title, items]) => {
   rect(MARGIN, y, TEXT_W, 8, color)
-  text(`${week} — ${title}`, MARGIN + 4, y + 5.5, { color: WHITE, size: 10, bold: true })
+  text(`${week} - ${title}`, MARGIN + 4, y + 5.5, { color: WHITE, size: 10, bold: true })
   y += 10
   items.forEach((item, i) => {
     rect(MARGIN, y, TEXT_W, 7, i % 2 === 0 ? LGRAY : WHITE)
@@ -447,7 +447,7 @@ plan.forEach(([week, color, title, items]) => {
 pageFooter(9)
 
 // ══════════════════════════════════════════════════════════════════════════
-// PÁGINA 10 — CTA FINAL
+// PÁGINA 10 - CTA FINAL
 // ══════════════════════════════════════════════════════════════════════════
 addPage()
 rect(0, 0, W, H, NAVY)
@@ -488,7 +488,7 @@ text('sidejoao89@gmail.com', W/2, 212, { color: [148,163,184], size: 10, align: 
 text('planejofinanceiro.com.br', W/2, 235, { color: GOLD, size: 14, bold: true, align: 'center' })
 
 text('Organize · Invista · Conquiste', W/2, 260, { color: [100,120,180], size: 11, align: 'center' })
-text('© 2026 Planejamento Financeiro — Todos os direitos reservados', W/2, H - 15, { color: [60,80,120], size: 8, align: 'center' })
+text('© 2026 Planejamento Financeiro - Todos os direitos reservados', W/2, H - 15, { color: [60,80,120], size: 8, align: 'center' })
 
 // ── Salvar ─────────────────────────────────────────────────────────────────
 const outPath = path.join(__dirname, 'public', 'ebook-planejamento-financeiro.pdf')
