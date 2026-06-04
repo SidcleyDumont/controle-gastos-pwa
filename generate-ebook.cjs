@@ -192,12 +192,20 @@ function bullet(items, icon = '+') {
   y += 3
 }
 function highlight(txt, color = BLUE) {
-  rect(MARGIN, y - 4, TEXT_W, 14 + (doc.splitTextToSize(txt, TEXT_W - 8).length - 1) * 5.5, LGRAY)
-  doc.setDrawColor(...color)
-  doc.setLineWidth(0.8)
-  doc.line(MARGIN, y - 4, MARGIN, y + 10 + (doc.splitTextToSize(txt, TEXT_W - 8).length - 1) * 5.5)
-  paragraph(txt, { color, bold: false, after: 6 })
-  doc.setLineWidth(0.2)
+  doc.setFontSize(10.5)
+  doc.setFont('helvetica', 'normal')
+  const lines = doc.splitTextToSize(txt, TEXT_W - 8)
+  const boxH = 10 + lines.length * 5.5 + 4
+  // Fundo cinza
+  rect(MARGIN, y - 4, TEXT_W, boxH, LGRAY)
+  // Barra colorida lateral
+  doc.setFillColor(...color)
+  doc.rect(MARGIN, y - 4, 3, boxH, 'F')
+  // Texto
+  doc.setTextColor(...color)
+  doc.text(lines, MARGIN + 7, y + 4)
+  y += boxH + 4
+  if (y > H - 20) { addPage(); y = 20 }
 }
 
 paragraph('Você recebe seu salário, paga as contas e, no final do mês, se pergunta: "Para onde foi tudo?" Se isso soa familiar, saiba que você não está sozinho.')
