@@ -319,6 +319,7 @@ export default function Landing() {
             <a
               href="/ebook-planejamento-financeiro.pdf"
               download="Guia-Planejamento-Financeiro.pdf"
+              target="_blank" rel="noreferrer"
               style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', background: '#fbbf24', color: '#0f172a', borderRadius: '10px', padding: '12px 24px', fontSize: '14px', fontWeight: '800', textDecoration: 'none', boxShadow: '0 4px 16px rgba(251,191,36,0.4)' }}
             >
               📥 Baixar e-book grátis
@@ -341,6 +342,7 @@ export default function Landing() {
 
       {/* Botão flutuante E-book */}
       <a href="/ebook-planejamento-financeiro.pdf" download="Guia-Planejamento-Financeiro.pdf"
+        target="_blank" rel="noreferrer"
         style={{ position: 'fixed', bottom: '92px', right: '24px', background: '#1e40af', color: 'white', borderRadius: '50%', width: '56px', height: '56px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 20px rgba(30,64,175,0.5)', textDecoration: 'none', zIndex: 999 }}
         title="Baixar e-book gratuito">
         <BookOpen size={24} />
