@@ -146,18 +146,25 @@ async function fetchMonthData(supabase: ReturnType<typeof createClient>, userId:
 
   for (const tx of txs) {
     if (tx.type === 'Receita') {
-      receita += tx.income_value || tx.original_value || 0
-      if (tx.status === 'Recebido') pagas++
-      else pendentes++
+      // Igual ao dashboard: só conta receitas "Recebido"
+      if (tx.status === 'Recebido') {
+        receita += tx.income_value || tx.original_value || 0
+        pagas++
+      } else {
+        pendentes++
+      }
     } else {
-      despesa += tx.expense_value || tx.original_value || 0
-      if (tx.status === 'Pago') pagas++
-      else if (tx.due_date && tx.due_date < today) vencidas++
-      else pendentes++
-
-      // Agrupa por categoria
-      const catName = (tx as any).categories?.name || 'Sem categoria'
-      categorias[catName] = (categorias[catName] || 0) + (tx.expense_value || tx.original_value || 0)
+      // Igual ao dashboard: só conta despesas "Pago"
+      if (tx.status === 'Pago') {
+        despesa += tx.expense_value || tx.original_value || 0
+        pagas++
+        const catName = (tx as any).categories?.name || 'Sem categoria'
+        categorias[catName] = (categorias[catName] || 0) + (tx.expense_value || tx.original_value || 0)
+      } else if (tx.due_date && tx.due_date < today) {
+        vencidas++
+      } else {
+        pendentes++
+      }
     }
   }
 
