@@ -27,12 +27,19 @@ export default defineConfig({
         ]
       },
       workbox: {
-        globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+        globPatterns: ['**/*.{js,css,html,ico,png,svg,pdf}'],
+        // Não interceptar downloads de PDF — serve direto da rede
+        navigateFallbackDenylist: [/\/ebook.*\.pdf$/, /\.pdf$/],
         runtimeCaching: [
           {
             urlPattern: /^https:\/\/.*\.supabase\.co\/.*/i,
             handler: 'NetworkFirst',
             options: { cacheName: 'supabase-cache', expiration: { maxEntries: 100, maxAgeSeconds: 300 } }
+          },
+          // PDF sempre busca da rede (nunca do cache)
+          {
+            urlPattern: /\.pdf$/,
+            handler: 'NetworkOnly',
           }
         ]
       }
