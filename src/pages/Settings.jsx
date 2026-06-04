@@ -339,6 +339,39 @@ export default function Settings() {
         </label>
       </div>
 
+      {/* Preferências de E-mail */}
+      <div style={{ ...S.card, padding: '20px 24px' }}>
+        <p style={S.sectionTitle}>📧 Preferências de E-mail</p>
+        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+          Escolha quais e-mails automáticos deseja receber.
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {[
+            { key: 'email_biweekly', label: 'Resumo quinzenal', desc: 'Lançamentos com vencimento nos próximos 15 dias — toda segunda-feira' },
+            { key: 'email_monthly',  label: 'Resumo mensal',    desc: 'Comparativo financeiro mês a mês — todo dia 5 do mês' },
+          ].map(({ key, label, desc }) => {
+            const currentVal = settings?.[key] !== false
+            return (
+              <label key={key} style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={currentVal}
+                  onChange={async (e) => {
+                    await userSettingsService.upsert(user.id, { [key]: e.target.checked })
+                    invalidateSettings()
+                  }}
+                  style={{ width: '16px', height: '16px', marginTop: '2px', cursor: 'pointer', flexShrink: 0 }}
+                />
+                <div>
+                  <div style={{ fontSize: '14px', fontWeight: '600', color: 'var(--text-primary)' }}>{label}</div>
+                  <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginTop: '2px' }}>{desc}</div>
+                </div>
+              </label>
+            )
+          })}
+        </div>
+      </div>
+
       {/* Sair */}
       <div style={{ ...S.card, padding: '20px 24px', border: '1px solid #fee2e2' }}>
         <p style={S.sectionTitle}>Sessão</p>
