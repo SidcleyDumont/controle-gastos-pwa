@@ -27,3 +27,5 @@ CREATE TRIGGER trg_bank_balances_updated_at
   BEFORE UPDATE ON bank_balances
   FOR EACH ROW
   EXECUTE FUNCTION update_bank_balances_updated_at();
+
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE bank_balances TO authenticated;
