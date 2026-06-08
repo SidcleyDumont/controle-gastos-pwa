@@ -35,6 +35,7 @@ export default function TransactionModal({ data, cats, items = [], onClose, onSa
     payment_method: data?.payment_method || 'Pix',
     origin:         data?.origin         || '',
     due_date:       data?.due_date       || '',
+    debit_source:   data?.debit_source   || 'Mês Atual',
   })
   const [error, setError]               = useState('')
   const [loading, setLoading]           = useState(false)
@@ -119,6 +120,7 @@ export default function TransactionModal({ data, cats, items = [], onClose, onSa
         original_value: valor,
         category_id:    form.category_id || null,
         due_date:       form.type === 'Despesa' && form.due_date ? form.due_date : null,
+        debit_source:   form.type === 'Despesa' ? form.debit_source : 'Mês Atual',
       }
       if (data?.id && !isDuplicate)
         await transactionService.update(data.id, user.id, payload)
@@ -286,6 +288,46 @@ export default function TransactionModal({ data, cats, items = [], onClose, onSa
             </label>
             <input type="date" value={form.due_date} onChange={e => set('due_date', e.target.value)}
               style={S.input} onFocus={onFocus} onBlur={onBlur} />
+          </div>
+        )}
+
+        {/* Descontar de (só Despesa) */}
+        {form.type === 'Despesa' && (
+          <div>
+            <label style={S.label}>Descontar de</label>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              {['Mês Atual', 'Mês Anterior'].map(opt => {
+                const active = form.debit_source === opt
+                const isMesAnterior = opt === 'Mês Anterior'
+                return (
+                  <button
+                    key={opt} type="button"
+                    onClick={() => set('debit_source', opt)}
+                    style={{
+                      flex: 1, padding: '9px 12px', borderRadius: '10px', cursor: 'pointer',
+                      fontFamily: 'inherit', fontSize: '13px', fontWeight: active ? '700' : '500',
+                      border: active
+                        ? `2px solid ${isMesAnterior ? '#f97316' : '#1e40af'}`
+                        : '2px solid var(--border-input)',
+                      background: active
+                        ? (isMesAnterior ? '#fff7ed' : '#eff6ff')
+                        : 'var(--bg-card)',
+                      color: active
+                        ? (isMesAnterior ? '#c2410c' : '#1e40af')
+                        : 'var(--text-secondary)',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {isMesAnterior ? '📦 Mês Anterior' : '📅 Mês Atual'}
+                    {isMesAnterior && active && (
+                      <div style={{ fontSize: '10px', fontWeight: '500', marginTop: '2px', opacity: 0.8 }}>
+                        desconta do saldo acumulado
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
           </div>
         )}
 

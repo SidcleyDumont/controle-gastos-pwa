@@ -11,7 +11,7 @@ import { useRecurring } from '../hooks/useRecurring'
 import { useBankBalances } from '../hooks/useBankBalances'
 import Onboarding from '../components/Onboarding'
 import { Modal } from '../components/ui/Modal'
-import { calcularResumoMes } from '../utils/calculations'
+import { calcularResumoMes, calcularCarryOver } from '../utils/calculations'
 import { formatCurrency, formatPercent, MESES, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { StatCard } from '../components/ui/Card'
 import { StatusBadge } from '../components/ui/Badge'
@@ -369,6 +369,7 @@ export default function Dashboard() {
   const { data: lancamentos = [], isLoading: l1 } = useTransactions(user?.id, { month: mes, year: ano })
   const { data: todos = [], isLoading: l2 } = useTransactions(user?.id, { year: ano })
   const { data: lancamentosPrev = [] } = useTransactions(user?.id, { month: prevMes, year: prevAno })
+  const { data: todasTransacoes = [] } = useTransactions(user?.id)
   const { data: cats = [], isLoading: catsLoading, invalidate: invalidateCats } = useCategories(user?.id)
   const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
   const { data: recorrentes = [] } = useRecurring(user?.id)
@@ -425,6 +426,9 @@ export default function Dashboard() {
   }
 
   const resumo = calcularResumoMes(lancamentos)
+  const carryOver = calcularCarryOver(todasTransacoes, mes, ano)
+
+  const mesAnteriorLabel = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][prevMes - 1]
 
   const dadosMensais = MESES.map((nome, i) => {
     const doMes = todos.filter(l => l.month === i + 1)
@@ -516,6 +520,34 @@ export default function Dashboard() {
 
         {/* Seção 1: Receita do Mês por período */}
         <ReceitaPeriodoSection receitaQuinzena={resumo.receitaQuinzena} receitaFinalMes={resumo.receitaFinalMes} />
+
+        {/* Saldo Acumulado de Meses Anteriores (carry-over) */}
+        {carryOver !== 0 && (
+          <div style={{
+            background: carryOver >= 0
+              ? 'linear-gradient(135deg, #fffbeb, #fef3c7)'
+              : 'linear-gradient(135deg, #fff1f2, #fee2e2)',
+            border: `1px solid ${carryOver >= 0 ? '#fcd34d' : '#fca5a5'}`,
+            borderRadius: '16px', padding: '18px 20px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '18px' }}>📦</span>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: carryOver >= 0 ? '#92400e' : '#b91c1c' }}>
+                    Saldo acumulado de meses anteriores
+                  </div>
+                  <div style={{ fontSize: '11px', color: carryOver >= 0 ? '#92400e' : '#b91c1c', opacity: 0.7, marginTop: '1px' }}>
+                    Acumulado até {mesAnteriorLabel}/{carryOver >= 0 ? prevAno : ano} — use "Mês Anterior" nos lançamentos para descontar daqui
+                  </div>
+                </div>
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: '900', color: carryOver >= 0 ? '#92400e' : '#b91c1c' }}>
+                {formatCurrency(carryOver)}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Period cards (despesas) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
