@@ -13,7 +13,7 @@ function pick(data, fields) {
 
 export const transactionService = {
   async list(userId, filters = {}) {
-    let q = supabase.from('transactions').select('*, categories(name, type)').eq('user_id', userId).order('date', { ascending: false })
+    let q = supabase.from('transactions').select('*, categories(name, type)').eq('user_id', userId).eq('manually_deleted', false).order('date', { ascending: false })
     if (filters.month) q = q.eq('month', filters.month)
     if (filters.year) q = q.eq('year', filters.year)
     if (filters.type) q = q.eq('type', filters.type)
@@ -63,6 +63,18 @@ export const transactionService = {
   },
 
   async delete(id, userId) {
+    // Lançamentos recorrentes: soft-delete para que o generatePending não os recrie
+    const { data: softDeleted } = await supabase
+      .from('transactions')
+      .update({ manually_deleted: true })
+      .eq('id', id)
+      .eq('user_id', userId)
+      .not('recurring_id', 'is', null)
+      .select('id')
+
+    if (softDeleted?.length) return
+
+    // Lançamentos manuais: delete físico
     const { error } = await supabase.from('transactions').delete().eq('id', id).eq('user_id', userId)
     if (error) throw error
   },
