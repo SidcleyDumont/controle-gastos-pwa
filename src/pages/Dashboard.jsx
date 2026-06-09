@@ -8,9 +8,10 @@ import { useTransactions } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useUserSettings } from '../hooks/useUserSettings'
 import { useRecurring } from '../hooks/useRecurring'
+import { useBankBalances } from '../hooks/useBankBalances'
 import Onboarding from '../components/Onboarding'
 import { Modal } from '../components/ui/Modal'
-import { calcularResumoMes } from '../utils/calculations'
+import { calcularResumoMes, calcularCarryOver } from '../utils/calculations'
 import { formatCurrency, formatPercent, MESES, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { StatCard } from '../components/ui/Card'
 import { StatusBadge } from '../components/ui/Badge'
@@ -200,6 +201,157 @@ function GoalModal({ currentGoal, onClose, onSave }) {
   )
 }
 
+// ─── Modal: adicionar / editar banco ─────────────────────────────────────────
+function BankModal({ data, onClose, onSave }) {
+  const [bankName, setBankName] = useState(data?.bank_name || '')
+  const [balance, setBalance]   = useState(data?.balance != null ? String(data.balance) : '')
+  const [loading, setLoading]   = useState(false)
+  const [error, setError]       = useState('')
+
+  const handleValueChange = (e) => {
+    let v = e.target.value.replace(/[^\d,.]/g, '').replace(',', '.')
+    const parts = v.split('.')
+    if (parts.length > 2) v = parts[0] + '.' + parts.slice(1).join('')
+    if (parts[1] !== undefined) v = parts[0] + '.' + parts[1].slice(0, 2)
+    setBalance(v)
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault()
+    const name = bankName.trim()
+    const val  = parseFloat(String(balance).replace(',', '.'))
+    if (!name)            return setError('Informe o nome do banco.')
+    if (name.length > 100) return setError('Nome muito longo — máximo 100 caracteres.')
+    if (isNaN(val))       return setError('Informe um saldo válido.')
+    setLoading(true); setError('')
+    try {
+      await onSave({ bank_name: name, balance: val })
+      onClose()
+    } catch (err) {
+      setError(err.message || 'Erro ao salvar.')
+    } finally { setLoading(false) }
+  }
+
+  const title = data?.id ? 'Editar Banco' : 'Adicionar Banco'
+
+  return (
+    <Modal onClose={onClose} title={title} maxWidth="380px">
+      <form onSubmit={handleSubmit} style={{ ...S.modal.body, gap: '16px' }}>
+        {error && <div style={S.modal.errorAlert} role="alert">{error}</div>}
+        <div>
+          <label style={S.label}>Nome do Banco *</label>
+          <input
+            value={bankName} onChange={e => setBankName(e.target.value)}
+            placeholder="Ex: Nubank, Bradesco, Inter..."
+            style={S.input} onFocus={onFocus} onBlur={onBlur}
+            autoFocus maxLength={100}
+          />
+        </div>
+        <div>
+          <label style={S.label}>Saldo (R$) *</label>
+          <input
+            type="text" inputMode="decimal"
+            value={balance} onChange={handleValueChange}
+            placeholder="0,00"
+            style={S.input} onFocus={onFocus} onBlur={onBlur}
+          />
+        </div>
+        <div style={S.modal.footer}>
+          <button type="button" onClick={onClose} style={S.modal.cancelBtn}>Cancelar</button>
+          <button type="submit" disabled={loading} style={{ ...S.modal.submitBtn(loading), flex: 1 }}>
+            {loading ? 'Salvando...' : 'Salvar'}
+          </button>
+        </div>
+      </form>
+    </Modal>
+  )
+}
+
+// ─── Seção: Receita do Mês por período ───────────────────────────────────────
+function ReceitaPeriodoSection({ receitaQuinzena, receitaFinalMes }) {
+  const total = receitaQuinzena + receitaFinalMes
+  return (
+    <div style={{ ...S.card, padding: '18px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '18px' }}>💰</span>
+          <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>Receita do Mês</span>
+        </div>
+        {total > 0 && (
+          <span style={{ fontSize: '13px', fontWeight: '700', color: '#15803d' }}>{formatCurrency(total)}</span>
+        )}
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+        <div style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', border: '1px solid #86efac', borderRadius: '12px', padding: '14px 16px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: '#15803d', marginBottom: '6px' }}>📅 Quinzena</div>
+          <div style={{ fontSize: '20px', fontWeight: '800', color: '#15803d' }}>{formatCurrency(receitaQuinzena)}</div>
+          <div style={{ fontSize: '11px', color: '#15803d', opacity: 0.7, marginTop: '2px' }}>1ª/2ª quinzena</div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)', border: '1px solid #93c5fd', borderRadius: '12px', padding: '14px 16px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: '#1d4ed8', marginBottom: '6px' }}>📆 Final do Mês</div>
+          <div style={{ fontSize: '20px', fontWeight: '800', color: '#1d4ed8' }}>{formatCurrency(receitaFinalMes)}</div>
+          <div style={{ fontSize: '11px', color: '#1d4ed8', opacity: 0.7, marginTop: '2px' }}>fechamento mensal</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ─── Seção: Outros Bancos ─────────────────────────────────────────────────────
+function OutrosBancosSection({ banks, onCreate, onEdit, onRemove }) {
+  const total = banks.reduce((s, b) => s + (b.balance || 0), 0)
+  return (
+    <div style={{ ...S.card, padding: '18px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <span style={{ fontSize: '18px' }}>🏦</span>
+          <span style={{ fontSize: '15px', fontWeight: '700', color: 'var(--text-primary)' }}>Saldo em Outros Bancos</span>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          {banks.length > 0 && (
+            <span style={{ fontSize: '13px', fontWeight: '700', color: '#1d4ed8' }}>{formatCurrency(total)}</span>
+          )}
+          <button onClick={onCreate} style={S.pillBtn(false)} title="Adicionar banco">+ Banco</button>
+        </div>
+      </div>
+
+      {banks.length === 0 ? (
+        <button onClick={onCreate} style={{
+          width: '100%', border: '2px dashed #e2e8f0', background: 'transparent',
+          borderRadius: '10px', padding: '16px', cursor: 'pointer',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+          fontFamily: 'inherit', color: '#94a3b8', fontSize: '13px',
+        }}>
+          <span style={{ fontSize: '20px' }}>+</span> Adicionar saldo de outro banco
+        </button>
+      ) : (
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '10px' }}>
+          {banks.map(bank => (
+            <div key={bank.id} style={{
+              background: 'var(--bg-hover)', border: '1px solid var(--border)',
+              borderRadius: '12px', padding: '12px 14px',
+              display: 'flex', flexDirection: 'column', gap: '6px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: '12px', fontWeight: '700', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '80%' }}>
+                  {bank.bank_name}
+                </span>
+                <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                  <button onClick={() => onEdit(bank)} title="Editar" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#64748b', borderRadius: '4px' }}>✏️</button>
+                  <button onClick={() => onRemove(bank.id)} title="Remover" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#64748b', borderRadius: '4px' }}>🗑️</button>
+                </div>
+              </div>
+              <div style={{ fontSize: '18px', fontWeight: '800', color: bank.balance >= 0 ? '#1d4ed8' : '#dc2626' }}>
+                {formatCurrency(bank.balance)}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 export default function Dashboard() {
   const { user } = useAuth()
   const navigate = useNavigate()
@@ -208,6 +360,7 @@ export default function Dashboard() {
   const [ano, setAno] = useState(getAnoAtual())
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showGoalModal, setShowGoalModal] = useState(false)
+  const [bankModal, setBankModal] = useState(null) // null | 'new' | {id, bank_name, balance}
   const [pdfLoading, setPdfLoading] = useState(false)
 
   const prevMes = mes > 1 ? mes - 1 : 12
@@ -216,9 +369,11 @@ export default function Dashboard() {
   const { data: lancamentos = [], isLoading: l1 } = useTransactions(user?.id, { month: mes, year: ano })
   const { data: todos = [], isLoading: l2 } = useTransactions(user?.id, { year: ano })
   const { data: lancamentosPrev = [] } = useTransactions(user?.id, { month: prevMes, year: prevAno })
+  const { data: todasTransacoes = [] } = useTransactions(user?.id)
   const { data: cats = [], isLoading: catsLoading, invalidate: invalidateCats } = useCategories(user?.id)
   const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
   const { data: recorrentes = [] } = useRecurring(user?.id)
+  const { data: banks = [], create: bankCreate, update: bankUpdate, remove: bankRemove } = useBankBalances(user?.id)
 
   const loading = l1 || l2
 
@@ -256,7 +411,24 @@ export default function Dashboard() {
     invalidateSettings()
   }
 
+  const handleSaveBank = async (payload) => {
+    if (bankModal?.id) {
+      await bankUpdate.mutateAsync({ id: bankModal.id, ...payload })
+    } else {
+      await bankCreate.mutateAsync(payload)
+    }
+  }
+
+  const handleRemoveBank = async (id) => {
+    if (window.confirm('Remover este banco?')) {
+      await bankRemove.mutateAsync(id)
+    }
+  }
+
   const resumo = calcularResumoMes(lancamentos)
+  const carryOver = calcularCarryOver(todasTransacoes, mes, ano)
+
+  const mesAnteriorLabel = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][prevMes - 1]
 
   const dadosMensais = MESES.map((nome, i) => {
     const doMes = todos.filter(l => l.month === i + 1)
@@ -301,6 +473,14 @@ export default function Dashboard() {
         />
       )}
 
+      {bankModal && (
+        <BankModal
+          data={bankModal === 'new' ? null : bankModal}
+          onClose={() => setBankModal(null)}
+          onSave={handleSaveBank}
+        />
+      )}
+
       {/* Header */}
       <div style={S.pageHeader}>
         <div>
@@ -333,17 +513,55 @@ export default function Dashboard() {
 
         {/* Stat Cards com ⓘ clicável */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '14px' }}>
-          <InfoCard title="Receitas" value={formatCurrency(resumo.receita)} color="green" icon="💰" info="Total de receitas com status 'Recebido' no mês. Lançamentos pendentes não entram aqui." />
           <InfoCard title="Despesas" value={formatCurrency(resumo.despesa)} color="red" icon="💸" info="Total de despesas com status 'Pago' no mês. Despesas 'A pagar' não são contabilizadas." />
           <InfoCard title="Saldo" value={formatCurrency(resumo.saldo)} color={resumo.saldo >= 0 ? 'blue' : 'red'} icon="⚖️" info="Receitas recebidas menos Despesas pagas. Representa o que realmente entrou e saiu." />
           <InfoCard title="% Poupança" value={formatPercent(resumo.poupanca)} color="purple" icon="🏦" info="Percentual da renda que sobrou. Meta: acima de 10%. Acima de 20% é excelente!" />
         </div>
 
-        {/* Period cards */}
+        {/* Seção 1: Receita do Mês por período */}
+        <ReceitaPeriodoSection receitaQuinzena={resumo.receitaQuinzena} receitaFinalMes={resumo.receitaFinalMes} />
+
+        {/* Saldo Acumulado de Meses Anteriores (carry-over) */}
+        {carryOver !== 0 && (
+          <div style={{
+            background: carryOver >= 0
+              ? 'linear-gradient(135deg, #fffbeb, #fef3c7)'
+              : 'linear-gradient(135deg, #fff1f2, #fee2e2)',
+            border: `1px solid ${carryOver >= 0 ? '#fcd34d' : '#fca5a5'}`,
+            borderRadius: '16px', padding: '18px 20px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ fontSize: '18px' }}>📦</span>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: carryOver >= 0 ? '#92400e' : '#b91c1c' }}>
+                    Saldo acumulado de meses anteriores
+                  </div>
+                  <div style={{ fontSize: '11px', color: carryOver >= 0 ? '#92400e' : '#b91c1c', opacity: 0.7, marginTop: '1px' }}>
+                    Acumulado até {mesAnteriorLabel}/{carryOver >= 0 ? prevAno : ano} — use "Mês Anterior" nos lançamentos para descontar daqui
+                  </div>
+                </div>
+              </div>
+              <div style={{ fontSize: '24px', fontWeight: '900', color: carryOver >= 0 ? '#92400e' : '#b91c1c' }}>
+                {formatCurrency(carryOver)}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Period cards (despesas) */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '14px' }}>
           <StatCard title="Despesas Quinzena" value={formatCurrency(resumo.quinzena)} color="yellow" icon="📅" />
           <StatCard title="Despesas Final do Mês" value={formatCurrency(resumo.finalMes)} color="yellow" icon="📆" />
         </div>
+
+        {/* Seção 2: Saldo em Outros Bancos */}
+        <OutrosBancosSection
+          banks={banks}
+          onCreate={() => setBankModal('new')}
+          onEdit={(bank) => setBankModal(bank)}
+          onRemove={handleRemoveBank}
+        />
 
         {/* Score Financeiro — calculado inline */}
         {resumo.receita > 0 && (() => {
