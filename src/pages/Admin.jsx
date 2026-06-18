@@ -165,6 +165,7 @@ export default function Admin() {
   }
 
   const handleDeleteUser = async (userId, email) => {
+    if (email === ADMIN_EMAIL) return alert('Não é possível excluir a conta administradora.')
     if (!confirm(`Excluir permanentemente o usuário ${email}?\n\nTodos os dados serão removidos e o e-mail ficará livre para novo cadastro.`)) return
     setUpdating(userId + '_del')
     try {
