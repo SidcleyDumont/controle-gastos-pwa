@@ -23,6 +23,12 @@ dist-ssr
 # Outros projetos na mesma pasta (não fazem parte deste repo)
 hervelly-keila-landing/
 
+# Supabase CLI temp files
+supabase/.temp/
+
+# SQL de setup avulso (não faz parte das migrations versionadas)
+supabase-staging-setup-completo.sql
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
