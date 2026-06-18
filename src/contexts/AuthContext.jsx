@@ -22,7 +22,7 @@ export function AuthProvider({ children }) {
   }, [])
 
   const appUrl = import.meta.env.VITE_APP_URL || window.location.origin
-  const signIn = (email, password) => supabase.auth.signInWithPassword({ email, password })
+  const signIn = (email, password) => supabase.auth.signInWithPassword({ email: email.toLowerCase().trim(), password })
   const signUp = async (email, password) => {
     const normalizedEmail = email.toLowerCase().trim()
 
