@@ -12,6 +12,8 @@ import { Modal } from '../components/ui/Modal'
 import { S, onFocus, onBlur } from '../styles'
 import { formatCurrency } from '../utils/formatters'
 
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
+
 function DeleteAccountModal({ onClose, onConfirm }) {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(false)
@@ -381,19 +383,21 @@ export default function Settings() {
       </div>
 
       {/* Zona de Perigo — LGPD */}
-      <div style={{ ...S.card, padding: '20px 24px', border: '1px solid #fca5a5', background: '#fff9f9' }}>
-        <p style={{ ...S.sectionTitle, color: '#b91c1c' }}>⚠️ Zona de Perigo</p>
-        <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.6' }}>
-          Em conformidade com a <strong>LGPD (Lei 13.709/2018)</strong>, você pode solicitar a exclusão completa da sua conta e de todos os dados financeiros vinculados a ela. Esta ação é <strong>permanente e irreversível</strong>.
-        </p>
-        <Button
-          variant="danger"
-          onClick={() => setShowDeleteModal(true)}
-          style={{ background: '#dc2626', color: 'white' }}
-        >
-          🗑️ Excluir minha conta e dados
-        </Button>
-      </div>
+      {user?.email !== ADMIN_EMAIL && (
+        <div style={{ ...S.card, padding: '20px 24px', border: '1px solid #fca5a5', background: '#fff9f9' }}>
+          <p style={{ ...S.sectionTitle, color: '#b91c1c' }}>⚠️ Zona de Perigo</p>
+          <p style={{ fontSize: '13px', color: 'var(--text-secondary)', marginBottom: '16px', lineHeight: '1.6' }}>
+            Em conformidade com a <strong>LGPD (Lei 13.709/2018)</strong>, você pode solicitar a exclusão completa da sua conta e de todos os dados financeiros vinculados a ela. Esta ação é <strong>permanente e irreversível</strong>.
+          </p>
+          <Button
+            variant="danger"
+            onClick={() => setShowDeleteModal(true)}
+            style={{ background: '#dc2626', color: 'white' }}
+          >
+            🗑️ Excluir minha conta e dados
+          </Button>
+        </div>
+      )}
 
       {showDeleteModal && (
         <DeleteAccountModal

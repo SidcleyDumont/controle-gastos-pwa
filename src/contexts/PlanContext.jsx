@@ -12,7 +12,7 @@ export function PlanProvider({ children }) {
 
   const now = new Date()
 
-  const expiresAt = settings?.plan_expires_at ? new Date(settings.plan_expires_at) : null
+  const expiresAt = !isAdmin && settings?.plan_expires_at ? new Date(settings.plan_expires_at) : null
   const isExpired = expiresAt ? now > expiresAt : false
   const daysUntilExpiry = expiresAt && !isExpired
     ? Math.ceil((expiresAt - now) / (1000 * 60 * 60 * 24))
