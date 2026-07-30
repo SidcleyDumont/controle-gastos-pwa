@@ -9,7 +9,7 @@ import TrialBanner from './TrialBanner'
 const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL
 
 const nav = [
-  { to: '/dashboard', label: 'Dashboard', emoji: '📊' },
+  { to: '/dashboard', label: 'Painel', emoji: '📊' },
   { to: '/lancamentos', label: 'Lançamentos', emoji: '💳' },
   { to: '/categorias', label: 'Categorias', emoji: '🏷️' },
   { to: '/resumo', label: 'Resumo Mensal', emoji: '📅' },

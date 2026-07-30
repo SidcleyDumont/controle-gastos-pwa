@@ -291,7 +291,7 @@ export default function Settings() {
           </div>
         )}
         <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px' }}>
-          {currentGoal ? 'Altere a meta abaixo:' : 'Defina quanto deseja poupar por mês. Acompanhe o progresso no Dashboard.'}
+          {currentGoal ? 'Altere a meta abaixo:' : 'Defina quanto deseja poupar por mês. Acompanhe o progresso no Painel.'}
         </p>
         {goalMsg && (
           <div style={{ background: goalMsgOk ? '#f0fdf4' : '#fff1f2', border: `1px solid ${goalMsgOk ? '#86efac' : '#fca5a5'}`, color: goalMsgOk ? '#15803d' : '#b91c1c', borderRadius: '10px', padding: '10px 14px', fontSize: '13px', marginBottom: '14px' }}>

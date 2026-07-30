@@ -171,7 +171,7 @@ function GoalModal({ currentGoal, onClose, onSave }) {
     <Modal onClose={onClose} title="Meta de Poupança Mensal" maxWidth="400px">
       <form onSubmit={handleSubmit} style={S.modal.body}>
         <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
-          Defina quanto deseja poupar por mês. O progresso aparece no Dashboard.
+          Defina quanto deseja poupar por mês. O progresso aparece no Painel.
         </p>
         {error && <div style={S.modal.errorAlert} role="alert">{error}</div>}
         <div>
@@ -484,7 +484,7 @@ export default function Dashboard() {
       {/* Header */}
       <div style={S.pageHeader}>
         <div>
-          <h1 style={S.pageTitle}>Dashboard</h1>
+          <h1 style={S.pageTitle}>Painel</h1>
           <p style={S.pageSubtitle}>Visão financeira do mês</p>
         </div>
         <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>

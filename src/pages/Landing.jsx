@@ -5,7 +5,7 @@ import { BookOpen } from 'lucide-react'
 const WA_URL = `https://wa.me/5583993500340?text=${encodeURIComponent('Olá! Vim pelo site planejofinanceiro.com.br e tenho interesse no Plano Pro. Poderia me ajudar? 😊')}`
 
 const screens = [
-  { src: '/screenshots/dashboard.png', title: 'Dashboard', desc: 'Visão geral em tempo real — saldo, receitas, despesas e meta de poupança do mês.' },
+  { src: '/screenshots/dashboard.png', title: 'Painel', desc: 'Visão geral em tempo real — saldo, receitas, despesas e meta de poupança do mês.' },
   { src: '/screenshots/lancamentos.png', title: 'Lançamentos', desc: 'Registre e filtre receitas e despesas por período, categoria e situação.' },
   { src: '/screenshots/resumo-mensal.png', title: 'Resumo Mensal', desc: 'Acompanhe a evolução financeira mês a mês com totais e % de poupança.' },
   { src: '/screenshots/orcamentos.png', title: 'Orçamentos', desc: 'Defina limites por categoria e veja em tempo real quanto já gastou.' },
@@ -13,7 +13,7 @@ const screens = [
 ]
 
 const features = [
-  { icon: '📊', title: 'Dashboard', desc: 'Visão geral das suas finanças em tempo real — saldo, receitas e despesas do mês.', free: true },
+  { icon: '📊', title: 'Painel', desc: 'Visão geral das suas finanças em tempo real — saldo, receitas e despesas do mês.', free: true },
   { icon: '🏷️', title: 'Categorias', desc: 'Crie categorias personalizadas e organize seus gastos do seu jeito.', free: true },
   { icon: '📅', title: 'Lançamentos', desc: 'Registre receitas e despesas, filtre por período, exporte para Excel ou CSV.', free: false },
   { icon: '🔁', title: 'Recorrentes', desc: 'Cadastre contas fixas e elas aparecem automaticamente todo mês.', free: false },
@@ -160,7 +160,7 @@ export default function Landing() {
       <section style={{ padding: '72px 24px', maxWidth: '900px', margin: '0 auto' }}>
         <div style={{ textAlign: 'center', marginBottom: '36px' }}>
           <h2 style={{ color: '#0f172a', fontSize: 'clamp(22px, 4vw, 32px)', fontWeight: '800', margin: '0 0 12px' }}>Tudo que você precisa para organizar as finanças</h2>
-          <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Após o trial, plano Free inclui Dashboard e Categorias — Pro desbloqueia tudo.</p>
+          <p style={{ color: '#64748b', fontSize: '15px', margin: 0 }}>Após o trial, plano Free inclui Painel e Categorias — Pro desbloqueia tudo.</p>
         </div>
 
         {/* Banner trial */}
@@ -226,7 +226,7 @@ export default function Landing() {
               🎁 Primeiros 7 dias com acesso total ao plano Pro
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-              {['Dashboard completo', 'Gestão de Categorias', 'Acesso pelo celular (PWA)', 'Tema claro e escuro'].map(item => (
+              {['Painel completo', 'Gestão de Categorias', 'Acesso pelo celular (PWA)', 'Tema claro e escuro'].map(item => (
                 <div key={item} style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px', color: '#374151' }}>
                   <span style={{ color: '#16a34a', fontWeight: '700' }}>✓</span>{item}
                 </div>

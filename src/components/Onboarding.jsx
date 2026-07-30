@@ -46,7 +46,7 @@ function WelcomeStep({ user, onNext, onSkip }) {
 
       <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '24px', textAlign: 'left' }}>
         {[
-          ['📊', 'Dashboard', 'Visão completa das suas finanças por mês'],
+          ['📊', 'Painel', 'Visão completa das suas finanças por mês'],
           ['🔄', 'Recorrentes', 'Automatize salário, aluguel e assinaturas fixas'],
           ['🎯', 'Orçamentos', 'Defina limites por categoria e evite excessos'],
         ].map(([emoji, title, desc]) => (
@@ -196,7 +196,7 @@ function DoneStep({ created, failed, onFinish }) {
       </div>
 
       <button onClick={onFinish} style={{ width: '100%', padding: '13px', border: 'none', borderRadius: '12px', background: 'linear-gradient(135deg, #1e3a8a, #2563eb)', color: 'white', fontSize: '15px', fontWeight: '700', cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 4px 14px rgba(30,64,175,0.35)' }}>
-        Ir para o Dashboard 🚀
+        Ir para o Painel 🚀
       </button>
     </div>
   )
