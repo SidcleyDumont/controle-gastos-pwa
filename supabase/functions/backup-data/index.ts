@@ -39,7 +39,8 @@ serve(async (req) => {
       continue
     }
     counts[table] = data?.length ?? 0
-    const csv = toCSV(data ?? [])
+    if (!data || data.length === 0) continue
+    const csv = toCSV(data)
     attachments.push({
       filename: `${table}_${today}.csv`,
       content: btoa(unescape(encodeURIComponent(csv))),
