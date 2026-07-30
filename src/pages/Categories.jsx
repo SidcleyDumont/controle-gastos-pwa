@@ -3,7 +3,6 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { categoryService } from '../services/categoryService'
 import { useCategories } from '../hooks/useCategories'
-import { useBankBalances } from '../hooks/useBankBalances'
 import { Badge } from '../components/ui/Badge'
 import { Button } from '../components/ui/Button'
 import { Modal } from '../components/ui/Modal'
@@ -11,8 +10,7 @@ import { S, onFocus, onBlur } from '../styles'
 
 function CategoryModal({ data, onClose, onSave }) {
   const { user } = useAuth()
-  const { data: banks = [] } = useBankBalances(user?.id)
-  const [form, setForm] = useState({ type: data?.type || 'Despesa', name: data?.name || '', usage: data?.usage || '', notes: data?.notes || '', bank_id: data?.bank_id || '' })
+  const [form, setForm] = useState({ type: data?.type || 'Despesa', name: data?.name || '', usage: data?.usage || '', notes: data?.notes || '' })
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }))
@@ -22,9 +20,8 @@ function CategoryModal({ data, onClose, onSave }) {
     if (!form.name.trim()) return setError('Nome obrigatório')
     setLoading(true)
     try {
-      const payload = { ...form, bank_id: form.type === 'Despesa' && form.bank_id ? form.bank_id : null }
-      if (data?.id) await categoryService.update(data.id, user.id, payload)
-      else await categoryService.create(user.id, payload)
+      if (data?.id) await categoryService.update(data.id, user.id, form)
+      else await categoryService.create(user.id, form)
       onSave(); onClose()
     } catch (err) { setError(err.message) } finally { setLoading(false) }
   }
@@ -56,19 +53,6 @@ function CategoryModal({ data, onClose, onSave }) {
             <input value={form.notes} onChange={e => set('notes', e.target.value)}
               placeholder="Detalhes adicionais..." style={S.input} onFocus={onFocus} onBlur={onBlur} />
           </div>
-          {form.type === 'Despesa' && (
-            <div>
-              <label style={S.label}>Vincular a um banco</label>
-              <select value={form.bank_id} onChange={e => set('bank_id', e.target.value)}
-                style={{ ...S.input, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
-                <option value="">Nenhum</option>
-                {banks.map(b => <option key={b.id} value={b.id}>{b.bank_name}</option>)}
-              </select>
-              <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 0' }}>
-                Despesas pagas nesta categoria descontam automaticamente do saldo desse banco (em Outros Bancos, no Painel).
-              </p>
-            </div>
-          )}
           <div style={S.modal.footer}>
             <button type="button" onClick={onClose} style={S.modal.cancelBtn}>Cancelar</button>
             <button type="submit" disabled={loading} style={S.modal.submitBtn(loading)}>
@@ -83,8 +67,6 @@ function CategoryModal({ data, onClose, onSave }) {
 export default function Categories() {
   const { user } = useAuth()
   const navigate = useNavigate()
-  const { data: banks = [] } = useBankBalances(user?.id)
-  const bankName = (id) => banks.find(b => b.id === id)?.bank_name
   const [modal, setModal] = useState({ open: false, data: null })
   const [filter, setFilter] = useState('')
   const [page, setPage] = useState(1)
@@ -146,14 +128,7 @@ export default function Categories() {
               ) : pageItems.map((item, idx) => (
                 <tr key={item.id} style={{ background: idx % 2 === 0 ? 'white' : '#fafafa' }}>
                   <td style={S.td}><Badge variant={item.type === 'Receita' ? 'success' : 'danger'}>{item.type}</Badge></td>
-                  <td style={{ ...S.td, fontWeight: '600', color: '#1e293b' }}>
-                    {item.name}
-                    {bankName(item.bank_id) && (
-                      <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: '600', color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '99px', padding: '1px 8px' }}>
-                        🏦 {bankName(item.bank_id)}
-                      </span>
-                    )}
-                  </td>
+                  <td style={{ ...S.td, fontWeight: '600', color: '#1e293b' }}>{item.name}</td>
                   <td style={{ ...S.td, color: '#64748b' }}>{item.usage || '-'}</td>
                   <td style={{ ...S.td, color: '#94a3b8', maxWidth: '220px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{item.notes || '-'}</td>
                   <td style={{ ...S.td, textAlign: 'right', whiteSpace: 'nowrap' }}>
@@ -205,14 +180,7 @@ export default function Categories() {
                   </button>
                 </div>
               </div>
-              <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '15px', marginBottom: '2px' }}>
-                {item.name}
-                {bankName(item.bank_id) && (
-                  <span style={{ marginLeft: '8px', fontSize: '11px', fontWeight: '600', color: '#1d4ed8', background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '99px', padding: '1px 8px' }}>
-                    🏦 {bankName(item.bank_id)}
-                  </span>
-                )}
-              </div>
+              <div style={{ fontWeight: '600', color: '#1e293b', fontSize: '15px', marginBottom: '2px' }}>{item.name}</div>
               {item.usage && <div style={{ fontSize: '12px', color: '#64748b' }}>Uso: {item.usage}</div>}
               {item.notes && <div style={{ fontSize: '12px', color: '#94a3b8', marginTop: '2px' }}>{item.notes}</div>}
             </div>

@@ -1,7 +1,8 @@
 import { useState, useRef, useMemo } from 'react'
 import { useAuth } from '../contexts/AuthContext'
 import { transactionService } from '../services/transactionService'
-import { PERIODOS, TIPOS, SITUACOES, FORMAS_PAGAMENTO } from '../utils/formatters'
+import { useBankBalances } from '../hooks/useBankBalances'
+import { PERIODOS, TIPOS, SITUACOES, FORMAS_PAGAMENTO, formatCurrency } from '../utils/formatters'
 import { Modal } from './ui/Modal'
 import { S, onFocus, onBlur } from '../styles'
 
@@ -24,6 +25,7 @@ function parseValue(str) {
 
 export default function TransactionModal({ data, cats, items = [], onClose, onSave, isDuplicate = false }) {
   const { user } = useAuth()
+  const { data: banks = [] } = useBankBalances(user?.id)
   const [form, setForm] = useState({
     date:           data?.date           || new Date().toISOString().split('T')[0],
     period:         data?.period         || 'Quinzena',
@@ -36,6 +38,7 @@ export default function TransactionModal({ data, cats, items = [], onClose, onSa
     origin:         data?.origin         || '',
     due_date:       data?.due_date       || '',
     debit_source:   data?.debit_source   || 'Mês Atual',
+    bank_id:        data?.bank_id        || '',
   })
   const [error, setError]               = useState('')
   const [loading, setLoading]           = useState(false)
@@ -70,6 +73,7 @@ export default function TransactionModal({ data, cats, items = [], onClose, onSa
       period:         t.period,
       payment_method: t.payment_method,
       original_value: String(t.original_value),
+      bank_id:        t.bank_id        || '',
     }))
     setShowSugs(false)
   }
@@ -121,6 +125,7 @@ export default function TransactionModal({ data, cats, items = [], onClose, onSa
         category_id:    form.category_id || null,
         due_date:       form.type === 'Despesa' && form.due_date ? form.due_date : null,
         debit_source:   form.type === 'Despesa' ? form.debit_source : 'Mês Atual',
+        bank_id:        form.type === 'Despesa' && form.bank_id ? form.bank_id : null,
       }
       if (data?.id && !isDuplicate)
         await transactionService.update(data.id, user.id, payload)
@@ -288,6 +293,21 @@ export default function TransactionModal({ data, cats, items = [], onClose, onSa
             </label>
             <input type="date" value={form.due_date} onChange={e => set('due_date', e.target.value)}
               style={S.input} onFocus={onFocus} onBlur={onBlur} />
+          </div>
+        )}
+
+        {/* Descontar de qual banco (só Despesa, e só se houver bancos cadastrados) */}
+        {form.type === 'Despesa' && banks.length > 0 && (
+          <div>
+            <label style={S.label}>Descontar do saldo de qual banco?</label>
+            <select value={form.bank_id} onChange={e => set('bank_id', e.target.value)}
+              style={{ ...S.input, cursor: 'pointer' }} onFocus={onFocus} onBlur={onBlur}>
+              <option value="">Nenhum — não afeta saldo de banco</option>
+              {banks.map(b => <option key={b.id} value={b.id}>{b.bank_name} ({formatCurrency(b.balance)})</option>)}
+            </select>
+            <p style={{ fontSize: '11px', color: '#94a3b8', margin: '4px 0 0' }}>
+              Ao marcar como "Pago", o valor é descontado automaticamente desse banco.
+            </p>
           </div>
         )}
 

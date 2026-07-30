@@ -1,8 +1,8 @@
 import { supabase } from './supabaseClient'
 
 // Whitelist de campos aceitos em create/update — campos fora desta lista são ignorados
-const ALLOWED_CREATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin', 'due_date', 'debit_source']
-const ALLOWED_UPDATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin', 'due_date', 'debit_source']
+const ALLOWED_CREATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin', 'due_date', 'debit_source', 'bank_id']
+const ALLOWED_UPDATE = ['date', 'period', 'type', 'description', 'category_id', 'original_value', 'status', 'payment_method', 'origin', 'due_date', 'debit_source', 'bank_id']
 
 function pick(data, fields) {
   return fields.reduce((acc, key) => {
