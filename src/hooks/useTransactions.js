@@ -10,8 +10,12 @@ export function useTransactions(userId, filters = {}) {
     enabled: !!userId,
   })
 
-  const invalidate = () =>
+  const invalidate = () => {
     queryClient.invalidateQueries({ queryKey: ['transactions', userId] })
+    // Lançamentos podem alterar o saldo de bancos vinculados (trigger no banco) e o carry-over
+    queryClient.invalidateQueries({ queryKey: ['bank_balances', userId] })
+    queryClient.invalidateQueries({ queryKey: ['carryOver', userId] })
+  }
 
   return { ...query, invalidate }
 }

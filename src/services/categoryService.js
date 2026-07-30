@@ -1,6 +1,6 @@
 import { supabase } from './supabaseClient'
 
-const ALLOWED_FIELDS = ['type', 'name', 'usage', 'notes']
+const ALLOWED_FIELDS = ['type', 'name', 'usage', 'notes', 'bank_id']
 
 function pick(data, fields) {
   return fields.reduce((acc, key) => {

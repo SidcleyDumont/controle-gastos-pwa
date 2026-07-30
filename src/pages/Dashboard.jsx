@@ -397,7 +397,11 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return
     recurringTransactionService.generatePending(user.id)
-      .then(() => queryClient.invalidateQueries({ queryKey: ['transactions', user.id] }))
+      .then(() => {
+        queryClient.invalidateQueries({ queryKey: ['transactions', user.id] })
+        queryClient.invalidateQueries({ queryKey: ['bank_balances', user.id] })
+        queryClient.invalidateQueries({ queryKey: ['carryOver', user.id] })
+      })
       .catch(err => console.error('[generatePending]', err))
   }, [user])
 
