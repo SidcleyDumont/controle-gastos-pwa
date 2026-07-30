@@ -41,4 +41,15 @@ export const bankBalanceService = {
       .eq('user_id', userId)
     if (error) throw error
   },
+
+  async history(userId, bankId) {
+    const { data, error } = await supabase
+      .from('bank_balance_history')
+      .select('*')
+      .eq('user_id', userId)
+      .eq('bank_id', bankId)
+      .order('created_at', { ascending: false })
+    if (error) throw error
+    return data
+  },
 }

@@ -8,7 +8,7 @@ import { useTransactions, useCarryOver } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useUserSettings } from '../hooks/useUserSettings'
 import { useRecurring } from '../hooks/useRecurring'
-import { useBankBalances } from '../hooks/useBankBalances'
+import { useBankBalances, useBankBalanceHistory } from '../hooks/useBankBalances'
 import Onboarding from '../components/Onboarding'
 import { Modal } from '../components/ui/Modal'
 import { calcularResumoMes } from '../utils/calculations'
@@ -267,6 +267,46 @@ function BankModal({ data, onClose, onSave }) {
   )
 }
 
+// ─── Modal: histórico de saldo de um banco ───────────────────────────────────
+function BankHistoryModal({ bank, userId, onClose }) {
+  const { data: history = [], isLoading } = useBankBalanceHistory(userId, bank.id)
+
+  return (
+    <Modal onClose={onClose} title={`Histórico — ${bank.bank_name}`} maxWidth="480px">
+      <div style={S.modal.body}>
+        <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+          Saldo atual: <strong style={{ color: bank.balance >= 0 ? '#1d4ed8' : '#dc2626' }}>{formatCurrency(bank.balance)}</strong>
+        </p>
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '13px' }}>Carregando...</div>
+        ) : history.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '24px', color: '#94a3b8', fontSize: '13px' }}>Nenhuma alteração registrada ainda.</div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '360px', overflowY: 'auto' }}>
+            {history.map(h => (
+              <div key={h.id} style={{ border: '1px solid var(--border)', borderRadius: '10px', padding: '10px 12px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--text-primary)', fontWeight: '600' }}>{h.reason || 'Ajuste manual do saldo'}</span>
+                  <span style={{ fontSize: '13px', fontWeight: '800', color: h.change_amount >= 0 ? '#16a34a' : '#dc2626', whiteSpace: 'nowrap' }}>
+                    {h.change_amount >= 0 ? '+' : ''}{formatCurrency(h.change_amount)}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>{new Date(h.created_at).toLocaleString('pt-BR')}</span>
+                  <span style={{ fontSize: '11px', color: '#94a3b8' }}>{formatCurrency(h.balance_before)} → {formatCurrency(h.balance_after)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+        <div style={S.modal.footer}>
+          <button type="button" onClick={onClose} style={{ ...S.modal.cancelBtn, flex: 1 }}>Fechar</button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 // ─── Seção: Receita do Mês por período ───────────────────────────────────────
 function ReceitaPeriodoSection({ receitaQuinzena, receitaFinalMes }) {
   const total = receitaQuinzena + receitaFinalMes
@@ -298,7 +338,7 @@ function ReceitaPeriodoSection({ receitaQuinzena, receitaFinalMes }) {
 }
 
 // ─── Seção: Outros Bancos ─────────────────────────────────────────────────────
-function OutrosBancosSection({ banks, onCreate, onEdit, onRemove }) {
+function OutrosBancosSection({ banks, onCreate, onEdit, onRemove, onHistory }) {
   const total = banks.reduce((s, b) => s + (b.balance || 0), 0)
   return (
     <div style={{ ...S.card, padding: '18px 20px' }}>
@@ -337,6 +377,7 @@ function OutrosBancosSection({ banks, onCreate, onEdit, onRemove }) {
                   {bank.bank_name}
                 </span>
                 <div style={{ display: 'flex', gap: '4px', flexShrink: 0 }}>
+                  <button onClick={() => onHistory(bank)} title="Ver histórico" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#64748b', borderRadius: '4px' }}>🕒</button>
                   <button onClick={() => onEdit(bank)} title="Editar" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#64748b', borderRadius: '4px' }}>✏️</button>
                   <button onClick={() => onRemove(bank.id)} title="Remover" style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#64748b', borderRadius: '4px' }}>🗑️</button>
                 </div>
@@ -361,6 +402,7 @@ export default function Dashboard() {
   const [showOnboarding, setShowOnboarding] = useState(false)
   const [showGoalModal, setShowGoalModal] = useState(false)
   const [bankModal, setBankModal] = useState(null) // null | 'new' | {id, bank_name, balance}
+  const [historyBankId, setHistoryBankId] = useState(null)
   const [pdfLoading, setPdfLoading] = useState(false)
 
   const prevMes = mes > 1 ? mes - 1 : 12
@@ -484,6 +526,14 @@ export default function Dashboard() {
         />
       )}
 
+      {historyBankId && (
+        <BankHistoryModal
+          bank={banks.find(b => b.id === historyBankId) || { id: historyBankId, bank_name: '', balance: 0 }}
+          userId={user?.id}
+          onClose={() => setHistoryBankId(null)}
+        />
+      )}
+
       {/* Header */}
       <div style={S.pageHeader}>
         <div>
@@ -564,6 +614,7 @@ export default function Dashboard() {
           onCreate={() => setBankModal('new')}
           onEdit={(bank) => setBankModal(bank)}
           onRemove={handleRemoveBank}
+          onHistory={(bank) => setHistoryBankId(bank.id)}
         />
 
         {/* Score Financeiro — calculado inline */}

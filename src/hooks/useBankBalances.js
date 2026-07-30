@@ -31,3 +31,11 @@ export function useBankBalances(userId) {
 
   return { ...query, create, update, remove, invalidate }
 }
+
+export function useBankBalanceHistory(userId, bankId) {
+  return useQuery({
+    queryKey: ['bank_balance_history', userId, bankId],
+    queryFn: () => bankBalanceService.history(userId, bankId),
+    enabled: !!userId && !!bankId,
+  })
+}
