@@ -15,3 +15,11 @@ export function useTransactions(userId, filters = {}) {
 
   return { ...query, invalidate }
 }
+
+export function useCarryOver(userId, month, year) {
+  return useQuery({
+    queryKey: ['carryOver', userId, month, year],
+    queryFn: () => transactionService.getCarryOver(userId, month, year),
+    enabled: !!userId,
+  })
+}

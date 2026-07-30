@@ -17,37 +17,6 @@ export function calcularResumoMes(lancamentos) {
   return { receita, despesa, quinzena, finalMes, receitaQuinzena, receitaFinalMes, saldo, poupanca, status }
 }
 
-// Calcula o saldo acumulado de todos os meses anteriores ao mês/ano informado.
-// Considera apenas lançamentos efetivados (Recebido / Pago).
-export function calcularCarryOver(todasTransacoes, mes, ano) {
-  if (!todasTransacoes || todasTransacoes.length === 0) return 0
-
-  // Receitas recebidas em meses anteriores
-  const receitaAnterior = todasTransacoes
-    .filter(l => l.type === 'Receita' && l.status === 'Recebido' && isAnterior(l, mes, ano))
-    .reduce((s, l) => s + (l.income_value || 0), 0)
-
-  // Despesas "Mês Atual" pagas em meses anteriores
-  const despesaAnterior = todasTransacoes
-    .filter(l => l.type === 'Despesa' && l.status === 'Pago' && l.debit_source !== 'Mês Anterior' && isAnterior(l, mes, ano))
-    .reduce((s, l) => s + (l.expense_value || 0), 0)
-
-  // Despesas "Mês Anterior" pagas em qualquer mês até o atual (inclusive) — reduzem o carry-over
-  const deducoes = todasTransacoes
-    .filter(l => l.type === 'Despesa' && l.status === 'Pago' && l.debit_source === 'Mês Anterior' && !isDepois(l, mes, ano))
-    .reduce((s, l) => s + (l.expense_value || 0), 0)
-
-  return receitaAnterior - despesaAnterior - deducoes
-}
-
-function isAnterior(l, mes, ano) {
-  return l.year < ano || (l.year === ano && l.month < mes)
-}
-
-function isDepois(l, mes, ano) {
-  return l.year > ano || (l.year === ano && l.month > mes)
-}
-
 export function calcularResumoAnual(lancamentos) {
   const meses = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro']
   return meses.map((nome, idx) => {

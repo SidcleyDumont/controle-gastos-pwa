@@ -29,6 +29,12 @@ export const transactionService = {
     return data
   },
 
+  async getCarryOver(userId, month, year) {
+    const { data, error } = await supabase.rpc('get_carry_over', { p_month: month, p_year: year })
+    if (error) throw error
+    return Number(data) || 0
+  },
+
   async create(userId, data) {
     const safe = pick(data, ALLOWED_CREATE)
     const [year, month] = safe.date.split('-').map(Number)

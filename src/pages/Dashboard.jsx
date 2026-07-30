@@ -4,14 +4,14 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import { recurringTransactionService } from '../services/recurringTransactionService'
 import { userSettingsService } from '../services/userSettingsService'
-import { useTransactions } from '../hooks/useTransactions'
+import { useTransactions, useCarryOver } from '../hooks/useTransactions'
 import { useCategories } from '../hooks/useCategories'
 import { useUserSettings } from '../hooks/useUserSettings'
 import { useRecurring } from '../hooks/useRecurring'
 import { useBankBalances } from '../hooks/useBankBalances'
 import Onboarding from '../components/Onboarding'
 import { Modal } from '../components/ui/Modal'
-import { calcularResumoMes, calcularCarryOver } from '../utils/calculations'
+import { calcularResumoMes } from '../utils/calculations'
 import { formatCurrency, formatPercent, MESES, getMesAtual, getAnoAtual } from '../utils/formatters'
 import { StatCard } from '../components/ui/Card'
 import { StatusBadge } from '../components/ui/Badge'
@@ -369,7 +369,7 @@ export default function Dashboard() {
   const { data: lancamentos = [], isLoading: l1 } = useTransactions(user?.id, { month: mes, year: ano })
   const { data: todos = [], isLoading: l2 } = useTransactions(user?.id, { year: ano })
   const { data: lancamentosPrev = [] } = useTransactions(user?.id, { month: prevMes, year: prevAno })
-  const { data: todasTransacoes = [] } = useTransactions(user?.id)
+  const { data: carryOver = 0 } = useCarryOver(user?.id, mes, ano)
   const { data: cats = [], isLoading: catsLoading, invalidate: invalidateCats } = useCategories(user?.id)
   const { data: settings, invalidate: invalidateSettings } = useUserSettings(user?.id)
   const { data: recorrentes = [] } = useRecurring(user?.id)
@@ -426,7 +426,6 @@ export default function Dashboard() {
   }
 
   const resumo = calcularResumoMes(lancamentos)
-  const carryOver = calcularCarryOver(todasTransacoes, mes, ano)
 
   const mesAnteriorLabel = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'][prevMes - 1]
 
@@ -567,15 +566,26 @@ export default function Dashboard() {
         {resumo.receita > 0 && (() => {
           let sc = 0
           const det = []
-          if (resumo.saldo >= 0) { sc += 25; det.push({ label: 'Saldo positivo no mês', ok: true }) }
+          if (resumo.saldo >= 0) { sc += 30; det.push({ label: 'Saldo positivo no mês', ok: true }) }
           else { det.push({ label: 'Saldo negativo no mês', ok: false }) }
           const pct = resumo.poupanca || 0
           if (pct >= 20) { sc += 40; det.push({ label: `Poupança excelente (${pct.toFixed(0)}%)`, ok: true }) }
           else if (pct >= 10) { sc += 25; det.push({ label: `Poupança boa (${pct.toFixed(0)}%)`, ok: true }) }
           else if (pct >= 5) { sc += 12; det.push({ label: `Poupança baixa (${pct.toFixed(0)}%)`, ok: false }) }
           else { det.push({ label: 'Poupança abaixo de 5%', ok: false }) }
-          sc += 10; det.push({ label: 'Lançamentos registrados', ok: true })
-          sc = Math.min(100, sc + 10)
+          const despesasPagas = lancamentos.filter(l => l.type === 'Despesa' && l.status === 'Pago')
+          if (despesasPagas.length > 0) {
+            const numCategorias = new Set(despesasPagas.map(l => l.category_id || 'sem-categoria')).size
+            if (numCategorias >= 3) { sc += 15; det.push({ label: 'Gastos organizados em 3+ categorias', ok: true }) }
+            else { det.push({ label: 'Poucas categorias usadas nos gastos', ok: false }) }
+          }
+          if (goal) {
+            if (resumo.saldo >= goal) { sc += 15; det.push({ label: 'Meta de poupança atingida', ok: true }) }
+            else { det.push({ label: 'Meta de poupança ainda não atingida', ok: false }) }
+          } else if (banks.length > 0 && banks.reduce((s, b) => s + (b.balance || 0), 0) > 0) {
+            sc += 15; det.push({ label: 'Possui reserva em outro banco', ok: true })
+          }
+          sc = Math.min(100, sc)
           const nivel = sc >= 85 ? 'Excelente' : sc >= 70 ? 'Bom' : sc >= 50 ? 'Regular' : 'Atenção'
           const cor = sc >= 85 ? '#2563eb' : sc >= 70 ? '#16a34a' : sc >= 50 ? '#d97706' : '#dc2626'
           const emoji = sc >= 85 ? '🏆' : sc >= 70 ? '✅' : sc >= 50 ? '⚠️' : '🚨'
