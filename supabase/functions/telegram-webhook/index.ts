@@ -124,29 +124,23 @@ serve(async (req) => {
       let categoryId: string | null = null
       let categoryNote = ''
       if (catMatch) {
-        const { data: cat } = await supabase
-          .from('categories')
-          .select('id')
-          .eq('user_id', userId)
-          .eq('type', isDespesa ? 'Despesa' : 'Receita')
-          .ilike('name', `%${catMatch[1]}%`)
-          .limit(1)
-          .maybeSingle()
-        if (cat) categoryId = cat.id
+        const { data: catId } = await supabase.rpc('find_category', {
+          p_user_id: userId,
+          p_type: isDespesa ? 'Despesa' : 'Receita',
+          p_search: catMatch[1],
+        })
+        if (catId) categoryId = catId
         else categoryNote = ` (categoria "${catMatch[1]}" não encontrada)`
       }
 
       let bankId: string | null = null
       let bankNote = ''
       if (isDespesa && bankMatch) {
-        const { data: bank } = await supabase
-          .from('bank_balances')
-          .select('id')
-          .eq('user_id', userId)
-          .ilike('bank_name', `%${bankMatch[1]}%`)
-          .limit(1)
-          .maybeSingle()
-        if (bank) bankId = bank.id
+        const { data: foundBankId } = await supabase.rpc('find_bank', {
+          p_user_id: userId,
+          p_search: bankMatch[1],
+        })
+        if (foundBankId) bankId = foundBankId
         else bankNote = ` (banco "${bankMatch[1]}" não encontrado)`
       }
 
