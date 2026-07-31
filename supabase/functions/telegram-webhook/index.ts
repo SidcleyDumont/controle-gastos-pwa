@@ -22,11 +22,34 @@ function parseValue(str: string): number | null {
   return isNaN(n) ? null : n
 }
 
+// Extrai uma tag de data (!DD/MM ou !DD/MM/AAAA) e devolve 'AAAA-MM-DD'.
+// Sem tag ou data inválida -> usa hoje.
+function parseDateTag(dateMatch: RegExpMatchArray | null): { date: string; invalid: boolean } {
+  const now = new Date()
+  if (!dateMatch) {
+    return { date: now.toISOString().split('T')[0], invalid: false }
+  }
+  const day   = Number(dateMatch[1])
+  const month = Number(dateMatch[2])
+  let year    = dateMatch[3] ? Number(dateMatch[3]) : now.getFullYear()
+  if (year < 100) year += 2000
+
+  const d = new Date(Date.UTC(year, month - 1, day))
+  const valid = d.getUTCFullYear() === year && d.getUTCMonth() === month - 1 && d.getUTCDate() === day
+  if (!valid) return { date: now.toISOString().split('T')[0], invalid: true }
+
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return { date: `${year}-${pad(month)}-${pad(day)}`, invalid: false }
+}
+
 const HELP_TEXT =
   '👋 Comandos disponíveis:\n\n' +
-  '/despesa 50 Mercado #alimentacao @Nubank\n' +
-  '/receita 3442 Salário\n\n' +
-  'As tags #categoria e @banco são opcionais. Sem elas, lança sem categoria e sem descontar de banco nenhum.\n\n' +
+  '/despesa 50 Mercado #alimentacao @Nubank !05/08\n' +
+  '/receita 3442 Salário !05/08/2026\n\n' +
+  'Tags opcionais (em qualquer ordem):\n' +
+  '#categoria — tenta achar uma categoria com esse nome\n' +
+  '@banco — desconta automaticamente desse banco (só em despesa)\n' +
+  '!DD/MM ou !DD/MM/AAAA — data do lançamento (sem isso, usa hoje)\n\n' +
   '/vincular CÓDIGO — conecta sua conta (gere o código em Configurações no app)'
 
 serve(async (req) => {
@@ -84,7 +107,8 @@ serve(async (req) => {
 
       const catMatch  = rest.match(/#(\S+)/)
       const bankMatch = rest.match(/@(\S+)/)
-      const clean = rest.replace(/#\S+/g, '').replace(/@\S+/g, '').trim()
+      const dateMatch = rest.match(/!(\d{1,2})\/(\d{1,2})(?:\/(\d{2,4}))?/)
+      const clean = rest.replace(/#\S+/g, '').replace(/@\S+/g, '').replace(/!\S+/g, '').trim()
 
       const parts = clean.split(/\s+/)
       const valor = parseValue(parts[0])
@@ -126,12 +150,13 @@ serve(async (req) => {
         else bankNote = ` (banco "${bankMatch[1]}" não encontrado)`
       }
 
-      const today = new Date().toISOString().split('T')[0]
-      const [year, month] = today.split('-').map(Number)
+      const { date: txDate, invalid: invalidDate } = parseDateTag(dateMatch)
+      const [year, month] = txDate.split('-').map(Number)
+      const dateNote = invalidDate ? ' (data inválida, usei hoje)' : ''
 
       const { error: insertErr } = await supabase.from('transactions').insert({
         user_id: userId,
-        date: today,
+        date: txDate,
         period: 'Quinzena',
         type: isDespesa ? 'Despesa' : 'Receita',
         description,
@@ -152,7 +177,8 @@ serve(async (req) => {
         await reply(chatId, `❌ Erro ao lançar: ${insertErr.message}`)
       } else {
         const emoji = isDespesa ? '💸' : '💰'
-        await reply(chatId, `✅ ${emoji} ${isDespesa ? 'Despesa' : 'Receita'} lançada: ${description} — R$ ${valor.toFixed(2).replace('.', ',')}${categoryNote}${bankNote}`)
+        const [y, m, d] = txDate.split('-')
+        await reply(chatId, `✅ ${emoji} ${isDespesa ? 'Despesa' : 'Receita'} lançada: ${description} — R$ ${valor.toFixed(2).replace('.', ',')} — ${d}/${m}/${y}${categoryNote}${bankNote}${dateNote}`)
       }
       return new Response('ok')
     }
