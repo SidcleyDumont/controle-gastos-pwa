@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router-dom'
 import { transactionService } from '../services/transactionService'
 import { userSettingsService } from '../services/userSettingsService'
 import { accountService } from '../services/accountService'
-import { useUserSettings } from '../hooks/useUserSettings'
+import { useUserSettings, useTelegramLink } from '../hooks/useUserSettings'
 import { useState } from 'react'
 import * as XLSX from 'xlsx'
 import { Button } from '../components/ui/Button'
@@ -112,6 +112,23 @@ export default function Settings() {
   const [goalInput, setGoalInput] = useState('')
   const [goalMsg, setGoalMsg] = useState('')
   const [savingGoal, setSavingGoal] = useState(false)
+
+  const { data: telegramLink, invalidate: invalidateTelegramLink } = useTelegramLink(user?.id)
+  const [generatingCode, setGeneratingCode] = useState(false)
+
+  const handleGenerateTelegramCode = async () => {
+    setGeneratingCode(true)
+    try {
+      await userSettingsService.generateTelegramLinkCode(user.id)
+      invalidateTelegramLink()
+    } finally { setGeneratingCode(false) }
+  }
+
+  const handleUnlinkTelegram = async () => {
+    if (!confirm('Desvincular o Telegram? Você não vai mais conseguir lançar por mensagem até vincular de novo.')) return
+    await userSettingsService.unlinkTelegram(user.id)
+    invalidateTelegramLink()
+  }
 
   const handleSignOut = async () => { await signOut(); navigate('/login') }
 
@@ -372,6 +389,46 @@ export default function Settings() {
             )
           })}
         </div>
+      </div>
+
+      {/* Automação via Telegram */}
+      <div style={{ ...S.card, padding: '20px 24px' }}>
+        <p style={S.sectionTitle}>🤖 Lançar pelo Telegram</p>
+        {telegramLink?.telegram_chat_id ? (
+          <>
+            <div style={{ background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', fontSize: '13px', color: '#15803d', fontWeight: '600', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '8px' }}>
+              <span>✅ Telegram conectado</span>
+              <button onClick={handleUnlinkTelegram} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#dc2626', fontSize: '12px', fontWeight: '600', fontFamily: 'inherit' }}>
+                Desvincular
+              </button>
+            </div>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: 0 }}>
+              Mande mensagens pro bot pra lançar direto, ex: <code>/despesa 50 Mercado</code> ou <code>/receita 3442 Salário</code>.
+            </p>
+          </>
+        ) : (
+          <>
+            <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '14px' }}>
+              Conecte sua conta ao bot do Telegram pra lançar receitas e despesas mandando mensagem, de qualquer lugar.
+            </p>
+            {telegramLink?.telegram_link_code ? (
+              <div style={{ background: '#eff6ff', border: '1px solid #bfdbfe', borderRadius: '10px', padding: '14px 16px', marginBottom: '14px' }}>
+                <p style={{ fontSize: '13px', color: '#1e40af', fontWeight: '600', margin: '0 0 8px' }}>
+                  1. Abra o bot no Telegram{import.meta.env.VITE_TELEGRAM_BOT_USERNAME ? <> — <a href={`https://t.me/${import.meta.env.VITE_TELEGRAM_BOT_USERNAME}`} target="_blank" rel="noreferrer" style={{ color: '#1e40af' }}>abrir @{import.meta.env.VITE_TELEGRAM_BOT_USERNAME}</a></> : null}
+                </p>
+                <p style={{ fontSize: '13px', color: '#1e40af', fontWeight: '600', margin: '0 0 8px' }}>
+                  2. Envie esta mensagem pro bot:
+                </p>
+                <code style={{ display: 'block', background: '#1e293b', color: '#bfdbfe', padding: '10px 14px', borderRadius: '8px', fontSize: '14px', fontWeight: '700', textAlign: 'center' }}>
+                  /vincular {telegramLink.telegram_link_code}
+                </code>
+              </div>
+            ) : null}
+            <Button variant="secondary" onClick={handleGenerateTelegramCode} disabled={generatingCode}>
+              {generatingCode ? 'Gerando...' : telegramLink?.telegram_link_code ? '↻ Gerar novo código' : '🔗 Gerar código de vinculação'}
+            </Button>
+          </>
+        )}
       </div>
 
       {/* Sair */}

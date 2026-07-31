@@ -16,3 +16,19 @@ export function useUserSettings(userId) {
 
   return { ...query, invalidate }
 }
+
+export function useTelegramLink(userId) {
+  const queryClient = useQueryClient()
+  const key = ['telegram_link', userId]
+
+  const query = useQuery({
+    queryKey: key,
+    queryFn: () => userSettingsService.getTelegramLink(userId),
+    enabled: !!userId,
+    staleTime: 0,
+  })
+
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: key })
+
+  return { ...query, invalidate }
+}
