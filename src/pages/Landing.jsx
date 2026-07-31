@@ -20,6 +20,7 @@ const features = [
   { icon: '🎯', title: 'Orçamentos', desc: 'Defina limites por categoria e acompanhe o quanto já gastou.', free: false },
   { icon: '📈', title: 'Resumo Mensal', desc: 'Relatório completo mês a mês com gráficos de evolução financeira.', free: false },
   { icon: '📋', title: 'Duplicar Lançamentos', desc: 'Copie os lançamentos do mês anterior com um clique — ideal para despesas fixas.', free: false },
+  { icon: '🤖', title: 'Lançar pelo Telegram', desc: 'Mande uma mensagem pro bot e o lançamento entra automaticamente no sistema, de qualquer lugar.', free: false },
   { icon: '🌙', title: 'Tema Escuro', desc: 'Interface com modo escuro para conforto visual a qualquer hora do dia.', free: true, noBadge: true },
 ]
 
@@ -244,7 +245,7 @@ export default function Landing() {
             <div style={{ fontSize: '32px', fontWeight: '900', color: 'white', marginBottom: '4px' }}>R$ 29,90</div>
             <div style={{ color: '#64748b', fontSize: '13px', marginBottom: '24px' }}>por mês</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '28px' }}>
-              {['Tudo do plano Free', 'Lançamentos ilimitados', 'Duplicar lançamentos do mês', 'Transações Recorrentes', 'Orçamentos por categoria', 'Resumo Mensal com gráficos', 'Exportação Excel e CSV'].map(item => (
+              {['Tudo do plano Free', 'Lançamentos ilimitados', 'Lançar pelo Telegram', 'Duplicar lançamentos do mês', 'Transações Recorrentes', 'Orçamentos por categoria', 'Resumo Mensal com gráficos', 'Exportação Excel e CSV'].map(item => (
                 <div key={item} style={{ display: 'flex', gap: '8px', alignItems: 'center', fontSize: '14px', color: item === 'Tudo do plano Free' ? '#94a3b8' : 'white' }}>
                   <span style={{ color: '#4ade80', fontWeight: '700' }}>✓</span>{item}
                 </div>
