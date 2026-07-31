@@ -292,6 +292,9 @@ export default function Transactions() {
     return 0
   })
 
+  const totalReceitas = sorted.filter(i => i.type === 'Receita').reduce((s, i) => s + (i.original_value || 0), 0)
+  const totalDespesas = sorted.filter(i => i.type === 'Despesa').reduce((s, i) => s + (i.original_value || 0), 0)
+
   const totalPages = Math.max(1, Math.ceil(sorted.length / PER_PAGE))
   const safePage = Math.min(page, totalPages)
   const pageItems = sorted.slice((safePage - 1) * PER_PAGE, safePage * PER_PAGE)
@@ -328,6 +331,22 @@ export default function Transactions() {
               + <span className="btn-label-full">Novo lançamento</span><span className="btn-label-short">Novo</span>
             </Button>
           </>)}
+        </div>
+      </div>
+
+      {/* Resumo: totais do que está filtrado na tela */}
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '12px' }}>
+        <div style={{ background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)', border: '1px solid #86efac', borderRadius: '14px', padding: '14px 16px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: '#15803d', opacity: 0.85 }}>Total Receitas</div>
+          <div style={{ fontSize: '19px', fontWeight: '800', color: '#15803d', marginTop: '2px' }}>{formatCurrency(totalReceitas)}</div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #fff1f2, #fee2e2)', border: '1px solid #fca5a5', borderRadius: '14px', padding: '14px 16px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: '#b91c1c', opacity: 0.85 }}>Total Despesas</div>
+          <div style={{ fontSize: '19px', fontWeight: '800', color: '#b91c1c', marginTop: '2px' }}>{formatCurrency(totalDespesas)}</div>
+        </div>
+        <div style={{ background: 'linear-gradient(135deg, #eff6ff, #dbeafe)', border: '1px solid #93c5fd', borderRadius: '14px', padding: '14px 16px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '600', color: '#1d4ed8', opacity: 0.85 }}>Saldo</div>
+          <div style={{ fontSize: '19px', fontWeight: '800', color: totalReceitas - totalDespesas >= 0 ? '#1d4ed8' : '#dc2626', marginTop: '2px' }}>{formatCurrency(totalReceitas - totalDespesas)}</div>
         </div>
       </div>
 
